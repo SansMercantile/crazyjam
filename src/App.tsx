@@ -737,7 +737,7 @@ export default function App() {
         <div className="max-w-4xl mx-auto w-full">
           <div className="flex flex-col items-center mb-6 text-center select-none">
             <h1 className="font-display font-black text-2xl uppercase tracking-widest bg-gradient-to-r from-brand-pink to-brand-cyan bg-clip-text text-transparent filter drop-shadow">
-              CRAZYJAM DAW STUDIO
+              CRAZYJAM STUDIO
             </h1>
             <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-1 font-bold">
               Neural Multi-Agent Music Composition Environment

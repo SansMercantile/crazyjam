@@ -125,8 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   referrerPolicy="no-referrer"
                 />
                 <span id="text-logo-fallback" className="hidden font-display font-black text-sm uppercase tracking-wide bg-gradient-to-r from-brand-pink to-brand-cyan bg-clip-text text-transparent">
-                  CrazyJam DAW
-                </span>
+                  CrazyJam                </span>
               </div>
             ) : (
               <div 
