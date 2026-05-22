@@ -1,0 +1,6 @@
+{
+  "name": "CrazyJam AI Music Studio",
+  "description": "AI-powered music composition studio and multi-agent Digital Audio Workstation (DAW) for modular music production, synthesized with live Web Audio playback.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
