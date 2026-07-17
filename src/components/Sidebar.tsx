@@ -7,7 +7,8 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Grid 
+  Grid,
+  Palette
 } from "lucide-react";
 import { AnimatedAvatar } from "./AnimatedAvatar";
 
@@ -85,6 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "dashboard", label: "Control Room", icon: Sliders, color: "text-brand-pink" },
     { id: "sequencer", label: "Modular Arranger", icon: Music, color: "text-brand-cyan" },
     { id: "launchpad", label: "Launchpad Grid", icon: Grid, color: "text-rose-400" },
+    { id: "artwork", label: "Cover Art Studio", icon: Palette, color: "text-orange-400" },
     { id: "agents", label: "Neural Swarm", icon: Users, color: "text-purple-400" },
     { id: "support", label: "Audio & Hum Support", icon: MessageSquare, color: "text-yellow-400" },
     { id: "profile", label: "Creator Profile", icon: User, color: "text-emerald-400" },

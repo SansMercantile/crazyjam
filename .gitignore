@@ -6,3 +6,4 @@ coverage/
 *.log
 .env*
 !.env.example
+_deprecated_moved_to_backend/

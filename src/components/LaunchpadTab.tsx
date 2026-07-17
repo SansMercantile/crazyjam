@@ -136,7 +136,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
       agentName: "CrazyJam Syncer",
       role: "Account Integrator",
       avatar: "🔗",
-      message: `Successfully established secure feed handshake with your external ${id.toUpperCase()} profile! Synchronizing streaming history.`,
+      message: `Successfully established secure feed with your external ${id.toUpperCase()} profile! Synchronizing streaming history.`,
       phase: "Inspiration",
       status: "completed"
     });
@@ -455,7 +455,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                 {isLinking && (
                   <div className="mt-3 p-4 bg-[#1e1526] border border-brand-pink/30 rounded-2xl animate-slideDown text-left">
                     <span className="text-[8px] font-mono text-brand-pink tracking-widest block uppercase font-black mb-1">
-                      OAuth Gateway Handshake
+                      OAuth Gateway
                     </span>
                     <h4 className="text-xs font-bold text-white mb-2 leading-tight">
                       Connect to {accounts.find(a => a.id === isLinking)?.name} Catalog
@@ -746,7 +746,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
 
                 {/* Distributor selection of Ditto, DistroKid, LANDR */}
                 <span className="text-[9px] font-mono text-white/35 uppercase tracking-widest block font-bold border-b border-white/5 pb-1 pt-1.5">
-                  3. Carrier System Handshake
+                  3. Carrier System
                 </span>
                 
                 <div className="grid grid-cols-2 gap-2">

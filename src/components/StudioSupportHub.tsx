@@ -13,6 +13,7 @@ import {
   X,
   Play
 } from "lucide-react";
+import { customerSupport, humToBeat } from "../utils/api";
 
 interface SpeechBubble {
   id: string;
@@ -85,20 +86,7 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
         text: m.text
       }));
 
-      const response = await fetch("/api/customer-support", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: textToSend,
-          chatHistory: historyPayload
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error("Support link timed out");
-      }
-
-      const replyData = await response.json();
+      const replyData = await customerSupport(textToSend, historyPayload);
       
       const aiMsg: SpeechBubble = {
         id: (Date.now() + 1).toString(),
@@ -208,20 +196,7 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
         // Strip data url format
         const cleanBase64 = base64data.split(",")[1];
 
-        const response = await fetch("/api/hum-to-beat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            audio: cleanBase64,
-            mimeType: blob.type || "audio/webm"
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error("Bypassed audio analysis response");
-        }
-
-        const blueprint = await response.json();
+        const blueprint = await humToBeat(cleanBase64, blob.type || "audio/webm");
         onLoadAudioBlueprint(blueprint);
         setMicState("success");
       };

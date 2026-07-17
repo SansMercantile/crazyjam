@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ServiceAgent, TrackState, AgentLog, MusicBlueprint, NoteEvent } from "./types";
 import { AudioEngine } from "./utils/audioEngine";
+import { generateBlueprint } from "./utils/api";
 import { Header } from "./components/Header";
 import { Visualizer } from "./components/Visualizer";
 import { SequencerGrid } from "./components/SequencerGrid";
@@ -22,6 +23,7 @@ import { AgentsTab } from "./components/AgentsTab";
 import { SupportTab } from "./components/SupportTab";
 import { ProfileTab } from "./components/ProfileTab";
 import { LaunchpadTab } from "./components/LaunchpadTab";
+import { AlbumArtStudio } from "./components/AlbumArtStudio";
 import { Sparkles, Library, AlertCircle, RefreshCw, Volume2, Moon, Sliders } from "lucide-react";
 
 // Initialize singleton audio engine
@@ -690,20 +692,7 @@ export default function App() {
           bias: a.biasValue
         }));
 
-      const res = await fetch("/api/generate-blueprint", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: targetPrompt,
-          agentsSettings: activeAgentsConfig
-        })
-      });
-
-      if (!res.ok) {
-        throw new Error(`Cloud connection failed with code: ${res.status}`);
-      }
-
-      const blueprints: MusicBlueprint | any = await res.json();
+      const blueprints: MusicBlueprint | any = await generateBlueprint(targetPrompt, activeAgentsConfig);
       handleLoadAudioBlueprint(blueprints);
 
     } catch (err: any) {
@@ -828,6 +817,10 @@ export default function App() {
               audioCtx={audioEngine.getContext()}
               addLog={addLog}
             />
+          )}
+
+          {activeTab === "artwork" && (
+            <AlbumArtStudio addLog={addLog} />
           )}
 
           {activeTab === "agents" && (
