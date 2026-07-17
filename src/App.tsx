@@ -729,7 +729,7 @@ export default function App() {
               CRAZYJAM STUDIO
             </h1>
             <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-1 font-bold">
-              Neural Multi-Agent Music Composition Environment
+              This Jam Is Crazy
             </p>
           </div>
 
