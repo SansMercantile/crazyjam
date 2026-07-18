@@ -25,6 +25,7 @@ import { ProfileTab } from "./components/ProfileTab";
 import { LaunchpadTab } from "./components/LaunchpadTab";
 import { AlbumArtStudio } from "./components/AlbumArtStudio";
 import { Sparkles, Library, AlertCircle, RefreshCw, Volume2, Moon, Sliders } from "lucide-react";
+import { Analytics } from '@vercel/analytics/react';
 
 // Initialize singleton audio engine
 const audioEngine = new AudioEngine();
@@ -872,6 +873,7 @@ export default function App() {
           )}
         </main>
       </div>
+      <Analytics />
     </div>
   );
 }
