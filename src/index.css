@@ -1,18 +1,97 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:wght@500;600;700&display=swap');
 @import "tailwindcss";
+
+/* Class-based dark mode so the toggle can override system preference. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
+  --font-display: "Playfair Display", "Inter", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-brand-dark: #0d0d12;
-  --color-brand-card: #14141d;
-  --color-brand-purple: #7000ff;
-  --color-brand-pink: #ff00ff;
-  --color-brand-cyan: #00ffff;
+  /* Semantic tokens - values come from the CSS custom properties below,
+     which flip between the :root (dark default) and .light blocks. This
+     means "bg-brand-bg text-brand-ink" etc. always look correct in either
+     theme without needing dark: variants sprinkled everywhere. */
+  --color-brand-bg: var(--bg);
+  --color-brand-surface: var(--surface);
+  --color-brand-surface-2: var(--surface-2);
+  --color-brand-ink: var(--ink);
+  --color-brand-ink-muted: var(--ink-muted);
+  --color-brand-border: var(--border);
+  --color-brand-gold: var(--gold);
+  --color-brand-gold-soft: var(--gold-soft);
+  --color-brand-gold-deep: var(--gold-deep);
 
-  --shadow-neon-glow: 0 0 20px rgba(255, 0, 255, 0.4);
-  --shadow-neon-cyan: 0 0 15px rgba(0, 255, 255, 0.35);
+  /* Legacy aliases kept so components not yet migrated still render
+     something reasonable instead of breaking outright. */
+  --color-brand-dark: var(--bg);
+  --color-brand-card: var(--surface);
+  --color-brand-purple: var(--gold-deep);
+  --color-brand-pink: var(--gold);
+  --color-brand-cyan: var(--gold-soft);
+
+  --shadow-neon-glow: var(--shadow-soft);
+  --shadow-neon-cyan: var(--shadow-soft);
 }
 
+:root {
+  /* Dark theme (default) - true black canvas, warm gold finishes. */
+  --bg: #0a0a0a;
+  --surface: #141210;
+  --surface-2: #1c1a16;
+  --ink: #f5f2ea;
+  --ink-muted: rgba(245, 242, 234, 0.58);
+  --border: rgba(212, 175, 55, 0.16);
+  --gold: #c9a227;
+  --gold-soft: #e6cd7a;
+  --gold-deep: #8a6d1f;
+  --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* System preference fallback only applies when no explicit choice is stored */
+@media (prefers-color-scheme: light) {
+  :root:not(.dark):not(.light) {
+    --bg: #ffffff;
+    --surface: #faf9f6;
+    --surface-2: #f2f0ea;
+    --ink: #17140f;
+    --ink-muted: rgba(23, 20, 15, 0.6);
+    --border: rgba(180, 140, 30, 0.22);
+    --gold: #a9822a;
+    --gold-soft: #7a5f1e;
+    --gold-deep: #c9a227;
+    --shadow-soft: 0 8px 30px rgba(23, 20, 15, 0.08);
+  }
+}
+
+.light {
+  --bg: #ffffff;
+  --surface: #faf9f6;
+  --surface-2: #f2f0ea;
+  --ink: #17140f;
+  --ink-muted: rgba(23, 20, 15, 0.6);
+  --border: rgba(180, 140, 30, 0.22);
+  --gold: #a9822a;
+  --gold-soft: #7a5f1e;
+  --gold-deep: #c9a227;
+  --shadow-soft: 0 8px 30px rgba(23, 20, 15, 0.08);
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --surface: #141210;
+  --surface-2: #1c1a16;
+  --ink: #f5f2ea;
+  --ink-muted: rgba(245, 242, 234, 0.58);
+  --border: rgba(212, 175, 55, 0.16);
+  --gold: #c9a227;
+  --gold-soft: #e6cd7a;
+  --gold-deep: #8a6d1f;
+  --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+}

@@ -4,9 +4,10 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { ServiceAgent, TrackState, AgentLog, MusicBlueprint, NoteEvent } from "./types";
-import { AudioEngine } from "./utils/audioEngine";
-import { generateBlueprint } from "./utils/api";
+import { AudioEngine, audioEngine } from "./utils/audioEngine";
+import { generateBlueprint, logout as apiLogout } from "./utils/api";
 import { Header } from "./components/Header";
 import { Visualizer } from "./components/Visualizer";
 import { SequencerGrid } from "./components/SequencerGrid";
@@ -24,10 +25,12 @@ import { SupportTab } from "./components/SupportTab";
 import { ProfileTab } from "./components/ProfileTab";
 import { LaunchpadTab } from "./components/LaunchpadTab";
 import { AlbumArtStudio } from "./components/AlbumArtStudio";
+import { CreateTab } from "./components/CreateTab";
+import { CrazyJamMusicTab } from "./components/CrazyJamMusicTab";
+import { saveTrack } from "./utils/api";
 import { Sparkles, Library, AlertCircle, RefreshCw, Volume2, Moon, Sliders } from "lucide-react";
 
-// Initialize singleton audio engine
-const audioEngine = new AudioEngine();
+// Shared audio engine singleton (imported from utils/audioEngine)
 
 const INITIAL_AGENTS: ServiceAgent[] = [
   {
@@ -172,6 +175,7 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [prompt, setPrompt] = useState<string>("Slow spacey vaporwave with deep sub-bass rumble and a shining pluck melody");
+  const [lyrics, setLyrics] = useState<string>("");
   
   // Track meta values
   const [title, setTitle] = useState<string>("Vapor Lounge");
@@ -199,8 +203,49 @@ export default function App() {
     bio: "Composing high-fidelity synthetic micro-rhythms with neural multi-agent swarm grids."
   });
   const [onboardingFinished, setOnboardingFinished] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [activeTab, setActiveTab] = useState<string>("create");
   const [sidebarExpanded, setSidebarExpanded] = useState<boolean>(true);
+
+  // --- Theme: light / dark / system ---
+  const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">(() => {
+    return (localStorage.getItem("crazyjam_theme_mode") as "light" | "dark" | "system") || "dark";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const applyEffective = () => {
+      root.classList.remove("light", "dark");
+      if (themeMode === "system") {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.classList.add(prefersDark ? "dark" : "light");
+      } else {
+        root.classList.add(themeMode);
+      }
+    };
+    applyEffective();
+    localStorage.setItem("crazyjam_theme_mode", themeMode);
+
+    if (themeMode === "system") {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      const listener = () => applyEffective();
+      mq.addEventListener("change", listener);
+      return () => mq.removeEventListener("change", listener);
+    }
+  }, [themeMode]);
+
+  const { isAuthenticated: auth0Authenticated, logout: auth0Logout } = useAuth0();
+
+  const handleLogout = () => {
+    apiLogout();
+    localStorage.removeItem("crazyjam_onboarding_completed");
+    localStorage.removeItem("crazyjam_user_profile");
+    setOnboardingFinished(false);
+    setActiveTab("create");
+    setCurrentUser(null);
+    if (auth0Authenticated) {
+      auth0Logout({ logoutParams: { returnTo: window.location.origin } });
+    }
+  };
 
   // Synchronize audio engine state values on start
   useEffect(() => {
@@ -567,6 +612,7 @@ export default function App() {
       setTempo(blueprints.tempo || 105);
       audioEngine.setBPM(blueprints.tempo || 105);
       setScale(blueprints.scale || "C Minor");
+      setLyrics(blueprints.lyrics || "");
 
       // Setup mapped tracks inside Sequencer State
       setTracks((prevTracks) => {
@@ -665,7 +711,7 @@ export default function App() {
   };
 
   // Neural Generator trigger API call
-  const handleGenerate = async (overridePrompt?: string) => {
+  const handleGenerate = async (overridePrompt?: string, generationOptions?: { mode?: "simple" | "custom"; style?: string; lyrics?: string; userTitle?: string }) => {
     const targetPrompt = overridePrompt || prompt;
     if (!targetPrompt.trim() || isGenerating) return;
 
@@ -678,7 +724,7 @@ export default function App() {
       agentName: "Swarm Coordinator",
       role: "System Broker",
       avatar: "⚙️",
-      message: `Analyzing prompt: "${targetPrompt}"\nSpawning neural swarm and establishing Express API channel to Gemini-3.5-flash. Please wait...`,
+      message: `Analyzing prompt: "${targetPrompt}"\nSpawning neural swarm and establishing secure channel to the CrazyJam composition core. Please wait...`,
       phase: "System",
       status: "thinking"
     });
@@ -692,7 +738,7 @@ export default function App() {
           bias: a.biasValue
         }));
 
-      const blueprints: MusicBlueprint | any = await generateBlueprint(targetPrompt, activeAgentsConfig);
+      const blueprints: MusicBlueprint | any = await generateBlueprint(targetPrompt, activeAgentsConfig, generationOptions);
       handleLoadAudioBlueprint(blueprints);
 
     } catch (err: any) {
@@ -722,14 +768,15 @@ export default function App() {
 
   if (!onboardingFinished) {
     return (
-      <div className="min-h-screen bg-[#0d0d12] bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0d0d12] to-[#0d0d12] text-white flex flex-col justify-center p-6 sm:p-12 animate-fadeIn">
+      <div className="min-h-screen bg-brand-bg text-brand-ink flex flex-col justify-center p-6 sm:p-12 animate-fadeIn">
         <div className="max-w-4xl mx-auto w-full">
-          <div className="flex flex-col items-center mb-6 text-center select-none">
-            <h1 className="font-display font-black text-2xl uppercase tracking-widest bg-gradient-to-r from-brand-pink to-brand-cyan bg-clip-text text-transparent filter drop-shadow">
-              CRAZYJAM STUDIO
+          <div className="flex flex-col items-center mb-8 text-center select-none">
+            <h1 className="font-display font-semibold text-3xl text-brand-ink tracking-tight">
+              CrazyJam Studio
             </h1>
-            <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-1 font-bold">
-              This Jam Is Crazy
+            <div className="h-px w-16 bg-brand-gold my-3" />
+            <p className="text-[11px] font-sans text-brand-ink-muted tracking-[0.2em] uppercase">
+              AI-Native Music Production
             </p>
           </div>
 
@@ -745,7 +792,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0d12] bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#1a1a2e] via-[#0d0d12] to-[#0d0d12] text-white font-sans antialiased flex text-left relative overflow-hidden">
+    <div className="min-h-screen bg-brand-bg text-brand-ink font-sans antialiased flex text-left relative overflow-hidden">
       {/* Sidebar Navigation Panel with automated 5-min logo alternations */}
       <Sidebar
         activeTab={activeTab}
@@ -753,6 +800,9 @@ export default function App() {
         isExpanded={sidebarExpanded}
         setIsExpanded={setSidebarExpanded}
         userInfo={currentUser}
+        onLogout={handleLogout}
+        themeMode={themeMode}
+        onThemeModeChange={setThemeMode}
       />
 
       {/* Main DAW Content Space */}
@@ -777,6 +827,26 @@ export default function App() {
 
         {/* Modular Page Selector space */}
         <main className="max-w-[1600px] w-full mx-auto p-5 pb-20">
+          {activeTab === "create" && (
+            <CreateTab
+              isGenerating={isGenerating}
+              onGenerate={handleGenerate}
+              currentBlueprint={{ title, genre, tempo, scale, lyrics, tracks, debates: logs }}
+              onSaveTrack={async (trackTitle: string) => {
+                await saveTrack(trackTitle, {
+                  title, genre, tempo, scale,
+                  drumPatterns: Object.fromEntries(
+                    (tracks.find(t => t.id === "drums")?.drumLanes || []).map(l => [l.id, l.pattern])
+                  ),
+                  leadNotes: tracks.find(t => t.id === "lead")?.melodyNotes || [],
+                  bassNotes: tracks.find(t => t.id === "bass")?.melodyNotes || [],
+                  padNotes: tracks.find(t => t.id === "pad")?.melodyNotes || [],
+                }, lyrics);
+              }}
+              addLog={addLog}
+            />
+          )}
+
           {activeTab === "dashboard" && (
             <DashboardTab
               analyser={audioEngine.analyser}
@@ -804,6 +874,7 @@ export default function App() {
             <SequencerTab
               tracks={tracks}
               currentStep={currentStep}
+              isPlaying={isPlaying}
               onStepToggle={handleStepToggle}
               onTrackVolumeChange={handleTrackVolumeChange}
               onTrackMuteToggle={handleTrackMuteToggle}
@@ -821,6 +892,16 @@ export default function App() {
 
           {activeTab === "artwork" && (
             <AlbumArtStudio addLog={addLog} />
+          )}
+
+          {activeTab === "music" && (
+            <CrazyJamMusicTab
+              tracks={tracks}
+              tempo={tempo}
+              trackTitle={title}
+              lyrics={lyrics}
+              addLog={addLog}
+            />
           )}
 
           {activeTab === "agents" && (

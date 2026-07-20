@@ -164,12 +164,12 @@ export function SequencerGrid({
   };
 
   return (
-    <div className="bg-brand-card border border-white/10 rounded-[32px] p-6 flex flex-col gap-6" id="sequencer-matrix">
+    <div className="bg-brand-card border border-brand-border rounded-2xl p-6 flex flex-col gap-6" id="sequencer-matrix">
       {/* Sequencer Track Selector Header */}
-      <div className="flex flex-wrap items-center justify-between border-b border-white/5 pb-4 gap-4">
+      <div className="flex flex-wrap items-center justify-between border-b border-brand-border pb-4 gap-4">
         <div className="flex items-center gap-3">
           <div className="h-2.5 w-2.5 rounded-full bg-brand-cyan animate-pulse shadow-neon-cyan" />
-          <h2 className="font-display font-black text-sm tracking-widest uppercase text-white">
+          <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">
             Digital Multi-Track Sequencer
           </h2>
         </div>
@@ -177,24 +177,24 @@ export function SequencerGrid({
         <div className="flex flex-wrap items-center gap-3">
           {/* Algorithmic operators strip */}
           {onTracksUpdate && (
-            <div className="flex flex-wrap items-center gap-2 bg-brand-dark/40 border border-white/10 p-0.5 rounded-xl">
+            <div className="flex flex-wrap items-center gap-2 bg-brand-dark/40 border border-brand-border p-0.5 rounded-xl">
               <button
                 onClick={handleMutate}
-                className="px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase cursor-pointer transition-all border border-brand-pink/20 hover:border-brand-pink text-white flex items-center gap-1 hover:bg-brand-pink/10"
+                className="px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase cursor-pointer transition-all border border-brand-pink/20 hover:border-brand-pink text-brand-ink flex items-center gap-1 hover:bg-brand-pink/10"
                 title="Evolve active track randomly via Neural mutation"
               >
                 <RefreshCw className="h-3.5 w-3.5 text-brand-pink" /> <span>Mutate</span>
               </button>
               <button
                 onClick={handleRandomize}
-                className="px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase cursor-pointer transition-all border border-brand-cyan/20 hover:border-brand-cyan text-white flex items-center gap-1 hover:bg-brand-cyan/10"
+                className="px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase cursor-pointer transition-all border border-brand-cyan/20 hover:border-brand-cyan text-brand-ink flex items-center gap-1 hover:bg-brand-cyan/10"
                 title="Generates a perfect melodic or beat loop using scale theory"
               >
                 <Sparkles className="h-3.5 w-3.5 text-brand-cyan" /> <span>Algo Gen</span>
               </button>
               <button
                 onClick={handleHumanize}
-                className="px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase cursor-pointer transition-all border border-teal-500/20 hover:border-teal-400 text-white flex items-center gap-1 hover:bg-teal-400/10"
+                className="px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase cursor-pointer transition-all border border-teal-500/20 hover:border-teal-400 text-brand-ink flex items-center gap-1 hover:bg-teal-400/10"
                 title="Slightly humanize instrument steps structure"
               >
                 <Bolt className="h-3.5 w-3.5 text-teal-400" /> <span>Humanize</span>
@@ -210,17 +210,17 @@ export function SequencerGrid({
           )}
 
           {/* Tab triggers */}
-          <div className="flex items-center bg-brand-dark/80 border border-white/10 p-1 rounded-xl">
+          <div className="flex items-center bg-brand-dark/80 border border-brand-border p-1 rounded-xl">
             {tracks.map((track) => {
               const isActive = activeTab === track.id;
               return (
                 <button
                   key={track.id}
                   onClick={() => setActiveTab(track.id)}
-                  className={`px-4 py-2 rounded-lg text-xs font-mono font-bold tracking-wider uppercase cursor-pointer transition-all ${
+                  className={`px-4 py-2 rounded-lg text-xs font-mono font-bold tracking-wide uppercase cursor-pointer transition-all ${
                     isActive
-                      ? "bg-brand-pink text-white shadow-neon-glow scale-102"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
+                      ? "bg-brand-pink text-brand-ink shadow-neon-glow scale-102"
+                      : "text-brand-ink-muted hover:text-brand-ink hover:bg-brand-surface-2"
                   }`}
                 >
                   {track.name}
@@ -241,14 +241,14 @@ export function SequencerGrid({
             return (
               <div key={track.id} className="flex flex-col gap-5">
                 {/* Track Strip Header */}
-                <div className="flex flex-wrap items-center justify-between gap-4 bg-brand-dark/40 border border-white/5 p-4 rounded-2xl">
+                <div className="flex flex-wrap items-center justify-between gap-4 bg-brand-dark/40 border border-brand-border p-4 rounded-2xl">
                   <div className="flex items-center gap-3">
                     <div className="text-xl">🥁</div>
                     <div>
-                      <h4 className="font-black text-sm text-white uppercase font-display">
+                      <h4 className="font-semibold text-sm text-brand-ink uppercase font-display">
                         {track.name} Group
                       </h4>
-                      <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest font-bold">
+                      <p className="text-[10px] font-mono text-brand-ink-muted uppercase tracking-wide font-bold">
                         Rhythm Step Matrix
                       </p>
                     </div>
@@ -262,7 +262,7 @@ export function SequencerGrid({
                       className={`p-2 rounded-lg border transition-colors cursor-pointer ${
                         track.muted
                           ? "bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20"
-                          : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white"
+                          : "bg-brand-surface-2 text-brand-ink-muted border border-brand-border hover:bg-brand-surface-2 hover:text-brand-ink"
                       }`}
                     >
                       {track.muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
@@ -270,7 +270,7 @@ export function SequencerGrid({
 
                     {/* Volume Slider */}
                     <div className="flex items-center gap-2 min-w-[130px]">
-                      <span className="text-[10px] font-mono text-white/30 font-bold">VOL</span>
+                      <span className="text-[10px] font-mono text-brand-ink-muted font-bold">VOL</span>
                       <input
                         type="range"
                         min="0"
@@ -279,9 +279,9 @@ export function SequencerGrid({
                         value={track.volume}
                         disabled={track.muted}
                         onChange={(e) => onTrackVolumeChange(track.id, Number(e.target.value))}
-                        className="flex-1 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-pink disabled:opacity-30"
+                        className="flex-1 h-1.5 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-brand-pink disabled:opacity-30"
                       />
-                      <span className="text-[10px] font-mono text-white/80 font-bold w-6 text-right">
+                      <span className="text-[10px] font-mono text-brand-ink-muted font-bold w-6 text-right">
                         {Math.round(track.volume * 100)}
                       </span>
                     </div>
@@ -291,8 +291,8 @@ export function SequencerGrid({
                 {/* DRUMS Trigger 16-Step grid sheet */}
                 <div className="ring-1 ring-white/10 rounded-2xl overflow-hidden bg-brand-dark/60">
                   {/* Step coordinates header grid */}
-                  <div className="grid grid-cols-12 md:grid-cols-20 items-center border-b border-white/5 p-2 bg-white/5">
-                    <div className="col-span-3 text-[10px] font-mono text-white/30 font-bold px-2 uppercase tracking-widest text-left">
+                  <div className="grid grid-cols-12 md:grid-cols-20 items-center border-b border-brand-border p-2 bg-brand-surface-2">
+                    <div className="col-span-3 text-[10px] font-mono text-brand-ink-muted font-bold px-2 uppercase tracking-wide text-left">
                       Instr Lane
                     </div>
                     <div className="col-span-9 md:col-span-17 grid grid-cols-16 gap-1 md:gap-1.5 px-2">
@@ -307,8 +307,8 @@ export function SequencerGrid({
                               isCurrent
                                 ? "text-brand-pink bg-brand-pink/10 border border-brand-pink/30 p-0.5 animate-pulse"
                                 : isPrimaryBeat
-                                ? "text-white/80"
-                                : "text-white/30"
+                                ? "text-brand-ink-muted"
+                                : "text-brand-ink-muted"
                             }`}
                           >
                             {stepIdx + 1}
@@ -323,7 +323,7 @@ export function SequencerGrid({
                     {track.drumLanes.map((lane) => (
                       <div
                         key={lane.id}
-                        className="grid grid-cols-12 md:grid-cols-20 items-center p-3 hover:bg-white/5 transition-colors"
+                        className="grid grid-cols-12 md:grid-cols-20 items-center p-3 hover:bg-brand-surface-2 transition-colors"
                       >
                         {/* Lane identity details */}
                         <div className="col-span-3 flex items-center gap-2.5 px-2">
@@ -334,10 +334,10 @@ export function SequencerGrid({
                             "bg-amber-400"
                           }`} />
                           <div className="min-w-0">
-                            <span className="font-bold text-xs text-white block truncate">
+                            <span className="font-bold text-xs text-brand-ink block truncate">
                               {lane.name}
                             </span>
-                            <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest block font-bold">
+                            <span className="text-[9px] font-mono text-brand-ink-muted uppercase tracking-wide block font-bold">
                               {lane.id.toUpperCase()}
                             </span>
                           </div>
@@ -363,19 +363,19 @@ export function SequencerGrid({
                               <button
                                 key={stepIdx}
                                 onClick={() => onStepToggle(track.id, lane.id, stepIdx)}
-                                className={`aspect-square sm:h-9 hover:scale-105 active:scale-95 transition-all rounded-lg border cursor-pointer outline-none relative ${
+                                className={`aspect-square sm:h-9 hover:brightness-110 active:scale-95 transition-all rounded-lg border cursor-pointer outline-none relative ${
                                   isSet
-                                    ? `${activeBg} text-white`
+                                    ? `${activeBg} text-brand-ink`
                                     : isCurrent
-                                    ? "bg-white/10 border-brand-cyan shadow-neon-cyan"
+                                    ? "bg-brand-surface-2 border-brand-cyan shadow-neon-cyan"
                                     : isFour
-                                    ? "bg-brand-dark border-white/10"
-                                    : "bg-brand-dark/40 border-white/5"
+                                    ? "bg-brand-dark border-brand-border"
+                                    : "bg-brand-dark/40 border-brand-border"
                                 }`}
                                 title={`${lane.name} Step ${stepIdx + 1}`}
                               >
                                 {isCurrent && (
-                                  <div className="absolute inset-0.5 rounded-md border border-dashed border-white/20 animate-ping pointer-events-none" />
+                                  <div className="absolute inset-0.5 rounded-md border border-dashed border-brand-border animate-ping pointer-events-none" />
                                 )}
                               </button>
                             );
@@ -395,14 +395,14 @@ export function SequencerGrid({
           return (
             <div key={track.id} className="flex flex-col gap-5 animate-fadeIn">
               {/* Synth settings bar */}
-              <div className="flex flex-wrap items-center justify-between gap-4 bg-brand-dark/40 border border-white/5 p-4 rounded-2xl">
+              <div className="flex flex-wrap items-center justify-between gap-4 bg-brand-dark/40 border border-brand-border p-4 rounded-2xl">
                 <div className="flex items-center gap-3">
                   <div className="text-xl">🎹</div>
                   <div>
                     <h4 className="font-semibold text-sm text-slate-100 uppercase font-display flex items-center gap-2">
                       {track.name} Synthesis
                     </h4>
-                    <p className="text-[10px] font-mono text-brand-pink uppercase tracking-widest font-bold">
+                    <p className="text-[10px] font-mono text-brand-pink uppercase tracking-wide font-bold">
                       Oscillator Node Selector ({scaleKey || "A Minor"} Scale)
                     </p>
                   </div>
@@ -411,7 +411,7 @@ export function SequencerGrid({
                 {/* Synth configuration controls */}
                 <div className="flex flex-wrap items-center gap-4">
                   {/* Waveform type picker */}
-                  <div className="flex items-center bg-brand-dark border border-white/10 p-1 rounded-lg">
+                  <div className="flex items-center bg-brand-dark border border-brand-border p-1 rounded-lg">
                     {(["saw", "square", "sine", "triangle", "pluck"] as const).map((wt) => {
                       const isActive = (track.instrumentType || "saw") === wt;
                       return (
@@ -421,7 +421,7 @@ export function SequencerGrid({
                           className={`px-3 py-1 rounded text-[10px] font-mono font-bold uppercase transition-colors cursor-pointer ${
                             isActive
                               ? "bg-brand-pink/20 text-brand-pink border border-[#ff00ff]/30"
-                              : "text-white/40 hover:text-white"
+                              : "text-brand-ink-muted hover:text-brand-ink"
                           }`}
                         >
                           {wt}
@@ -437,14 +437,14 @@ export function SequencerGrid({
                       className={`p-2 rounded-lg border transition-colors cursor-pointer ${
                         track.muted
                           ? "bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20"
-                          : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white"
+                          : "bg-brand-surface-2 text-brand-ink-muted border border-brand-border hover:bg-brand-surface-2 hover:text-brand-ink"
                       }`}
                     >
                       {track.muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                     </button>
 
                     <div className="flex items-center gap-2 min-w-[130px]">
-                      <span className="text-[10px] font-mono text-white/30 font-bold">VOL</span>
+                      <span className="text-[10px] font-mono text-brand-ink-muted font-bold">VOL</span>
                       <input
                         type="range"
                         min="0"
@@ -453,9 +453,9 @@ export function SequencerGrid({
                         value={track.volume}
                         disabled={track.muted}
                         onChange={(e) => onTrackVolumeChange(track.id, Number(e.target.value))}
-                        className="flex-1 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                        className="flex-1 h-1.5 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-brand-pink"
                       />
-                      <span className="text-[10px] font-mono text-white/80 font-bold w-6 text-right">
+                      <span className="text-[10px] font-mono text-brand-ink-muted font-bold w-6 text-right">
                         {Math.round(track.volume * 100)}
                       </span>
                     </div>
@@ -466,8 +466,8 @@ export function SequencerGrid({
               {/* PIANO ROLL Guts Matrix */}
               <div className="ring-1 ring-white/10 rounded-2xl overflow-hidden bg-brand-dark/60">
                 {/* Roll Coordinates header */}
-                <div className="grid grid-cols-12 md:grid-cols-20 items-center border-b border-white/5 p-2 bg-white/5">
-                  <div className="col-span-3 text-[10px] font-mono text-white/30 font-bold px-2 uppercase tracking-widest text-left">
+                <div className="grid grid-cols-12 md:grid-cols-20 items-center border-b border-brand-border p-2 bg-brand-surface-2">
+                  <div className="col-span-3 text-[10px] font-mono text-brand-ink-muted font-bold px-2 uppercase tracking-wide text-left">
                     Pitch Freq
                   </div>
                   <div className="col-span-9 md:col-span-17 grid grid-cols-16 gap-1 md:gap-1.5 px-2">
@@ -481,8 +481,8 @@ export function SequencerGrid({
                             isCurrent
                               ? "text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/30 p-0.5 animate-pulse"
                               : isPrimaryBeat
-                              ? "text-white/80"
-                              : "text-white/30"
+                              ? "text-brand-ink-muted"
+                              : "text-brand-ink-muted"
                           }`}
                         >
                           {stepIdx + 1}
@@ -497,11 +497,11 @@ export function SequencerGrid({
                   {notesSet.map((note) => (
                     <div
                       key={note}
-                      className="grid grid-cols-12 md:grid-cols-20 items-center py-2.5 hover:bg-white/5 transition-all"
+                      className="grid grid-cols-12 md:grid-cols-20 items-center py-2.5 hover:bg-brand-surface-2 transition-all"
                     >
                       {/* Note tag element */}
                       <div className="col-span-3 flex items-center justify-between px-3">
-                        <span className="font-mono text-xs font-black text-white/70 uppercase">
+                        <span className="font-mono text-xs font-semibold text-brand-ink-muted uppercase">
                           {note}
                         </span>
                         {/* Black key indicator logic */}
@@ -535,19 +535,19 @@ export function SequencerGrid({
                             <button
                               key={stepIdx}
                               onClick={() => onStepToggle(track.id, note, stepIdx)}
-                              className={`aspect-square sm:h-9 hover:scale-105 active:scale-95 transition-all rounded-lg border cursor-pointer outline-none relative ${
+                              className={`aspect-square sm:h-9 hover:brightness-110 active:scale-95 transition-all rounded-lg border cursor-pointer outline-none relative ${
                                 pinActive
-                                  ? `bg-gradient-to-tr ${fillGradient} text-white`
+                                  ? `bg-gradient-to-tr ${fillGradient} text-brand-ink`
                                   : isCurrent
-                                  ? "bg-white/10 border-brand-cyan shadow-neon-cyan"
+                                  ? "bg-brand-surface-2 border-brand-cyan shadow-neon-cyan"
                                   : isFour
-                                  ? "bg-brand-dark border-white/10"
-                                  : "bg-brand-dark/40 border-white/5"
+                                  ? "bg-brand-dark border-brand-border"
+                                  : "bg-brand-dark/40 border-brand-border"
                               }`}
                               title={`${track.name} ${note} Step ${stepIdx + 1}`}
                             >
                               {isCurrent && (
-                                <div className="absolute inset-0.5 rounded-md border border-dashed border-white/20 animate-ping pointer-events-none" />
+                                <div className="absolute inset-0.5 rounded-md border border-dashed border-brand-border animate-ping pointer-events-none" />
                               )}
                             </button>
                           );

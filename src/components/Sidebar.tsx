@@ -8,21 +8,22 @@ import {
   ChevronLeft,
   ChevronRight,
   Grid,
-  Palette
+  Palette,
+  Wand2,
+  LogOut,
+  Sun,
+  Moon,
+  Monitor,
+  Disc3
 } from "lucide-react";
 import { AnimatedAvatar } from "./AnimatedAvatar";
 
-// Import local images from assets location
 // @ts-ignore
 import textLogo1 from "../assets/images/text-logo-1.png";
 // @ts-ignore
-import textLogo2 from "../assets/images/text-logo-2.png";
-// @ts-ignore
-import textLogo3 from "../assets/images/text-logo-3.png";
-// @ts-ignore
 import iconLogo1 from "../assets/images/CrazyJam-Icon-logo-1.png";
-// @ts-ignore
-import iconLogo2 from "../assets/images/CrazyJam-Icon-logo-2.png";
+
+type ThemeMode = "light" | "dark" | "system";
 
 interface SidebarProps {
   activeTab: string;
@@ -30,6 +31,9 @@ interface SidebarProps {
   isExpanded: boolean;
   setIsExpanded: (expanded: boolean) => void;
   userInfo: { name: string; avatar: string; handle: string } | null;
+  onLogout: () => void;
+  themeMode: ThemeMode;
+  onThemeModeChange: (mode: ThemeMode) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -38,139 +42,81 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isExpanded,
   setIsExpanded,
   userInfo,
+  onLogout,
+  themeMode,
+  onThemeModeChange,
 }) => {
-  // Logo indexes - 5 minute rotation
-  const [textLogoIdx, setTextLogoIdx] = useState(0); 
-  const [iconLogoIdx, setIconLogoIdx] = useState(0); 
-  const [timeLeft, setTimeLeft] = useState(300); 
-
-  const textLogos = [textLogo1, textLogo2, textLogo3];
-  const iconLogos = [iconLogo1, iconLogo2];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          setTextLogoIdx((prevIdx) => (prevIdx + 1) % 3);
-          setIconLogoIdx((prevIdx) => (prevIdx + 1) % 2);
-          return 300; 
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Sync document favicon dynamically when active icon logo changes
-  useEffect(() => {
-    const currentLogo = iconLogos[iconLogoIdx];
-    if (currentLogo) {
-      let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "shortcut icon";
-        document.getElementsByTagName("head")[0].appendChild(link);
-      }
-      link.href = currentLogo;
-    }
-  }, [iconLogoIdx]);
-
-  const triggerManualCycle = () => {
-    setTextLogoIdx((prev) => (prev + 1) % 3);
-    setIconLogoIdx((prev) => (prev + 1) % 2);
-    setTimeLeft(300); 
-  };
-
   const navItems = [
-    { id: "dashboard", label: "Control Room", icon: Sliders, color: "text-brand-pink" },
-    { id: "sequencer", label: "Modular Arranger", icon: Music, color: "text-brand-cyan" },
-    { id: "launchpad", label: "Launchpad Grid", icon: Grid, color: "text-rose-400" },
-    { id: "artwork", label: "Cover Art Studio", icon: Palette, color: "text-orange-400" },
-    { id: "agents", label: "Neural Swarm", icon: Users, color: "text-purple-400" },
-    { id: "support", label: "Audio & Hum Support", icon: MessageSquare, color: "text-yellow-400" },
-    { id: "profile", label: "Creator Profile", icon: User, color: "text-emerald-400" },
+    { id: "create", label: "Create", icon: Wand2 },
+    { id: "dashboard", label: "Control Room", icon: Sliders },
+    { id: "sequencer", label: "CrazyJam Studio", icon: Music },
+    { id: "launchpad", label: "Launchpad", icon: Grid },
+    { id: "artwork", label: "Cover Art Studio", icon: Palette },
+    { id: "music", label: "CrazyJam Music", icon: Disc3 },
+    { id: "agents", label: "Neural Swarm", icon: Users },
+    { id: "support", label: "Support", icon: MessageSquare },
+    { id: "profile", label: "Creator Profile", icon: User },
   ];
 
   return (
     <aside
       id="daw-sidebar"
-      className={`bg-[#14141d]/50 backdrop-blur-xl border-r border-white/10 h-screen fixed left-0 top-0 flex flex-col justify-between transition-all duration-300 z-50 shadow-xl ${
+      className={`bg-brand-surface border-r border-brand-border h-screen fixed left-0 top-0 flex flex-col justify-between transition-all duration-300 z-50 ${
         isExpanded ? "w-64" : "w-18"
       }`}
     >
       {/* Top Brand Area */}
       <div className="flex flex-col">
-        <div className={`flex items-center justify-between border-b border-white/5 bg-black/20 h-20 transition-all ${
-          isExpanded ? "p-4" : "p-3 relative"
+        <div className={`flex items-center justify-between border-b border-brand-border h-[72px] transition-all ${
+          isExpanded ? "px-5" : "px-3 relative"
         }`}>
-          {/* Logo Area */}
+          {/* Logo Area - the white CrazyJam wordmark keeps a soft shadow for contrast; icon mark stays clean */}
           <div className={`flex items-center overflow-hidden transition-all ${isExpanded ? "gap-3" : "w-full justify-center"}`}>
             {isExpanded ? (
-              <div 
-                className="flex flex-col items-start cursor-pointer group"
-                onClick={() => {
-                  triggerManualCycle();
-                  setIsExpanded(!isExpanded);
-                }}
-                title="Click to alternate logos and collapse sidebar"
+              <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => setIsExpanded(!isExpanded)}
+                title="Collapse sidebar"
               >
                 <img
-                  src={textLogos[textLogoIdx]}
-                  alt="CrazyJam Text Logo"
-                  className="h-10 w-auto object-contain transition-all duration-300 transform-gpu [will-change:filter] group-hover:scale-105 [filter:drop-shadow(0_0_6px_rgba(255,0,128,0.35))] group-hover:[filter:drop-shadow(0_0_16px_rgba(255,0,128,0.8))]"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const fallbackEl = document.getElementById("text-logo-fallback");
-                    if (fallbackEl) fallbackEl.classList.remove("hidden");
-                  }}
+                  src={textLogo1}
+                  alt="CrazyJam"
+                  className="h-7 w-auto object-contain [filter:drop-shadow(0_1px_3px_rgba(0,0,0,0.4))]"
+                  onError={(e) => { e.currentTarget.style.display = "none"; }}
                   referrerPolicy="no-referrer"
                 />
-                <span id="text-logo-fallback" className="hidden font-display font-black text-sm uppercase tracking-wide bg-gradient-to-r from-brand-pink to-brand-cyan bg-clip-text text-transparent">
-                  CrazyJam                </span>
               </div>
             ) : (
-              <div 
-                className="flex flex-col items-center justify-center cursor-pointer group w-11 h-11"
-                onClick={() => {
-                  triggerManualCycle();
-                  setIsExpanded(!isExpanded);
-                }}
-                title="Click to alternate logos and expand sidebar"
+              <div
+                className="flex items-center justify-center cursor-pointer w-9 h-9"
+                onClick={() => setIsExpanded(!isExpanded)}
+                title="Expand sidebar"
               >
                 <img
-                  src={iconLogos[iconLogoIdx]}
-                  alt="CrazyJam Icon Logo"
-                  className="h-9 w-9 object-contain transition-all duration-300 transform-gpu [will-change:filter] group-hover:rotate-12 group-hover:scale-110 [filter:drop-shadow(0_0_6px_rgba(0,255,255,0.4))] group-hover:[filter:drop-shadow(0_0_16px_rgba(0,255,255,0.85))]"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const fallbackEl = document.getElementById("icon-logo-fallback");
-                    if (fallbackEl) fallbackEl.classList.remove("hidden");
-                  }}
+                  src={iconLogo1}
+                  alt="CrazyJam"
+                  className="h-7 w-7 object-contain"
+                  onError={(e) => { e.currentTarget.style.display = "none"; }}
                   referrerPolicy="no-referrer"
                 />
-                <div id="icon-logo-fallback" className="hidden h-8 w-8 rounded-lg bg-gradient-to-br from-brand-pink to-brand-cyan items-center justify-center font-display font-black text-xs text-brand-dark">
-                  CJ
-                </div>
               </div>
             )}
           </div>
 
-          {/* Toggle Expand Bar */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className={`text-white/40 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition shrink-0 ${
-              isExpanded 
-                ? "p-1.5 ml-1 rounded-lg" 
-                : "absolute -right-3 top-7 p-1 bg-brand-dark hover:bg-white/10 z-50 border border-white/20 shadow-lg rounded-full"
+            className={`text-brand-ink-muted hover:text-brand-gold transition shrink-0 ${
+              isExpanded
+                ? "p-1.5 rounded-lg hover:bg-brand-surface-2"
+                : "absolute -right-3 top-6 p-1 bg-brand-surface hover:bg-brand-surface-2 border border-brand-border rounded-full"
             }`}
           >
             {isExpanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </button>
         </div>
 
-        {/* Navigation Section */}
-        <nav className="p-3 space-y-1">
+        {/* Navigation - expanded: label only, collapsed: icon only */}
+        <nav className="p-3 space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -178,53 +124,95 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-xs font-display font-black tracking-wider uppercase transition-all duration-300 ${
+                title={item.label}
+                className={`w-full flex items-center ${isExpanded ? "justify-start px-3.5" : "justify-center"} gap-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors duration-150 ${
                   isActive
-                    ? "bg-gradient-to-r from-white/[0.08] to-transparent text-white border-l-4 border-brand-pink"
-                    : "text-white/50 hover:text-white/90 hover:bg-white/[0.03]"
+                    ? "bg-brand-gold/10 text-brand-gold"
+                    : "text-brand-ink-muted hover:text-brand-ink hover:bg-brand-surface-2"
                 }`}
               >
-                <Icon className={`h-4.5 w-4.5 shrink-0 ${isActive ? item.color : "text-white/40"}`} />
-                {isExpanded && <span className="truncate">{item.label}</span>}
+                {isExpanded ? (
+                  <span className="truncate">{item.label}</span>
+                ) : (
+                  <Icon className="h-4.5 w-4.5 shrink-0" />
+                )}
               </button>
             );
           })}
         </nav>
       </div>
 
-      {/* Combined Utility and Corporate Footer Container */}
-      <div className="flex flex-col border-t border-white/5 bg-black/15 p-3 font-mono">
-        {/* Profile Preview Block */}
-        <div className="pb-2 select-none text-left">
-          {isExpanded ? (
-            <div className="flex items-center gap-3 p-2 bg-white/5 border border-white/5 rounded-xl">
-              <AnimatedAvatar avatar={userInfo?.avatar || "🕵️"} size="sm" className="border-brand-cyan shrink-0" />
-              <div className="min-w-0 flex-1">
-                <h4 className="text-[11px] font-black font-display text-white truncate uppercase tracking-wide leading-none mb-0.5">
-                  {userInfo?.name || "Independent Pro"}
-                </h4>
-                <p className="text-[9px] font-mono font-bold text-brand-cyan truncate leading-none">
-                  {userInfo?.handle || "@jam_architect"}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center relative select-none" title={`${userInfo?.name || 'Producer'} is online`}>
-              <AnimatedAvatar avatar={userInfo?.avatar || "🕵️"} size="sm" className="border border-brand-cyan" />
-              <span className="absolute bottom-[-1px] right-[1px] h-2.5 w-2.5 rounded-full bg-emerald-500 border border-brand-dark" />
-            </div>
-          )}
-        </div>
-
-        {/* Corporate Branding Footer Anchor */}
+      {/* Footer: theme toggle, profile, sign out */}
+      <div className="flex flex-col border-t border-brand-border p-3 gap-2">
+        {/* Theme toggle */}
         {isExpanded ? (
-          <div className="border-t border-white/5 pt-3 text-[9px] text-zinc-600 font-semibold space-y-0.5 text-center">
-            <div>SANS MERCANTILE CO.</div>
-            <div className="tracking-wider">REIMAGINE &bull; REBUILD &bull; TRANSCEND</div>
+          <div className="flex items-center gap-1 bg-brand-surface-2 rounded-lg p-1">
+            {([
+              { mode: "light" as ThemeMode, icon: Sun },
+              { mode: "dark" as ThemeMode, icon: Moon },
+              { mode: "system" as ThemeMode, icon: Monitor },
+            ]).map(({ mode, icon: Icon }) => (
+              <button
+                key={mode}
+                onClick={() => onThemeModeChange(mode)}
+                title={mode.charAt(0).toUpperCase() + mode.slice(1)}
+                className={`flex-1 flex items-center justify-center py-1.5 rounded-md transition-all ${
+                  themeMode === mode ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+              </button>
+            ))}
           </div>
         ) : (
-          <div className="border-t border-white/5 pt-2 text-[8px] font-black text-zinc-600 text-center select-none" title="Sans Mercantile Accounts">
-            S·M
+          <button
+            onClick={() => onThemeModeChange(themeMode === "dark" ? "light" : themeMode === "light" ? "system" : "dark")}
+            title={`Theme: ${themeMode}`}
+            className="flex items-center justify-center p-2 rounded-lg text-brand-ink-muted hover:text-brand-gold hover:bg-brand-surface-2 transition-all"
+          >
+            {themeMode === "light" ? <Sun className="h-4 w-4" /> : themeMode === "dark" ? <Moon className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
+          </button>
+        )}
+
+        {/* Profile + Sign out */}
+        {isExpanded ? (
+          <div className="flex items-center gap-2.5 p-2 bg-brand-surface-2 rounded-lg">
+            <AnimatedAvatar avatar={userInfo?.avatar || "🕵️"} size="sm" className="border-brand-gold/40 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h4 className="text-[12px] font-medium text-brand-ink truncate leading-tight">
+                {userInfo?.name || "Independent Producer"}
+              </h4>
+              <p className="text-[10px] text-brand-ink-muted truncate leading-tight">
+                {userInfo?.handle || "@jam_architect"}
+              </p>
+            </div>
+            <button
+              onClick={onLogout}
+              title="Sign Out"
+              className="shrink-0 p-1.5 rounded-md text-brand-ink-muted hover:text-red-400 hover:bg-red-500/10 transition-all"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="relative" title={userInfo?.name || "Producer"}>
+              <AnimatedAvatar avatar={userInfo?.avatar || "🕵️"} size="sm" className="border border-brand-gold/40" />
+              <span className="absolute bottom-[-1px] right-[1px] h-2 w-2 rounded-full bg-emerald-500 border border-brand-surface" />
+            </div>
+            <button
+              onClick={onLogout}
+              title="Sign Out"
+              className="p-1.5 rounded-md text-brand-ink-muted hover:text-red-400 hover:bg-red-500/10 transition-all"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
+        {isExpanded && (
+          <div className="pt-1 text-center">
+            <span className="text-[9px] text-brand-ink-muted tracking-wide">Sans Mercantile Co.</span>
           </div>
         )}
       </div>

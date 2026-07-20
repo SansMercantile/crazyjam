@@ -56,23 +56,23 @@ export const SupportTab: React.FC<SupportTabProps> = ({
         </div>
 
         {/* Right column: Advanced Vocal Rack FX processor */}
-        <div className="lg:col-span-4 bg-brand-card border border-white/10 rounded-[32px] p-6 flex flex-col justify-between relative overflow-hidden">
+        <div className="lg:col-span-4 bg-brand-card border border-brand-border rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
           <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 border-b border-brand-border pb-3">
               <Settings2 className="h-5 w-5 text-purple-400" />
               <div>
-                <span className="text-[9px] uppercase font-mono tracking-widest text-purple-400 font-bold">Mic DSP Processor</span>
-                <h3 className="font-display font-black text-sm uppercase text-white leading-tight">Vocal FX Master Processor</h3>
+                <span className="text-[9px] uppercase font-mono tracking-wide text-purple-400 font-bold">Mic DSP Processor</span>
+                <h3 className="font-display font-semibold text-sm uppercase text-brand-ink leading-tight">Vocal FX Master Processor</h3>
               </div>
             </div>
 
-            <p className="text-[10px] text-white/50 leading-relaxed font-sans">
+            <p className="text-[10px] text-brand-ink-muted leading-relaxed font-sans">
               Chain high-speed vocal autotune, hardware level limiters, noise gates, and stereo space reflections into the capture microphone.
             </p>
 
             {/* Vocal Autotune */}
             <div className="space-y-1.5 pt-2">
-              <div className="flex justify-between text-[9px] font-mono text-white/40 uppercase">
+              <div className="flex justify-between text-[9px] font-mono text-brand-ink-muted uppercase">
                 <span>Vocal Pitch Correction / Autotune</span>
                 <span className="text-purple-400 font-bold">
                   {autotuneValue === 100 ? "Hard Pitch Corrector" : autotuneValue === 0 ? "Bypassed" : `${autotuneValue}% Alignment`}
@@ -84,13 +84,13 @@ export const SupportTab: React.FC<SupportTabProps> = ({
                 max="100"
                 value={autotuneValue}
                 onChange={(e) => setAutotuneValue(Number(e.target.value))}
-                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-purple-400"
+                className="w-full h-1 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-purple-400"
               />
             </div>
 
             {/* Vocal Reverb Wetness */}
             <div className="space-y-1.5">
-              <div className="flex justify-between text-[9px] font-mono text-white/40 uppercase">
+              <div className="flex justify-between text-[9px] font-mono text-brand-ink-muted uppercase">
                 <span>Vocal Space Reverb Room Size</span>
                 <span className="text-brand-pink font-bold">{reverbValue}% Wet</span>
               </div>
@@ -100,13 +100,13 @@ export const SupportTab: React.FC<SupportTabProps> = ({
                 max="100"
                 value={reverbValue}
                 onChange={(e) => setReverbValue(Number(e.target.value))}
-                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                className="w-full h-1 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-brand-pink"
               />
             </div>
 
             {/* Vocal High Pass filter */}
             <div className="space-y-1.5">
-              <div className="flex justify-between text-[9px] font-mono text-white/40 uppercase">
+              <div className="flex justify-between text-[9px] font-mono text-brand-ink-muted uppercase">
                 <span>High-Pass Low Frequency Cutout</span>
                 <span className="text-[#e2933a] font-bold">{vocalLowCut} Hz</span>
               </div>
@@ -116,13 +116,13 @@ export const SupportTab: React.FC<SupportTabProps> = ({
                 max="240"
                 value={vocalLowCut}
                 onChange={(e) => setVocalLowCut(Number(e.target.value))}
-                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#e2933a]"
+                className="w-full h-1 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-[#e2933a]"
               />
             </div>
 
             {/* Mic Gain Level */}
             <div className="space-y-1.5">
-              <div className="flex justify-between text-[9px] font-mono text-white/40 uppercase">
+              <div className="flex justify-between text-[9px] font-mono text-brand-ink-muted uppercase">
                 <span>Analog Microphone input Gain</span>
                 <span className="text-brand-cyan font-bold">{micInputGain}% Boost</span>
               </div>
@@ -132,22 +132,22 @@ export const SupportTab: React.FC<SupportTabProps> = ({
                 max="100"
                 value={micInputGain}
                 onChange={(e) => setMicInputGain(Number(e.target.value))}
-                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-cyan"
+                className="w-full h-1 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-brand-cyan"
               />
             </div>
 
             {/* Noise gate Toggle */}
-            <div className="flex items-center justify-between bg-black/45 hover:bg-black/60 border border-white/5 p-3 rounded-xl transition mt-3">
+            <div className="flex items-center justify-between bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border p-3 rounded-xl transition mt-3">
               <div>
-                <span className="text-[10px] uppercase font-mono tracking-wider font-bold text-white block">Acoustic Noise Gate Threshold</span>
-                <span className="text-[8px] text-white/40 font-mono block">Excludes backround environment noise</span>
+                <span className="text-[10px] uppercase font-mono tracking-wide font-bold text-brand-ink block">Acoustic Noise Gate Threshold</span>
+                <span className="text-[8px] text-brand-ink-muted font-mono block">Excludes backround environment noise</span>
               </div>
               <button
                 onClick={() => setVocalGate(!vocalGate)}
-                className={`px-3 py-1.5 rounded-lg text-[9px] font-mono font-black uppercase border transition cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-mono font-semibold uppercase border transition cursor-pointer ${
                   vocalGate
                     ? "bg-brand-cyan hover:bg-cyan-600 text-brand-dark border-brand-cyan"
-                    : "bg-white/5 border-white/15 text-white/55"
+                    : "bg-brand-surface-2 border-brand-border text-brand-ink-muted"
                 }`}
               >
                 {vocalGate ? "Enabled" : "Muted Gate"}
@@ -155,7 +155,7 @@ export const SupportTab: React.FC<SupportTabProps> = ({
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/5 text-[9px] font-mono text-white/40 flex items-center justify-between">
+          <div className="mt-4 pt-3 border-t border-brand-border text-[9px] font-mono text-brand-ink-muted flex items-center justify-between">
             <span className="flex items-center gap-1 font-bold text-purple-400">
               <Mic className="h-3 w-3 animate-pulse" /> Capturing Vocal Formant Frequencies
             </span>
@@ -165,26 +165,26 @@ export const SupportTab: React.FC<SupportTabProps> = ({
       </div>
 
       {/* Guide manual list */}
-      <div className="bg-brand-card border border-white/10 rounded-[32px] p-6 text-left relative overflow-hidden">
-        <h3 className="font-display font-black text-xs uppercase tracking-widest text-[#e2933a] mb-3">
+      <div className="bg-brand-card border border-brand-border rounded-2xl p-6 text-left relative overflow-hidden">
+        <h3 className="font-display font-semibold text-xs uppercase tracking-wide text-[#e2933a] mb-3">
           Voice Sequenser & Hum-To-Beat Vocal Guide
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-            <h4 className="text-[11px] font-bold text-white uppercase block mb-1">1. Click Start Mic</h4>
-            <p className="text-[10px] text-white/50 leading-relaxed font-sans">
+          <div className="bg-brand-surface-2 p-4 rounded-xl border border-brand-border">
+            <h4 className="text-[11px] font-bold text-brand-ink uppercase block mb-1">1. Click Start Mic</h4>
+            <p className="text-[10px] text-brand-ink-muted leading-relaxed font-sans">
               Grant microphone browser permissions inside the applet. Click the "Hum-To-Beat Vocals" tab and click the recording trigger to initialize coordinates.
             </p>
           </div>
-          <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-            <h4 className="text-[11px] font-bold text-white uppercase block mb-1">2. Hum / Beatbox / Sing</h4>
-            <p className="text-[10px] text-white/50 leading-relaxed font-sans">
+          <div className="bg-brand-surface-2 p-4 rounded-xl border border-brand-border">
+            <h4 className="text-[11px] font-bold text-brand-ink uppercase block mb-1">2. Hum / Beatbox / Sing</h4>
+            <p className="text-[10px] text-brand-ink-muted leading-relaxed font-sans">
               Hum a simple synth lead, sing a deep bass progression, or vocalize beat patterns (e.g., boom-clack kick and snare timings). Captures up to 8s.
             </p>
           </div>
-          <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-            <h4 className="text-[11px] font-bold text-white uppercase block mb-1">3. Auto Synthesis Render</h4>
-            <p className="text-[10px] text-white/50 leading-relaxed font-sans">
+          <div className="bg-brand-surface-2 p-4 rounded-xl border border-brand-border">
+            <h4 className="text-[11px] font-bold text-brand-ink uppercase block mb-1">3. Auto Synthesis Render</h4>
+            <p className="text-[10px] text-brand-ink-muted leading-relaxed font-sans">
               Gemini decodes frequency wave transients, maps them to standard musical notes, and automatically populates drum trigger patterns and melodic matrices!
             </p>
           </div>

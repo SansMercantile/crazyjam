@@ -2,20 +2,8 @@ import React, { useState } from "react";
 import { Visualizer } from "./Visualizer";
 import { EffectsRack } from "./EffectsRack";
 import { MidiStudio } from "./MidiStudio";
-import { 
-  Sparkles, 
-  Download, 
-  Music, 
-  Sliders, 
-  Volume2, 
-  Radio, 
-  Activity, 
-  Flame, 
-  Compass,
-  ArrowRight,
-  Disc,
-  Layers
-} from "lucide-react";
+import { Download, Radio, Compass, Loader2 } from "lucide-react";
+import { audioEngine } from "../utils/audioEngine";
 
 interface DashboardTabProps {
   analyser: AnalyserNode | null;
@@ -38,6 +26,13 @@ interface DashboardTabProps {
   tracks: any[];
 }
 
+const SPACE_PRESETS = [
+  { id: "cathedral", label: "Cathedral", desc: "Long trails, high decay" },
+  { id: "club", label: "Club", desc: "Short slapback resonance" },
+  { id: "tape", label: "Tape echo", desc: "Warm analog degradation" },
+  { id: "pingpong", label: "Ping-pong", desc: "Stereo spatial panning" },
+];
+
 export const DashboardTab: React.FC<DashboardTabProps> = ({
   analyser,
   isPlaying,
@@ -58,163 +53,117 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
   audioCtx,
   tracks,
 }) => {
-  // Enhanced Dashboard State
   const [delayPreset, setDelayPreset] = useState("classic");
   const [isRecording, setIsRecording] = useState(false);
-  const [recordedFiles, setRecordedFiles] = useState<Array<{ id: string; name: string; date: string; bpm: number }>>([]);
-  const [spaceReverb, setSpaceReverb] = useState(30); // Preconfigured reverb space wetness (30%)
+  const [recordedFiles, setRecordedFiles] = useState<Array<{ id: string; name: string; date: string }>>([]);
+  const [spaceReverb, setSpaceReverb] = useState(30);
+  const [exportError, setExportError] = useState("");
 
-  // Handle Preset Modification
   const handleSpacePresetChange = (preset: string) => {
     setDelayPreset(preset);
-    if (preset === "cathedral") {
-      onDelayTimeChange(0.65);
-      onDelayFeedbackChange(0.60);
-      onReleaseChange(0.85);
-    } else if (preset === "club") {
-      onDelayTimeChange(0.20);
-      onDelayFeedbackChange(0.30);
-      onReleaseChange(0.22);
-    } else if (preset === "tape") {
-      onDelayTimeChange(0.42);
-      onDelayFeedbackChange(0.45);
-      onReleaseChange(0.35);
-    } else if (preset === "pingpong") {
-      onDelayTimeChange(0.35);
-      onDelayFeedbackChange(0.25);
-      onReleaseChange(0.28);
-    }
+    if (preset === "cathedral") { onDelayTimeChange(0.65); onDelayFeedbackChange(0.60); onReleaseChange(0.85); }
+    else if (preset === "club") { onDelayTimeChange(0.20); onDelayFeedbackChange(0.30); onReleaseChange(0.22); }
+    else if (preset === "tape") { onDelayTimeChange(0.42); onDelayFeedbackChange(0.45); onReleaseChange(0.35); }
+    else if (preset === "pingpong") { onDelayTimeChange(0.35); onDelayFeedbackChange(0.25); onReleaseChange(0.28); }
   };
 
-  // Live Session Recording Exporter Simulator (synthesizes downloadable track mock)
-  const handleExportSession = () => {
+  // Real offline render of the current arrangement, not a mock file.
+  const handleExportSession = async () => {
     if (isRecording) return;
     setIsRecording(true);
-
-    // Stagger a beautiful progress countdown
-    setTimeout(() => {
-      setIsRecording(false);
-      const newFile = {
-        id: `rec-${Date.now()}`,
-        name: `CrazyJam-Mixdown-${genre.replace(/\s+/g, "-")}-${tempo}BPM.wav`,
-        date: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        bpm: tempo,
-      };
-      setRecordedFiles([newFile, ...recordedFiles]);
-
-      // Create browser-native mock binary file to trigger instant genuine user browser download!
-      const mockWavContent = new Uint8Array(100); // 100 bytes of dummy data
-      const blob = new Blob([mockWavContent], { type: "audio/wav" });
+    setExportError("");
+    try {
+      const blob = await audioEngine.exportMixWav(tracks, tempo, 4);
+      const name = `CrazyJam-Mixdown-${genre.replace(/\s+/g, "-")}-${tempo}BPM.wav`;
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = newFile.name;
-      document.body.appendChild(link);
+      link.download = name;
       link.click();
-      document.body.removeChild(link);
-    }, 2800);
+      URL.revokeObjectURL(url);
+      setRecordedFiles((prev) => [{ id: `rec-${Date.now()}`, name, date: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }, ...prev]);
+    } catch (e: any) {
+      setExportError(e.message || "Export failed.");
+    } finally {
+      setIsRecording(false);
+    }
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn text-left">
-      {/* Upper Grid: Visualizer & Expanded Master Space Rack */}
+    <div className="space-y-5 animate-fadeIn text-left">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Visualizer card Component */}
         <div className="lg:col-span-8">
           <Visualizer analyser={analyser} isPlaying={isPlaying} scaleKey={scaleKey} />
         </div>
 
-        {/* Studio Space & Exporter controller Component */}
-        <div className="lg:col-span-4 bg-brand-card border border-white/10 rounded-[32px] p-6 flex flex-col justify-between relative overflow-hidden">
+        <div className="lg:col-span-4 bg-brand-surface border border-brand-border rounded-2xl p-5 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-              <Compass className="h-5 w-5 text-brand-pink" />
+            <div className="flex items-center gap-2.5 border-b border-brand-border pb-3 text-brand-gold">
+              <Compass className="h-4.5 w-4.5" />
               <div>
-                <span className="text-[9px] uppercase font-mono tracking-widest text-brand-pink font-bold">Space Expander Controls</span>
-                <h3 className="font-display font-black text-sm uppercase text-white leading-tight">Master Spatializer Node</h3>
+                <span className="text-[10px] text-brand-ink-muted block">Space expander</span>
+                <h3 className="font-display text-[15px] text-brand-ink leading-tight">Master spatializer</h3>
               </div>
             </div>
 
-            <p className="text-[10px] text-white/50 leading-relaxed font-sans">
-              Alter spatial coordinates of audio delays and oscillator releases instantly. Paired with high-definition peak mastering filters.
+            <p className="text-[12px] text-brand-ink-muted leading-relaxed">
+              Adjust spatial delay and release characteristics, paired with the master limiter.
             </p>
 
-            {/* Delay presets selector */}
             <div className="space-y-2">
-              <label className="text-[9px] font-mono uppercase tracking-wider text-white/40 block">Echo Space Presets</label>
+              <label className="text-[11px] text-brand-ink-muted block">Space presets</label>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  { id: "cathedral", label: "⛪ Space Cathedral", desc: "Long trails, high decay" },
-                  { id: "club", label: "🕺 Club Enclosure", desc: "Short slapback resonance" },
-                  { id: "tape", label: "📻 Retro Tape Echo", desc: "Warm analog degradation" },
-                  { id: "pingpong", label: "🏓 Ping-pong Delay", desc: "Stereo spatial panning" },
-                ].map((p) => (
+                {SPACE_PRESETS.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => handleSpacePresetChange(p.id)}
-                    className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
-                      delayPreset === p.id
-                        ? "bg-brand-pink/10 border-brand-pink text-white"
-                        : "bg-white/5 border-white/5 text-white/65 hover:bg-white/10"
+                    className={`p-2.5 rounded-lg border text-left transition-all ${
+                      delayPreset === p.id ? "bg-brand-gold/10 border-brand-gold/40 text-brand-ink" : "bg-brand-surface-2 border-brand-border text-brand-ink-muted"
                     }`}
                   >
-                    <span className="text-[10px] font-bold block">{p.label}</span>
-                    <span className="text-[8px] text-white/40 block mt-0.5">{p.desc}</span>
+                    <span className="text-[12px] font-medium block">{p.label}</span>
+                    <span className="text-[10px] text-brand-ink-muted block mt-0.5">{p.desc}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Wet Mix Slider */}
-            <div className="space-y-1.5 pt-1.5">
-              <div className="flex justify-between text-[9px] font-mono text-white/40 uppercase">
-                <span>Spatial Wetness Coefficient</span>
-                <span className="text-brand-pink font-bold">{spaceReverb}%</span>
+            <div className="space-y-1.5 pt-1">
+              <div className="flex justify-between text-[11px] text-brand-ink-muted">
+                <span>Wet mix</span>
+                <span className="text-brand-gold">{spaceReverb}%</span>
               </div>
               <input
-                type="range"
-                min="0"
-                max="100"
-                value={spaceReverb}
+                type="range" min="0" max="100" value={spaceReverb}
                 onChange={(e) => setSpaceReverb(Number(e.target.value))}
-                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-pink"
+                className="w-full h-1 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-brand-gold"
               />
             </div>
           </div>
 
-          {/* WAV Export Controls */}
-          <div className="mt-5 pt-4 border-t border-white/5">
+          <div className="mt-5 pt-4 border-t border-brand-border">
             <div className="flex items-center justify-between pb-3">
               <div>
-                <span className="text-[10px] font-display font-black text-white block uppercase tracking-wide">Studio WAV Bounce</span>
-                <span className="text-[8px] font-mono text-white/35 block uppercase tracking-wider">High Fidelity 32-bit floating float</span>
+                <span className="text-[12px] text-brand-ink block">WAV bounce</span>
+                <span className="text-[10px] text-brand-ink-muted block">Real offline render of the current arrangement</span>
               </div>
               <button
                 onClick={handleExportSession}
                 disabled={isRecording}
-                className="bg-[#e59632] hover:bg-[#c97f26] disabled:bg-neutral-800 text-brand-dark px-4 py-2 font-display font-black text-[10px] uppercase tracking-wider rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed shadow-md text-center"
+                className="bg-brand-gold hover:brightness-110 disabled:opacity-50 text-brand-bg px-4 py-2 font-semibold text-[12px] rounded-lg transition flex items-center gap-1.5"
               >
-                {isRecording ? (
-                  <>
-                    <span className="h-3 w-3 border-2 border-brand-dark border-t-transparent animate-spin rounded-full" />
-                    Bouncing...
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-3.5 w-3.5" />
-                    Bounce Studio WAV
-                  </>
-                )}
+                {isRecording ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                {isRecording ? "Rendering..." : "Export WAV"}
               </button>
             </div>
+            {exportError && <p className="text-[11px] text-red-400">{exportError}</p>}
 
-            {/* Recorded Files Archive */}
             {recordedFiles.length > 0 && (
-              <div className="mt-2 space-y-1 bg-black/30 p-2 rounded-xl border border-white/5 max-h-[64px] overflow-y-auto scrollbar-thin">
+              <div className="mt-2 space-y-1 bg-brand-surface-2 p-2 rounded-lg border border-brand-border max-h-[64px] overflow-y-auto">
                 {recordedFiles.map((f) => (
-                  <div key={f.id} className="flex justify-between items-center text-[9px] font-mono px-1">
-                    <span className="text-white/70 truncate max-w-[170px] font-bold">🎵 {f.name}</span>
-                    <span className="text-[#e59632] font-black">{f.date}</span>
+                  <div key={f.id} className="flex justify-between items-center text-[11px] px-1">
+                    <span className="text-brand-ink-muted truncate max-w-[170px]">{f.name}</span>
+                    <span className="text-brand-gold">{f.date}</span>
                   </div>
                 ))}
               </div>
@@ -223,56 +172,43 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
         </div>
       </div>
 
-      {/* Real-time Web Audio Synth Effects Rack */}
-      <div className="w-full">
-        <EffectsRack
-          onCutoffChange={onCutoffChange}
-          onQChange={onQChange}
-          onDelayTimeChange={onDelayTimeChange}
-          onDelayFeedbackChange={onDelayFeedbackChange}
-          onReleaseChange={onReleaseChange}
-        />
-      </div>
+      <EffectsRack
+        onCutoffChange={onCutoffChange}
+        onQChange={onQChange}
+        onDelayTimeChange={onDelayTimeChange}
+        onDelayFeedbackChange={onDelayFeedbackChange}
+        onReleaseChange={onReleaseChange}
+      />
 
-      {/* MIDI Instrumentation Keyboard */}
-      <div className="w-full">
-        <MidiStudio
-          tempo={tempo}
-          cutoff={cutoff}
-          qFactor={qFactor}
-          delayTime={delayTime}
-          delayFeedback={delayFeedback}
-          volume={volume}
-          onAutoFix={onAutoFix}
-          audioCtx={audioCtx}
-        />
-      </div>
+      <MidiStudio
+        tempo={tempo}
+        cutoff={cutoff}
+        qFactor={qFactor}
+        delayTime={delayTime}
+        delayFeedback={delayFeedback}
+        volume={volume}
+        onAutoFix={onAutoFix}
+        audioCtx={audioCtx}
+      />
 
-      {/* Live DAW Session telemetry status overview at the bottom */}
-      <div className="bg-gradient-to-r from-brand-card/70 to-brand-dark/40 border border-white/10 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-brand-surface border border-brand-border rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <Radio className="h-4.5 w-4.5 text-brand-cyan animate-pulse animate-duration-1000" />
+            <Radio className="h-4 w-4 text-brand-gold" />
             <div>
-              <span className="text-[8px] font-mono text-white/35 block uppercase tracking-wider">DAW Sound Engine</span>
-              <span className="text-xs font-bold text-white uppercase font-display select-none">WebAudio Direct API Active</span>
+              <span className="text-[10px] text-brand-ink-muted block">Sound engine</span>
+              <span className="text-[12px] text-brand-ink">Web Audio API</span>
             </div>
           </div>
-          <div className="h-8 w-px bg-white/15 hidden sm:block" />
+          <div className="h-8 w-px bg-brand-border hidden sm:block" />
           <div className="hidden sm:block">
-            <span className="text-[8px] font-mono text-white/35 block uppercase tracking-wider">Dynamic Limiter Threshold</span>
-            <span className="text-xs font-mono text-[#e59632] font-semibold">-0.3dB High Ceiling</span>
-          </div>
-          <div className="h-8 w-px bg-white/15 hidden md:block" />
-          <div className="hidden md:block">
-            <span className="text-[8px] font-mono text-white/35 block uppercase tracking-wider">Active Output Channels</span>
-            <span className="text-xs font-bold uppercase text-white font-display select-none">Dual Stereo Panner active</span>
+            <span className="text-[10px] text-brand-ink-muted block">Limiter</span>
+            <span className="text-[12px] text-brand-gold">-0.3dB ceiling</span>
           </div>
         </div>
-
-        <div className="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
-          <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>CrazyJam Synced Frame Buffer: 0 FPS latency</span>
+        <div className="flex items-center gap-1.5 text-[11px] text-brand-ink-muted">
+          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span>Engine ready</span>
         </div>
       </div>
     </div>

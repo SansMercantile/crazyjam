@@ -40,8 +40,8 @@ export function AnimatedAvatar({
   if (isCustomImage) {
     return (
       <div 
-        className={`relative rounded-2xl overflow-hidden border border-white/20 bg-black/40 shadow-inner flex items-center justify-center ${selectedSizeClass} ${className} ${
-          interactive ? "hover:scale-105 hover:border-brand-cyan/50 hover:shadow-neon-cyan/20 transition-all duration-300" : ""
+        className={`relative rounded-2xl overflow-hidden border border-brand-border bg-brand-surface-2 shadow-inner flex items-center justify-center ${selectedSizeClass} ${className} ${
+          interactive ? "hover:brightness-110 hover:border-brand-cyan/50 hover:shadow-neon-cyan/20 transition-all duration-300" : ""
         }`}
         style={customStyle}
       >
@@ -58,7 +58,7 @@ export function AnimatedAvatar({
   }
 
   // Helper container styles
-  const wrapperStyle = `relative flex items-center justify-center rounded-2xl overflow-hidden bg-gradient-to-b from-white/5 to-white/[0.02] border border-white/10 shadow-lg ${selectedSizeClass} ${className}`;
+  const wrapperStyle = `relative flex items-center justify-center rounded-2xl overflow-hidden bg-gradient-to-b from-white/5 to-white/[0.02] border border-brand-border shadow-lg ${selectedSizeClass} ${className}`;
 
   // Dedicated titles for metadata
   const titles: Record<string, string> = {
@@ -757,7 +757,7 @@ export function AnimatedAvatar({
 
   return (
     <div 
-      className={`${wrapperStyle} ${interactive ? "hover:scale-105 hover:border-brand-pink/40 hover:shadow-[#ff00ff]/10 transition-all duration-300" : ""}`}
+      className={`${wrapperStyle} ${interactive ? "hover:brightness-110 hover:border-brand-pink/40 hover:shadow-[#ff00ff]/10 transition-all duration-300" : ""}`}
       style={customStyle}
       title={activeTitle}
     >

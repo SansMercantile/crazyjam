@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { SequencerGrid } from "./SequencerGrid";
 import { CrazyJamStudio } from "./CrazyJamStudio";
+import { MultitrackTimeline } from "./MultitrackTimeline";
 import { 
   Dices, 
   Trash2, 
@@ -17,6 +18,7 @@ import { TrackState, NoteEvent } from "../types";
 interface SequencerTabProps {
   tracks: TrackState[];
   currentStep: number;
+  isPlaying: boolean;
   onStepToggle: (trackId: string, laneId: string | null, stepIndex: number) => void;
   onTrackVolumeChange: (trackId: string, val: number) => void;
   onTrackMuteToggle: (trackId: string) => void;
@@ -34,6 +36,7 @@ interface SequencerTabProps {
 export const SequencerTab: React.FC<SequencerTabProps> = ({
   tracks,
   currentStep,
+  isPlaying,
   onStepToggle,
   onTrackVolumeChange,
   onTrackMuteToggle,
@@ -177,24 +180,33 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
 
   return (
     <div className="space-y-6 animate-fadeIn text-left">
+      {/* Arrangement timeline - multi-section song structure + stem export */}
+      <MultitrackTimeline
+        tracks={tracks}
+        tempo={tempo}
+        isPlaying={isPlaying}
+        onLoadSectionTracks={onTracksUpdate}
+        addLog={addLog}
+      />
+
       {/* Top Console Command Dashboard */}
-      <div className="bg-brand-card border border-white/10 rounded-[32px] p-6 relative overflow-hidden">
+      <div className="bg-brand-card border border-brand-border rounded-2xl p-6 relative overflow-hidden">
         {/* glowing trace lights */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-brand-cyan/5 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 border-b border-white/5 pb-4 mb-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 border-b border-brand-border pb-4 mb-4">
           <div className="flex items-center gap-3">
             <div className="bg-brand-cyan/15 p-2 rounded-xl text-brand-cyan border border-brand-cyan/20">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <span className="text-[9px] uppercase font-mono tracking-widest text-brand-cyan font-bold">Sequenser Groove Controllers</span>
-              <h2 className="font-display font-black text-lg uppercase text-white leading-tight">Advanced Groove & Timing Console</h2>
+              <span className="text-[9px] uppercase font-mono tracking-wide text-brand-cyan font-bold">Sequenser Groove Controllers</span>
+              <h2 className="font-display font-semibold text-lg uppercase text-brand-ink leading-tight">Advanced Groove & Timing Console</h2>
             </div>
           </div>
 
           {/* Quick Helper Chip */}
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-mono text-white/50">
+          <div className="flex items-center gap-2 bg-brand-surface-2 border border-brand-border px-3.5 py-1.5 rounded-xl text-[10px] font-mono text-brand-ink-muted">
             <Info className="h-3.5 w-3.5 text-brand-pink" />
             <span>Click any block below to hear instant notes & build drum loop.</span>
           </div>
@@ -204,16 +216,16 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
           {/* Target Track Select */}
           <div className="md:col-span-4 space-y-1.5">
-            <label className="text-[9px] font-mono uppercase tracking-wider text-white/40 block">Target Track Array</label>
-            <div className="flex gap-1 bg-black/40 border border-white/10 p-1 rounded-xl">
+            <label className="text-[9px] font-mono uppercase tracking-wide text-brand-ink-muted block">Target Track Array</label>
+            <div className="flex gap-1 bg-brand-surface-2 border border-brand-border p-1 rounded-xl">
               {tracks.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setSelectedTrackId(t.id)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] font-display font-black uppercase text-center transition cursor-pointer ${
+                  className={`flex-1 py-2 rounded-lg text-[10px] font-display font-semibold uppercase text-center transition cursor-pointer ${
                     selectedTrackId === t.id
-                      ? "bg-brand-pink text-white shadow-md shadow-brand-pink/20"
-                      : "text-white/45 hover:text-white/80 hover:bg-white/5"
+                      ? "bg-brand-pink text-brand-ink shadow-md shadow-brand-pink/20"
+                      : "text-brand-ink-muted hover:text-brand-ink-muted hover:bg-brand-surface-2"
                   }`}
                 >
                   {t.id}
@@ -225,11 +237,11 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
           {/* Dynamic Step Action Buttons */}
           <div className="md:col-span-4 flex items-center gap-2">
             <div className="flex-1 space-y-1.5">
-              <label className="text-[9px] font-mono uppercase tracking-wider text-white/40 block">Arrangement Generators</label>
+              <label className="text-[9px] font-mono uppercase tracking-wide text-brand-ink-muted block">Arrangement Generators</label>
               <div className="flex gap-2">
                 <button
                   onClick={handleRandomizeTrack}
-                  className="flex-1 bg-brand-cyan hover:bg-cyan-600 font-display font-black text-brand-dark px-3 py-2.5 text-[10px] uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 bg-brand-cyan hover:bg-cyan-600 font-display font-semibold text-brand-dark px-3 py-2.5 text-[10px] uppercase tracking-wide rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
                   title="Randomize selected track patterns"
                 >
                   <Dices className="h-4.5 w-4.5" />
@@ -237,7 +249,7 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
                 </button>
                 <button
                   onClick={handleClearTrack}
-                  className="flex-1 bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 font-display font-black text-white hover:text-red-400 px-3 py-2.5 text-[10px] uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 bg-brand-surface-2 hover:bg-red-500/10 border border-brand-border hover:border-red-500/20 font-display font-semibold text-brand-ink hover:text-red-400 px-3 py-2.5 text-[10px] uppercase tracking-wide rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
                   title="Clear selected track note triggers"
                 >
                   <Trash2 className="h-4.5 w-4.5" />
@@ -251,7 +263,7 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
             {/* Step Offset Shifters and Groove timings */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-[9px] font-mono uppercase tracking-wider text-white/40 block">Timing Swing Delay</label>
+                <label className="text-[9px] font-mono uppercase tracking-wide text-brand-ink-muted block">Timing Swing Delay</label>
                 <div className="flex items-center gap-2 mt-1">
                   <input
                     type="range"
@@ -259,25 +271,25 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
                     max="80"
                     value={grooveSwing}
                     onChange={(e) => setGrooveSwing(Number(e.target.value))}
-                    className="flex-1 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-cyan"
+                    className="flex-1 h-1 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-brand-cyan"
                   />
                   <span className="text-[9px] font-mono font-bold text-brand-cyan">{grooveSwing}%</span>
                 </div>
               </div>
 
               <div>
-                <label className="text-[9px] font-mono uppercase tracking-wider text-white/40 block">Shift Steps Left/Right</label>
+                <label className="text-[9px] font-mono uppercase tracking-wide text-brand-ink-muted block">Shift Steps Left/Right</label>
                 <div className="flex gap-2 mt-1">
                   <button
                     onClick={() => handleShiftSequence("left")}
-                    className="flex-1 p-2 rounded-lg border border-white/10 hover:border-brand-pink/40 hover:text-brand-pink text-white/50 bg-white/5 transition text-center flex items-center justify-center cursor-pointer"
+                    className="flex-1 p-2 rounded-lg border border-brand-border hover:border-brand-pink/40 hover:text-brand-pink text-brand-ink-muted bg-brand-surface-2 transition text-center flex items-center justify-center cursor-pointer"
                     title="Slide steps backwards"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleShiftSequence("right")}
-                    className="flex-1 p-2 rounded-lg border border-white/10 hover:border-brand-pink/40 hover:text-brand-pink text-white/50 bg-white/5 transition text-center flex items-center justify-center cursor-pointer"
+                    className="flex-1 p-2 rounded-lg border border-brand-border hover:border-brand-pink/40 hover:text-brand-pink text-brand-ink-muted bg-brand-surface-2 transition text-center flex items-center justify-center cursor-pointer"
                     title="Slide steps forwards"
                   >
                     <ChevronRight className="h-4 w-4" />

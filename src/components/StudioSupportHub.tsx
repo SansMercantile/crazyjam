@@ -112,7 +112,7 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
         {
           id: Date.now().toString(),
           sender: "ai",
-          text: `⚠️ **Connection disrupted.** Gemini Studio Core could not formulate a diagnostic. Please check your network or try again.`,
+          text: `⚠️ **Connection disrupted.** The CrazyJam swarm couldn't reach the studio core. Please check your network or try again.`,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
         }
       ]);
@@ -214,15 +214,15 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
   };
 
   return (
-    <div id="studio-support-container" className="h-full min-h-[460px] bg-brand-card border border-white/10 rounded-[32px] overflow-hidden flex flex-col justify-between">
+    <div id="studio-support-container" className="h-full min-h-[460px] bg-brand-card border border-brand-border rounded-2xl overflow-hidden flex flex-col justify-between">
       {/* Sub-Header Tabs */}
-      <div className="flex border-b border-white/10 bg-black/40">
+      <div className="flex border-b border-brand-border bg-brand-surface-2">
         <button
           onClick={() => setActiveTab("support")}
-          className={`flex-1 py-4 text-xs font-display font-black uppercase tracking-wider flex items-center justify-center gap-2 transition ${
+          className={`flex-1 py-4 text-xs font-display font-semibold uppercase tracking-wide flex items-center justify-center gap-2 transition ${
             activeTab === "support"
-              ? "text-brand-pink border-b-2 border-brand-pink bg-black/10"
-              : "text-white/40 hover:text-white/80"
+              ? "text-brand-pink border-b-2 border-brand-pink bg-brand-surface-2"
+              : "text-brand-ink-muted hover:text-brand-ink-muted"
           }`}
         >
           <MessageSquare className="h-4 w-4" />
@@ -230,10 +230,10 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
         </button>
         <button
           onClick={() => setActiveTab("voice")}
-          className={`flex-1 py-4 text-xs font-display font-black uppercase tracking-wider flex items-center justify-center gap-2 transition ${
+          className={`flex-1 py-4 text-xs font-display font-semibold uppercase tracking-wide flex items-center justify-center gap-2 transition ${
             activeTab === "voice"
-              ? "text-purple-400 border-b-2 border-purple-400 bg-black/10"
-              : "text-white/40 hover:text-white/80"
+              ? "text-purple-400 border-b-2 border-purple-400 bg-brand-surface-2"
+              : "text-brand-ink-muted hover:text-brand-ink-muted"
           }`}
         >
           <Mic className="h-4 w-4" />
@@ -255,14 +255,14 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
                     m.sender === "user" ? "ml-auto items-end" : "mr-auto items-start"
                   }`}
                 >
-                  <span className="text-[9px] text-white/35 font-mono mb-1">
+                  <span className="text-[9px] text-brand-ink-muted font-mono mb-1">
                     {m.sender === "user" ? "Producer" : "Studio Support"} • {m.timestamp}
                   </span>
                   <div
                     className={`rounded-2xl p-3 text-[11px] leading-relaxed font-sans ${
                       m.sender === "user"
-                        ? "bg-brand-pink text-white rounded-tr-none font-semibold text-right"
-                        : "bg-white/5 border border-white/10 text-white/90 rounded-tl-none font-medium text-left"
+                        ? "bg-brand-pink text-brand-ink rounded-tr-none font-semibold text-right"
+                        : "bg-brand-surface-2 border border-brand-border text-brand-ink-muted rounded-tl-none font-medium text-left"
                     }`}
                   >
                     {/* Render minimal formatting/bold terms */}
@@ -274,7 +274,7 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
               ))}
               {isSending && (
                 <div className="flex mr-auto items-start max-w-[85%] animate-pulse">
-                  <div className="bg-white/5 border border-white/10 text-white/40 rounded-2xl rounded-tl-none p-3 text-[11px] font-mono flex items-center gap-2">
+                  <div className="bg-brand-surface-2 border border-brand-border text-brand-ink-muted rounded-2xl rounded-tl-none p-3 text-[11px] font-mono flex items-center gap-2">
                     <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-pink" />
                     AI Swarm formulation...
                   </div>
@@ -288,19 +288,19 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
               <div className="flex flex-wrap gap-1.5 pt-2">
                 <button
                   onClick={() => handleQuickChip("Explain Synth Controllers & LFOs")}
-                  className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-full px-2.5 py-1 text-[10px] text-brand-pink font-sans font-bold transition"
+                  className="bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-full px-2.5 py-1 text-[10px] text-brand-pink font-sans font-bold transition"
                 >
                   ❓ Synth Knobs
                 </button>
                 <button
                   onClick={() => handleQuickChip("Compose a slow lofi ambient melody")}
-                  className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-full px-2.5 py-1 text-[10px] text-purple-400 font-sans font-bold transition"
+                  className="bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-full px-2.5 py-1 text-[10px] text-purple-400 font-sans font-bold transition"
                 >
                   🎵 Make Ambient Track
                 </button>
                 <button
                   onClick={() => handleQuickChip("How do I record human voice or samplers?")}
-                  className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-full px-2.5 py-1 text-[10px] text-blue-450 font-sans font-bold transition"
+                  className="bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-full px-2.5 py-1 text-[10px] text-blue-450 font-sans font-bold transition"
                 >
                   🎙️ Recording Guide
                 </button>
@@ -315,16 +315,16 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
                 <div className="bg-purple-500/10 border border-purple-500/20 h-14 w-14 rounded-full flex items-center justify-center text-purple-400 animate-pulse mb-1">
                   <Mic className="h-7 w-7" />
                 </div>
-                <h4 className="text-xs font-display font-black text-white uppercase tracking-wider">
+                <h4 className="text-xs font-display font-semibold text-brand-ink uppercase tracking-wide">
                   Deploy Voice to Sequencer Grid
                 </h4>
-                <p className="text-[10px] text-white/50 leading-relaxed max-w-[280px] font-medium font-sans">
+                <p className="text-[10px] text-brand-ink-muted leading-relaxed max-w-[280px] font-medium font-sans">
                   Hum melodies, sing basslines, or beatbox a kick/snare pattern! CrazyJam will listen, analyze frequency transients recursively, and fabricate custom steps on the sequencer.
                 </p>
                 <button
                   onClick={startRecording}
                   disabled={isGeneratingTracks}
-                  className="mt-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-[11px] font-display font-black uppercase tracking-wider py-2 px-6 rounded-full transition shadow-lg shadow-purple-500/20 flex items-center gap-2"
+                  className="mt-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-brand-ink text-[11px] font-display font-semibold uppercase tracking-wide py-2 px-6 rounded-full transition shadow-lg shadow-purple-500/20 flex items-center gap-2"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                   Initialize Mic Capture
@@ -336,17 +336,17 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
               <>
                 <div className="relative mb-2">
                   <div className="absolute inset-0 bg-red-500/30 rounded-full animate-ping h-14 w-14" />
-                  <div className="bg-red-500 border border-red-400 h-14 w-14 rounded-full flex items-center justify-center text-white relative">
-                    <Square className="h-5 w-5 fill-current text-white animate-pulse" />
+                  <div className="bg-red-500 border border-red-400 h-14 w-14 rounded-full flex items-center justify-center text-brand-ink relative">
+                    <Square className="h-5 w-5 fill-current text-brand-ink animate-pulse" />
                   </div>
                 </div>
-                <h4 className="text-xs font-display font-black text-red-400 uppercase tracking-wider animate-pulse">
+                <h4 className="text-xs font-display font-semibold text-red-400 uppercase tracking-wide animate-pulse">
                   Vocal Track Capturing...
                 </h4>
-                <p className="text-[11px] font-mono text-white/70">
+                <p className="text-[11px] font-mono text-brand-ink-muted">
                   {recordingSeconds}s / 8s Limit
                 </p>
-                <div className="w-[180px] h-3 bg-white/5 rounded-full overflow-hidden border border-white/10 mt-1">
+                <div className="w-[180px] h-3 bg-brand-surface-2 rounded-full overflow-hidden border border-brand-border mt-1">
                   <div
                     className="h-full bg-red-500 transition-all duration-300"
                     style={{ width: `${(recordingSeconds / 8) * 100}%` }}
@@ -354,7 +354,7 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
                 </div>
                 <button
                   onClick={stopRecording}
-                  className="mt-3 bg-white hover:bg-neutral-100 text-black text-[10px] font-display font-black uppercase tracking-wider py-1.5 px-5 rounded-full transition"
+                  className="mt-3 bg-brand-surface-2 hover:bg-neutral-100 text-black text-[10px] font-display font-semibold uppercase tracking-wide py-1.5 px-5 rounded-full transition"
                 >
                   Finish & Synthesize
                 </button>
@@ -363,14 +363,14 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
 
             {micState === "processing" && (
               <>
-                <div className="bg-white/5 border border-white/10 h-14 w-14 rounded-full flex items-center justify-center text-brand-pink mb-1">
+                <div className="bg-brand-surface-2 border border-brand-border h-14 w-14 rounded-full flex items-center justify-center text-brand-pink mb-1">
                   <Loader2 className="h-7 w-7 animate-spin" />
                 </div>
-                <h4 className="text-xs font-display font-black text-white uppercase tracking-wider">
+                <h4 className="text-xs font-display font-semibold text-brand-ink uppercase tracking-wide">
                   Analyzing Audio Harmonics
                 </h4>
-                <p className="text-[10px] text-white/40 max-w-[240px] font-mono">
-                  Gemini-3.5-flash is listening and extracting rhythm transients + vocal formant chords...
+                <p className="text-[10px] text-brand-ink-muted max-w-[240px] font-mono">
+                  The CrazyJam swarm is listening and extracting rhythm transients + vocal formant chords...
                 </p>
               </>
             )}
@@ -380,15 +380,15 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
                 <div className="bg-green-500/10 border border-green-500/20 h-14 w-14 rounded-full flex items-center justify-center text-green-400 mb-1">
                   <CheckCircle className="h-7 w-7" />
                 </div>
-                <h4 className="text-xs font-display font-black text-green-400 uppercase tracking-wider">
+                <h4 className="text-xs font-display font-semibold text-green-400 uppercase tracking-wide">
                   Rhythm Structure Deployed!
                 </h4>
-                <p className="text-[10px] text-white/50 leading-relaxed max-w-[260px] font-medium font-sans">
+                <p className="text-[10px] text-brand-ink-muted leading-relaxed max-w-[260px] font-medium font-sans">
                   The sequencer triggers have been updated to replicate your hummed patterns! Check out the updated grid.
                 </p>
                 <button
                   onClick={resetMicState}
-                  className="mt-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-display font-black uppercase tracking-wider py-1.5 px-5 rounded-full transition"
+                  className="mt-2 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border text-brand-ink text-[10px] font-display font-semibold uppercase tracking-wide py-1.5 px-5 rounded-full transition"
                 >
                   Record Another
                 </button>
@@ -400,22 +400,22 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
                 <div className="bg-red-500/10 border border-red-500/20 h-14 w-14 rounded-full flex items-center justify-center text-red-500 mb-1">
                   <AlertTriangle className="h-7 w-7" />
                 </div>
-                <h4 className="text-xs font-display font-black text-red-500 uppercase tracking-wider">
+                <h4 className="text-xs font-display font-semibold text-red-500 uppercase tracking-wide">
                   Microphone Capture Failed
                 </h4>
-                <p className="text-[10px] text-white/45 max-w-[240px] font-mono leading-relaxed">
+                <p className="text-[10px] text-brand-ink-muted max-w-[240px] font-mono leading-relaxed">
                   {micErrorMessage || "Capture terminated raw."}
                 </p>
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={startRecording}
-                    className="bg-brand-pink text-white text-[10px] font-display font-black uppercase tracking-wider py-1.5 px-4 rounded-full transition"
+                    className="bg-brand-pink text-brand-ink text-[10px] font-display font-semibold uppercase tracking-wide py-1.5 px-4 rounded-full transition"
                   >
                     Retry Record
                   </button>
                   <button
                     onClick={resetMicState}
-                    className="bg-white/5 border border-white/10 text-white text-[10px] font-display font-black uppercase tracking-wider py-1.5 px-4 rounded-full transition"
+                    className="bg-brand-surface-2 border border-brand-border text-brand-ink text-[10px] font-display font-semibold uppercase tracking-wide py-1.5 px-4 rounded-full transition"
                   >
                     Reset
                   </button>
@@ -433,7 +433,7 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
             e.preventDefault();
             sendMessage(inputVal);
           }}
-          className="border-t border-white/10 p-3 bg-black/40 flex items-center gap-2"
+          className="border-t border-brand-border p-3 bg-brand-surface-2 flex items-center gap-2"
         >
           <input
             type="text"
@@ -445,12 +445,12 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
                 : "Ask support or type: 'Make a tech-house beat'..."
             }
             disabled={isSending || isGeneratingTracks}
-            className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-brand-pink transition font-medium font-sans"
+            className="flex-1 bg-brand-surface-2 border border-brand-border rounded-full px-4 py-2.5 text-xs text-brand-ink placeholder-brand-ink-muted focus:outline-none focus:border-brand-pink transition font-medium font-sans"
           />
           <button
             type="submit"
             disabled={!inputVal.trim() || isSending || isGeneratingTracks}
-            className="bg-brand-pink hover:bg-pink-600 disabled:bg-neutral-800 disabled:text-white/20 text-white h-9 w-9 rounded-full flex items-center justify-center transition shrink-0 shadow-md shadow-brand-pink/20"
+            className="bg-brand-pink hover:bg-pink-600 disabled:bg-neutral-800 disabled:text-brand-ink-muted text-brand-ink h-9 w-9 rounded-full flex items-center justify-center transition shrink-0 shadow-md shadow-brand-pink/20"
           >
             <Send className="h-3.5 w-3.5" />
           </button>

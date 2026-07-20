@@ -92,17 +92,17 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
       {/* Top Advisory Deck with Agreement Matrix */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Swarm Agreement Matrix */}
-        <div className="lg:col-span-7 bg-brand-card border border-white/10 rounded-[32px] p-6 relative overflow-hidden flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-brand-card border border-brand-border rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3 mb-4">
+            <div className="flex items-center gap-2 border-b border-brand-border pb-3 mb-4">
               <BrainCircuit className="h-5 w-5 text-purple-400" />
               <div>
-                <span className="text-[9px] uppercase font-mono tracking-widest text-purple-400 font-bold">Consensus telemetry</span>
-                <h3 className="font-display font-black text-sm uppercase text-white leading-tight">Neural Swarm Consensus Status</h3>
+                <span className="text-[9px] uppercase font-mono tracking-wide text-purple-400 font-bold">Consensus telemetry</span>
+                <h3 className="font-display font-semibold text-sm uppercase text-brand-ink leading-tight">Neural Swarm Consensus Status</h3>
               </div>
             </div>
 
-            <p className="text-[10px] text-white/50 leading-relaxed font-sans mb-4">
+            <p className="text-[10px] text-brand-ink-muted leading-relaxed font-sans mb-4">
               Real-time monitoring of AI Agent agreement coefficients. When compiling prompts, nodes synchronize synthesis metrics to prevent clashing frequencies.
             </p>
 
@@ -114,21 +114,21 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
                 { name: "Harmonic Architect Progressions", rate: 91, status: "Scales Verified", color: "bg-purple-500" },
                 { name: "Sonic mastering EQ Coordinator", rate: 86, status: "Limiter Threshold Calibrated", color: "bg-brand-pink" },
               ].map((ag) => (
-                <div key={ag.name} className="flex justify-between items-center text-[10px] bg-white/5 border border-white/5 p-2.5 rounded-xl">
+                <div key={ag.name} className="flex justify-between items-center text-[10px] bg-brand-surface-2 border border-brand-border p-2.5 rounded-xl">
                   <div className="flex items-center gap-2.5">
                     <span className={`h-2 w-2 rounded-full ${ag.color}`} />
-                    <span className="font-bold text-white/90">{ag.name}</span>
+                    <span className="font-bold text-brand-ink-muted">{ag.name}</span>
                   </div>
                   <div className="flex items-center gap-3 font-mono">
-                    <span className="text-[9px] text-white/40 uppercase">{ag.status}</span>
-                    <span className="text-white font-black">{ag.rate}% Synchrony</span>
+                    <span className="text-[9px] text-brand-ink-muted uppercase">{ag.status}</span>
+                    <span className="text-brand-ink font-semibold">{ag.rate}% Synchrony</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-white/40">
+          <div className="mt-4 pt-3 border-t border-brand-border flex items-center justify-between text-[10px] font-mono text-brand-ink-muted">
             <span className="flex items-center gap-1 font-bold text-brand-pink">
               ● Active Channels: 4 Swarms online
             </span>
@@ -137,30 +137,30 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
         </div>
 
         {/* Direct Advisory Console */}
-        <div className="lg:col-span-5 bg-brand-card border border-white/10 rounded-[32px] p-6 relative flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-brand-card border border-brand-border rounded-2xl p-6 relative flex flex-col justify-between">
           <form onSubmit={submitDirectInstruction} className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2 border-b border-brand-border pb-3">
               <MessageSquareCode className="h-5 w-5 text-[#e59632]" />
               <div>
-                <span className="text-[9px] uppercase font-mono tracking-widest text-[#e59632] font-black">Direct feedback routing</span>
-                <h3 className="font-display font-black text-sm uppercase text-white leading-tight">Agent Advisory Pipeline</h3>
+                <span className="text-[9px] uppercase font-mono tracking-wide text-[#e59632] font-semibold">Direct feedback routing</span>
+                <h3 className="font-display font-semibold text-sm uppercase text-brand-ink leading-tight">Agent Advisory Pipeline</h3>
               </div>
             </div>
 
-            <p className="text-[10px] text-white/50 leading-relaxed font-sans">
+            <p className="text-[10px] text-brand-ink-muted leading-relaxed font-sans">
               Deploy special instruction directives directly to an agent's neural priority heap. Overrides general swarm behaviors.
             </p>
 
             {/* Select Target Agent */}
             <div className="space-y-1">
-              <label className="text-[9px] font-mono uppercase tracking-wider text-white/40 block">Select Agent Node</label>
+              <label className="text-[9px] font-mono uppercase tracking-wide text-brand-ink-muted block">Select Agent Node</label>
               <select
                 value={selectedAgentId}
                 onChange={(e) => setSelectedAgentId(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 py-2 px-3 rounded-xl text-xs text-white uppercase font-bold outline-none focus:border-[#e59632]"
+                className="w-full bg-brand-surface-2 border border-brand-border py-2 px-3 rounded-xl text-xs text-brand-ink uppercase font-bold outline-none focus:border-[#e59632]"
               >
                 {agents.map((a) => (
-                  <option key={a.id} value={a.id} className="bg-brand-card text-white uppercase text-xs">
+                  <option key={a.id} value={a.id} className="bg-brand-card text-brand-ink uppercase text-xs">
                     {a.name}
                   </option>
                 ))}
@@ -169,20 +169,20 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
 
             {/* Instruction input */}
             <div className="space-y-1">
-              <label className="text-[9px] font-mono uppercase tracking-wider text-white/40 block">Custom Instruction Advisory</label>
+              <label className="text-[9px] font-mono uppercase tracking-wide text-brand-ink-muted block">Custom Instruction Advisory</label>
               <textarea
                 value={directMessage}
                 onChange={(e) => setDirectMessage(e.target.value)}
                 placeholder="Declare details... (e.g. 'boost snare dynamic swing and focus bass strictly on Minor keys')"
                 disabled={isAnswering}
-                className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-xs text-white placeholder-white/30 outline-none h-18 resize-none focus:border-[#e59632] transition font-sans"
+                className="w-full bg-brand-surface-2 border border-brand-border p-3 rounded-xl text-xs text-brand-ink placeholder-brand-ink-muted outline-none h-18 resize-none focus:border-[#e59632] transition font-sans"
               />
             </div>
 
             <button
               type="submit"
               disabled={!directMessage.trim() || isAnswering}
-              className="w-full py-2 bg-[#e59632] hover:bg-[#c97f26] disabled:bg-neutral-800 text-brand-dark font-display font-black uppercase text-[10px] tracking-wider rounded-xl transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+              className="w-full py-2 bg-[#e59632] hover:bg-[#c97f26] disabled:bg-neutral-800 text-brand-dark font-display font-semibold uppercase text-[10px] tracking-wide rounded-xl transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
             >
               {isAnswering ? (
                 <>

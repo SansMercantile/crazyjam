@@ -334,28 +334,28 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
   return (
     <div className="space-y-8 animate-fadeIn text-left">
       {/* Visual Banner Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#14141d]/80 via-[#22102f]/80 to-[#14141d]/80 border border-white/10 rounded-[32px] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#14141d]/80 via-[#22102f]/80 to-[#14141d]/80 border border-brand-border rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-2">
           {/* Tag */}
           <div className="inline-flex items-center gap-1 bg-brand-pink/10 border border-brand-pink/30 text-brand-pink text-[9px] uppercase font-mono px-2 py-0.5 rounded-full font-bold">
             <Rocket className="h-3 w-3" />
             <span>End-to-End Creative Ecosystem</span>
           </div>
-          <h2 className="font-display font-black text-xl uppercase tracking-wider text-white">
+          <h2 className="font-display font-semibold text-xl uppercase tracking-wide text-brand-ink">
             CrazyJam Global Production Launchpad
           </h2>
-          <p className="text-[11px] text-white/50 max-w-2xl leading-relaxed font-sans">
+          <p className="text-[11px] text-brand-ink-muted max-w-2xl leading-relaxed font-sans">
             Inspiration, creation, mastering, and distribution. We have bridged the entire industry workflow. 
             Connect your Spotify or YouTube accounts to feed streaming habits right to the CrazyJam AI generator.
             When you're ready to publish, select LANDR, DistroKid, or Ditto to instantly master and ship your songs directly to all global stores!
           </p>
         </div>
 
-        <div className="shrink-0 flex items-center gap-2.5 bg-black/40 border border-white/5 p-3.5 rounded-2xl">
+        <div className="shrink-0 flex items-center gap-2.5 bg-brand-surface-2 border border-brand-border p-3.5 rounded-2xl">
           <Activity className="h-5 w-5 text-brand-cyan animate-pulse" />
           <div className="font-mono text-left">
-            <span className="text-[9px] text-white/40 block uppercase">Catalog Releases</span>
-            <span className="text-sm font-black text-white">ACTIVE HUB v3.1</span>
+            <span className="text-[9px] text-brand-ink-muted block uppercase">Catalog Releases</span>
+            <span className="text-sm font-semibold text-brand-ink">ACTIVE HUB v3.1</span>
           </div>
         </div>
         
@@ -372,24 +372,24 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Streaming Handshakes Panel */}
-            <div className="bg-brand-card border border-white/10 rounded-[32px] p-6 flex flex-col justify-between relative overflow-hidden">
+            <div className="bg-brand-card border border-brand-border rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center justify-between border-b border-brand-border pb-3">
                   <div className="flex items-center gap-2">
                     <Compass className="h-5 w-5 text-brand-cyan animate-spin-slow" />
                     <div>
-                      <span className="text-[9px] uppercase font-mono tracking-widest text-brand-cyan font-bold">History Integrations</span>
-                      <h3 className="font-display font-black text-sm uppercase text-white leading-tight">Link Music Accounts</h3>
+                      <span className="text-[9px] uppercase font-mono tracking-wide text-brand-cyan font-bold">History Integrations</span>
+                      <h3 className="font-display font-semibold text-sm uppercase text-brand-ink leading-tight">Link Music Accounts</h3>
                     </div>
                   </div>
                   
                   <HelpCircle 
-                    className="h-4 w-4 text-white/20 hover:text-white/40 cursor-help" 
+                    className="h-4 w-4 text-brand-ink-muted hover:text-brand-ink-muted cursor-help" 
                     title="CrazyJam uses your history and liked music to teach the AI coach your favorite styles, suggesting personalized tempos and structures." 
                   />
                 </div>
 
-                <p className="text-[10px] text-white/50 leading-relaxed font-sans">
+                <p className="text-[10px] text-brand-ink-muted leading-relaxed font-sans">
                   Toggle links to streaming profiles. Secure handshakes enable our neural engines to index your liked playlists, saved genres, and tempo profiles safely.
                 </p>
 
@@ -400,26 +400,26 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                       key={acc.id}
                       className={`p-3 rounded-2xl border transition-all duration-300 ${
                         acc.connected 
-                          ? "bg-[#14141d]/80 border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.15)]" 
-                          : "bg-black/20 border-white/5 hover:border-white/10"
+                          ? "bg-[#14141d]/80 border-brand-border shadow-[0_4px_12px_rgba(0,0,0,0.15)]" 
+                          : "bg-brand-surface-2 border-brand-border hover:border-brand-border"
                       }`}
                       onMouseEnter={() => setHoveredAcc(acc.id)}
                       onMouseLeave={() => setHoveredAcc(null)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className={`h-8 w-8 rounded-xl flex items-center justify-center font-display font-black text-xs ${acc.logoColor}`}>
+                          <div className={`h-8 w-8 rounded-xl flex items-center justify-center font-display font-semibold text-xs ${acc.logoColor}`}>
                             {acc.name[0]}
                           </div>
                           <div>
-                            <span className="text-[11px] font-bold text-white block">{acc.name}</span>
+                            <span className="text-[11px] font-bold text-brand-ink block">{acc.name}</span>
                             {acc.connected ? (
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                <span className="text-[9px] font-mono text-white/40">{acc.userHandle} • Linked</span>
+                                <span className="text-[9px] font-mono text-brand-ink-muted">{acc.userHandle} • Linked</span>
                               </div>
                             ) : (
-                              <span className="text-[9px] font-mono text-white/30 block mt-0.5">Disconnected</span>
+                              <span className="text-[9px] font-mono text-brand-ink-muted block mt-0.5">Disconnected</span>
                             )}
                           </div>
                         </div>
@@ -427,7 +427,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                         {acc.connected ? (
                           <button
                             onClick={() => handleDisconnect(acc.id)}
-                            className="px-2.5 py-1 bg-white/5 hover:bg-red-500/10 hover:text-red-400 border border-white/5 hover:border-red-500/20 rounded-lg text-[9px] font-mono font-bold text-white/60 transition-all cursor-pointer"
+                            className="px-2.5 py-1 bg-brand-surface-2 hover:bg-red-500/10 hover:text-red-400 border border-brand-border hover:border-red-500/20 rounded-lg text-[9px] font-mono font-bold text-brand-ink-muted transition-all cursor-pointer"
                           >
                             Disconnect
                           </button>
@@ -442,7 +442,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                       </div>
 
                       {acc.connected && acc.stats && (
-                        <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center gap-1 text-[9px] font-mono text-white/50 bg-black/10 p-1.5 rounded-lg border border-white/5">
+                        <div className="mt-2.5 pt-2 border-t border-brand-border flex items-center gap-1 text-[9px] font-mono text-brand-ink-muted bg-brand-surface-2 p-1.5 rounded-lg border border-brand-border">
                           <Activity className="h-3 w-3 text-brand-pink" />
                           <span>Metrical Feed: {acc.stats}</span>
                         </div>
@@ -454,14 +454,14 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                 {/* Secure Link Modal/Drawer (Overlay inside container for sleek styling) */}
                 {isLinking && (
                   <div className="mt-3 p-4 bg-[#1e1526] border border-brand-pink/30 rounded-2xl animate-slideDown text-left">
-                    <span className="text-[8px] font-mono text-brand-pink tracking-widest block uppercase font-black mb-1">
+                    <span className="text-[8px] font-mono text-brand-pink tracking-wide block uppercase font-semibold mb-1">
                       OAuth Gateway
                     </span>
-                    <h4 className="text-xs font-bold text-white mb-2 leading-tight">
+                    <h4 className="text-xs font-bold text-brand-ink mb-2 leading-tight">
                       Connect to {accounts.find(a => a.id === isLinking)?.name} Catalog
                     </h4>
                     
-                    <p className="text-[10px] text-white/40 leading-tight mb-3">
+                    <p className="text-[10px] text-brand-ink-muted leading-tight mb-3">
                       We'll import your personal historical playback markers and curated track lists. No security edits or writes are initialized.
                     </p>
 
@@ -472,20 +472,20 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                           placeholder="Your profile username or handle (e.g. jam_master_42)"
                           value={typedHandle}
                           onChange={(e) => setTypedHandle(e.target.value)}
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[11px] text-white font-mono placeholder-white/20 focus:outline-none focus:border-brand-pink/50"
+                          className="w-full bg-brand-surface-2 border border-brand-border rounded-xl px-3 py-2 text-[11px] text-brand-ink font-mono placeholder-brand-ink-muted focus:outline-none focus:border-brand-pink/50"
                         />
                       </div>
                       <div className="flex gap-2 justify-end pt-1">
                         <button
                           onClick={() => setIsLinking(null)}
-                          className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-mono text-white/60 transition-all cursor-pointer"
+                          className="px-3 py-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 rounded-lg text-[10px] font-mono text-brand-ink-muted transition-all cursor-pointer"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={() => confirmLinkAccount(isLinking, typedHandle)}
                           disabled={!typedHandle.trim()}
-                          className="px-3 py-1.5 bg-brand-pink/20 hover:bg-brand-pink disabled:bg-brand-pink/5 text-white disabled:text-white/20 border border-brand-pink/40 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer"
+                          className="px-3 py-1.5 bg-brand-pink/20 hover:bg-brand-pink disabled:bg-brand-pink/5 text-brand-ink disabled:text-brand-ink-muted border border-brand-pink/40 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer"
                         >
                           Authenticate Feed
                         </button>
@@ -496,20 +496,20 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
               </div>
 
               {/* Sync Trigger button */}
-              <div className="border-t border-white/5 pt-4 mt-4">
+              <div className="border-t border-brand-border pt-4 mt-4">
                 <button
                   onClick={runAIEngineSync}
                   disabled={isSyncing || accounts.filter(a => a.connected).length === 0}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-brand-pink to-purple-600 hover:from-brand-pink/90 hover:to-purple-500 text-white font-display font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition duration-300 shadow-md shadow-brand-pink/10 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-brand-pink to-purple-600 hover:from-brand-pink/90 hover:to-purple-500 text-brand-ink font-display font-semibold text-xs uppercase tracking-wide rounded-2xl flex items-center justify-center gap-2 transition duration-300 shadow-md shadow-brand-pink/10 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isSyncing ? (
                     <>
-                      <RefreshCw className="h-4 w-4 animate-spin text-white" />
+                      <RefreshCw className="h-4 w-4 animate-spin text-brand-ink" />
                       <span>Syncing Playback Histories...</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4 text-white" />
+                      <Sparkles className="h-4 w-4 text-brand-ink" />
                       <span>Sync All Liked Music Data</span>
                     </>
                   )}
@@ -518,14 +518,14 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
             </div>
 
             {/* AI Custom suggestions box */}
-            <div className="bg-brand-card border border-white/10 rounded-[32px] p-6 flex flex-col justify-between relative overflow-hidden">
+            <div className="bg-brand-card border border-brand-border rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center justify-between border-b border-brand-border pb-3">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-brand-pink animate-pulse" />
                     <div>
-                      <span className="text-[9px] uppercase font-mono tracking-widest text-[#ff00ff] font-bold">Personalized Recipes</span>
-                      <h3 className="font-display font-black text-sm uppercase text-white leading-tight">AI Suggested Sound Styles</h3>
+                      <span className="text-[9px] uppercase font-mono tracking-wide text-[#ff00ff] font-bold">Personalized Recipes</span>
+                      <h3 className="font-display font-semibold text-sm uppercase text-brand-ink leading-tight">AI Suggested Sound Styles</h3>
                     </div>
                   </div>
                   
@@ -534,15 +534,15 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                   </span>
                 </div>
 
-                <p className="text-[10px] text-white/50 leading-relaxed font-sans">
+                <p className="text-[10px] text-brand-ink-muted leading-relaxed font-sans">
                   The CrazyJam AI analyzed your listening histories. Apply any blueprint directly to customize the local DAW workspace setup instantly!
                 </p>
 
                 {isSyncing && activeSyncStep && (
-                  <div className="p-4 bg-black/40 border border-brand-cyan/20 rounded-2xl space-y-2 animate-pulse">
-                    <span className="text-[9px] font-mono text-brand-cyan tracking-wider block uppercase font-bold">Deep Analyzer Active:</span>
-                    <p className="text-[10px] font-mono text-white/80 leading-none">{activeSyncStep}</p>
-                    <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                  <div className="p-4 bg-brand-surface-2 border border-brand-cyan/20 rounded-2xl space-y-2 animate-pulse">
+                    <span className="text-[9px] font-mono text-brand-cyan tracking-wide block uppercase font-bold">Deep Analyzer Active:</span>
+                    <p className="text-[10px] font-mono text-brand-ink-muted leading-none">{activeSyncStep}</p>
+                    <div className="w-full bg-brand-surface-2 h-1 rounded-full overflow-hidden">
                       <div className="bg-brand-cyan h-full w-2/3 animate-ping" />
                     </div>
                   </div>
@@ -553,12 +553,12 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                   {suggestions.map((sug) => (
                     <div 
                       key={sug.id}
-                      className="p-3 bg-black/35 rounded-2xl border border-white/5 hover:border-brand-pink/20 transition-all text-left flex flex-col justify-between gap-3"
+                      className="p-3 bg-brand-surface-2 rounded-2xl border border-brand-border hover:border-brand-pink/20 transition-all text-left flex flex-col justify-between gap-3"
                     >
                       <div>
                         {/* Header */}
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-black uppercase text-white tracking-wide">
+                          <span className="text-[11px] font-semibold uppercase text-brand-ink tracking-wide">
                             {sug.styleName}
                           </span>
                           <span className="text-[8px] font-mono text-brand-pink bg-brand-pink/10 border border-brand-pink/20 px-1.5 py-0.2 rounded-md font-bold">
@@ -567,18 +567,18 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                         </div>
 
                         {/* Description */}
-                        <p className="text-[9px] font-sans text-white/40 mt-1 leading-tight">
+                        <p className="text-[9px] font-sans text-brand-ink-muted mt-1 leading-tight">
                           {sug.description}
                         </p>
 
                         {/* Blueprint values */}
-                        <div className="grid grid-cols-2 gap-2 mt-2 bg-white/5 p-1.5 rounded-lg font-mono text-[9px]">
+                        <div className="grid grid-cols-2 gap-2 mt-2 bg-brand-surface-2 p-1.5 rounded-lg font-mono text-[9px]">
                           <div>
-                            <span className="text-white/30 block uppercase">Tempo</span>
+                            <span className="text-brand-ink-muted block uppercase">Tempo</span>
                             <span className="text-brand-cyan font-bold">{sug.tempo} BPM</span>
                           </div>
                           <div>
-                            <span className="text-white/30 block uppercase">Harmonic Scale</span>
+                            <span className="text-brand-ink-muted block uppercase">Harmonic Scale</span>
                             <span className="text-[#e2933a] font-bold">{sug.scale}</span>
                           </div>
                         </div>
@@ -586,7 +586,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                         {/* Pill tags */}
                         <div className="flex flex-wrap gap-1 mt-2.5">
                           {sug.attributes.map((attr, idx) => (
-                            <span key={idx} className="text-[8px] font-mono text-white/40 bg-[#1d1d2b] px-1.5 py-0.5 rounded-md">
+                            <span key={idx} className="text-[8px] font-mono text-brand-ink-muted bg-[#1d1d2b] px-1.5 py-0.5 rounded-md">
                               #{attr}
                             </span>
                           ))}
@@ -607,7 +607,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                           });
                           alert(`Applied '${sug.styleName}'! Checked & synced Tempo to ${sug.tempo} BPM and Scale to ${sug.scale}. Check your Modular Arranger tab to see the customized AI suggestions!`);
                         }}
-                        className="py-1.5 w-full bg-white/5 hover:bg-brand-cyan hover:text-black border border-white/10 hover:border-transparent text-white text-[10px] font-mono font-bold uppercase tracking-wider rounded-xl transition duration-300 flex items-center justify-center gap-1 cursor-pointer"
+                        className="py-1.5 w-full bg-brand-surface-2 hover:bg-brand-cyan hover:text-black border border-brand-border hover:border-transparent text-brand-ink text-[10px] font-mono font-bold uppercase tracking-wide rounded-xl transition duration-300 flex items-center justify-center gap-1 cursor-pointer"
                       >
                         <Import className="h-3 w-3" />
                         <span>Apply Sound Blueprint to Studio</span>
@@ -625,17 +625,17 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
         {/* LOWER SECTION: END-TO-END DISTRIBUTION CARRIER CONSOLE     */}
         {/* ========================================================= */}
         <div className="xl:col-span-12 space-y-6">
-          <div className="bg-brand-card border border-white/10 rounded-[32px] p-6 relative overflow-hidden">
+          <div className="bg-brand-card border border-brand-border rounded-2xl p-6 relative overflow-hidden">
             
-            <div className="flex flex-wrap items-center justify-between border-b border-white/5 pb-3 mb-5">
+            <div className="flex flex-wrap items-center justify-between border-b border-brand-border pb-3 mb-5">
               <div className="flex items-center gap-2.5">
                 <Rocket className="h-5 w-5 text-brand-pink" />
                 <div>
-                  <span className="text-[9px] uppercase font-mono tracking-widest text-brand-pink font-bold">WAV Export & Direct Shipping</span>
-                  <h3 className="font-display font-black text-sm uppercase text-white leading-tight">Master Carrier Publishing Portal</h3>
+                  <span className="text-[9px] uppercase font-mono tracking-wide text-brand-pink font-bold">WAV Export & Direct Shipping</span>
+                  <h3 className="font-display font-semibold text-sm uppercase text-brand-ink leading-tight">Master Carrier Publishing Portal</h3>
                 </div>
               </div>
-              <span className="text-[9px] font-mono text-white/30 tracking-wider">
+              <span className="text-[9px] font-mono text-brand-ink-muted tracking-wide">
                 Lossless Audio • Global ISRC Generator Enabled
               </span>
             </div>
@@ -644,7 +644,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
               
               {/* Form parameters */}
               <div className="lg:col-span-4 space-y-4">
-                <span className="text-[9px] font-mono text-white/35 uppercase tracking-widest block font-bold border-b border-white/5 pb-1">
+                <span className="text-[9px] font-mono text-brand-ink-muted uppercase tracking-wide block font-bold border-b border-brand-border pb-1">
                   1. Audio Metadata & Artwork
                 </span>
 
@@ -657,46 +657,46 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                 <div className="space-y-3">
                   {/* Title Box */}
                   <div className="space-y-1 text-left">
-                    <label className="text-[9px] font-mono text-white/40 block uppercase">Song/Release Title</label>
+                    <label className="text-[9px] font-mono text-brand-ink-muted block uppercase">Song/Release Title</label>
                     <input
                       type="text"
                       value={releaseTitle}
                       onChange={(e) => setReleaseTitle(e.target.value)}
                       placeholder="Type release title..."
-                      className="w-full bg-[#14141d] border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-brand-pink/50 focus:ring-1 focus:ring-brand-pink/30 font-display font-bold uppercase tracking-wider"
+                      className="w-full bg-[#14141d] border border-brand-border rounded-xl px-3 py-2 text-xs text-brand-ink placeholder-brand-ink-muted focus:outline-none focus:border-brand-pink/50 focus:ring-1 focus:ring-brand-pink/30 font-display font-bold uppercase tracking-wide"
                     />
                   </div>
 
                   {/* Creator Box */}
                   <div className="space-y-1 text-left">
-                    <label className="text-[9px] font-mono text-white/40 block uppercase">Primary Artist Name</label>
+                    <label className="text-[9px] font-mono text-brand-ink-muted block uppercase">Primary Artist Name</label>
                     <input
                       type="text"
                       value={artistName}
                       onChange={(e) => setArtistName(e.target.value)}
                       placeholder="Artist handle..."
-                      className="w-full bg-[#14141d] border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-brand-pink/50 focus:ring-1 focus:ring-brand-pink/30 font-display font-black uppercase tracking-widest text-brand-pink"
+                      className="w-full bg-[#14141d] border border-brand-border rounded-xl px-3 py-2 text-xs text-brand-ink placeholder-brand-ink-muted focus:outline-none focus:border-brand-pink/50 focus:ring-1 focus:ring-brand-pink/30 font-display font-semibold uppercase tracking-wide text-brand-pink"
                     />
                   </div>
 
                   {/* Artwork Image Container */}
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[9px] font-mono text-white/40 block uppercase">Release Cover Artwork</label>
+                    <label className="text-[9px] font-mono text-brand-ink-muted block uppercase">Release Cover Artwork</label>
                     
                     <div className="flex gap-4 items-center">
                       {/* Preview Box */}
-                      <div className="h-18 w-18 shrink-0 rounded-xl bg-[#14141d] border border-white/10 overflow-hidden flex items-center justify-center relative shadow-inner select-none">
+                      <div className="h-18 w-18 shrink-0 rounded-xl bg-[#14141d] border border-brand-border overflow-hidden flex items-center justify-center relative shadow-inner select-none">
                         {artworkUrl ? (
                           <img src={artworkUrl} alt="Cover Preview" className="h-full w-full object-cover" />
                         ) : (
-                          <Disc className="h-6 w-6 text-white/10 animate-spin-slow" />
+                          <Disc className="h-6 w-6 text-brand-ink-muted animate-spin-slow" />
                         )}
                         <div className="absolute inset-0 bg-neutral-900/10 pointer-events-none" />
                       </div>
 
                       {/* Upload triggers */}
                       <div className="flex-1 space-y-1">
-                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-brand-pink/40 rounded-xl cursor-pointer text-[10px] font-mono font-bold text-white transition-all">
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border hover:border-brand-pink/40 rounded-xl cursor-pointer text-[10px] font-mono font-bold text-brand-ink transition-all">
                           <UploadCloud className="h-3.5 w-3.5 text-brand-pink" />
                           <span>Choose Cover Art</span>
                           <input
@@ -706,7 +706,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                             className="hidden"
                           />
                         </label>
-                        <p className="text-[8px] font-mono text-white/30 block leading-tight">
+                        <p className="text-[8px] font-mono text-brand-ink-muted block leading-tight">
                           Supports JPEG or PNG. High-contrast square format recommended (min 1400x1400).
                         </p>
                       </div>
@@ -716,14 +716,14 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
               </div>
 
               {/* Master / Cloud Configs */}
-              <div className="lg:col-span-5 space-y-5 border-t lg:border-t-0 lg:border-x border-white/5 pt-4 lg:pt-0 lg:px-6">
+              <div className="lg:col-span-5 space-y-5 border-t lg:border-t-0 lg:border-x border-brand-border pt-4 lg:pt-0 lg:px-6">
                 
                 {/* Mastering curves */}
                 <div className="space-y-2">
-                  <span className="text-[9px] font-mono text-white/35 uppercase tracking-widest block font-bold border-b border-white/5 pb-1">
+                  <span className="text-[9px] font-mono text-brand-ink-muted uppercase tracking-wide block font-bold border-b border-brand-border pb-1">
                     2. AI Cloud Remastering Parameters
                   </span>
-                  <p className="text-[9px] text-white/40 leading-relaxed font-sans">
+                  <p className="text-[9px] text-brand-ink-muted leading-relaxed font-sans">
                     Integrate direct audio bounce with Cloud AI models. This simulates full mastering chains to optimize loudness, transients, and sub bass dynamics.
                   </p>
                   
@@ -732,10 +732,10 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                       <button
                         key={level}
                         onClick={() => setMasteringIntensity(level as any)}
-                        className={`flex-1 py-2 text-[10px] font-mono uppercase font-black tracking-widest border rounded-xl transition ${
+                        className={`flex-1 py-2 text-[10px] font-mono uppercase font-semibold tracking-wide border rounded-xl transition ${
                           masteringIntensity === level
                             ? "bg-brand-pink/15 border-brand-pink text-brand-pink shadow-md shadow-brand-pink/10"
-                            : "bg-[#14141d]/40 border-white/5 hover:border-white/10 text-white/50"
+                            : "bg-[#14141d]/40 border-brand-border hover:border-brand-border text-brand-ink-muted"
                         }`}
                       >
                         {level} intensity
@@ -745,7 +745,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                 </div>
 
                 {/* Distributor selection of Ditto, DistroKid, LANDR */}
-                <span className="text-[9px] font-mono text-white/35 uppercase tracking-widest block font-bold border-b border-white/5 pb-1 pt-1.5">
+                <span className="text-[9px] font-mono text-brand-ink-muted uppercase tracking-wide block font-bold border-b border-brand-border pb-1 pt-1.5">
                   3. Carrier System
                 </span>
                 
@@ -756,12 +756,12 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                       onClick={() => setSelectedDistributor(dist.id as any)}
                       className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition ${
                         selectedDistributor === dist.id 
-                          ? "bg-brand-cyan/15 border-brand-cyan text-white shadow-md shadow-brand-cyan/10" 
-                          : "bg-black/35 border-white/5 hover:border-white/10 text-white/50"
+                          ? "bg-brand-cyan/15 border-brand-cyan text-brand-ink shadow-md shadow-brand-cyan/10" 
+                          : "bg-brand-surface-2 border-brand-border hover:border-brand-border text-brand-ink-muted"
                       }`}
                     >
                       <div className="flex items-center justify-between w-full">
-                        <span className="text-[10px] font-display font-black uppercase text-white tracking-wide">
+                        <span className="text-[10px] font-display font-semibold uppercase text-brand-ink tracking-wide">
                           {dist.name.split(" ")[0]}
                         </span>
                         {selectedDistributor === dist.id && (
@@ -769,7 +769,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                         )}
                       </div>
                       <div className="space-y-0.5 mt-2">
-                        <span className="text-[8px] font-mono text-white/40 block leading-none">{dist.speed}</span>
+                        <span className="text-[8px] font-mono text-brand-ink-muted block leading-none">{dist.speed}</span>
                         <span className="text-[8px] font-mono text-brand-cyan font-bold block leading-none">{dist.fee}</span>
                       </div>
                     </button>
@@ -780,7 +780,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
 
               {/* Target Platforms Checkbox */}
               <div className="lg:col-span-3 space-y-4">
-                <span className="text-[9px] font-mono text-white/35 uppercase tracking-widest block font-bold border-b border-white/5 pb-1">
+                <span className="text-[9px] font-mono text-brand-ink-muted uppercase tracking-wide block font-bold border-b border-brand-border pb-1">
                   4. Release Storefront Channels
                 </span>
 
@@ -789,24 +789,24 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                     <button
                       key={id}
                       onClick={() => togglePlatform(id)}
-                      className={`py-2 px-2.5 rounded-xl border flex items-center justify-between gap-1.5 transition text-[10px] font-bold uppercase tracking-wider ${
+                      className={`py-2 px-2.5 rounded-xl border flex items-center justify-between gap-1.5 transition text-[10px] font-bold uppercase tracking-wide ${
                         enabled 
-                          ? "bg-amber-400/10 border-amber-400/30 text-white shadow-md shadow-amber-400/5 font-black"
-                          : "bg-black/25 border-white/5 hover:border-white/10 text-white/35"
+                          ? "bg-amber-400/10 border-amber-400/30 text-brand-ink shadow-md shadow-amber-400/5 font-semibold"
+                          : "bg-brand-surface-2 border-brand-border hover:border-brand-border text-brand-ink-muted"
                       }`}
                     >
                       <span>{id}</span>
                       {enabled ? (
                         <Check className="h-3 w-3 text-amber-400" />
                       ) : (
-                        <div className="h-3 w-3 rounded-full border border-white/10 shrink-0" />
+                        <div className="h-3 w-3 rounded-full border border-brand-border shrink-0" />
                       )}
                     </button>
                   ))}
                 </div>
 
-                <div className="bg-[#14141d]/50 p-3 rounded-2xl border border-white/5 space-y-1">
-                  <span className="text-[8px] font-mono text-white/35 uppercase block"> DAW Mix Summary:</span>
+                <div className="bg-[#14141d]/50 p-3 rounded-2xl border border-brand-border space-y-1">
+                  <span className="text-[8px] font-mono text-brand-ink-muted uppercase block"> DAW Mix Summary:</span>
                   <div className="flex gap-1.5 items-center text-[9px] font-mono text-emerald-400 font-bold">
                     <FileAudio className="h-3.5 w-3.5" />
                     <span>Active Audio Mix is Bounced ({tracks?.length || 4} channels)</span>
@@ -818,9 +818,9 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
             </div>
 
             {/* Ship Button Trigger */}
-            <div className="border-t border-white/5 pt-5 mt-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="border-t border-brand-border pt-5 mt-6 flex flex-col md:flex-row gap-4 items-center justify-between">
               <div className="text-left space-y-0.5">
-                <span className="text-[10px] text-white/40 block leading-tight font-sans">
+                <span className="text-[10px] text-brand-ink-muted block leading-tight font-sans">
                   Ready to bounce, master, and upload? Handshaking locks in full commercial copyrights automatically.
                 </span>
                 <span className="text-[9px] font-mono text-brand-cyan font-bold block">
@@ -832,7 +832,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                 <button
                   onClick={handleShipRelease}
                   disabled={isShipping}
-                  className="w-full md:w-auto px-8 py-3.5 bg-gradient-to-r from-brand-pink to-brand-cyan hover:from-white/95 hover:to-white hover:text-black text-white font-display font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2.5 transition duration-300 shadow-md shadow-brand-pink/10 disabled:opacity-40 cursor-pointer"
+                  className="w-full md:w-auto px-8 py-3.5 bg-gradient-to-r from-brand-pink to-brand-cyan hover:from-white/95 hover:to-white hover:text-black text-brand-ink font-display font-semibold text-xs uppercase tracking-wide rounded-2xl flex items-center justify-center gap-2.5 transition duration-300 shadow-md shadow-brand-pink/10 disabled:opacity-40 cursor-pointer"
                 >
                   <Rocket className="h-4.5 w-4.5" />
                   <span>{isShipping ? "Bouncing & Shipping Release..." : "Ship Release Worldwide"}</span>
@@ -844,15 +844,15 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
             {isShipping && (
               <div className="mt-6 p-4 rounded-3xl bg-[#09090e]/95 border border-brand-cyan/20 space-y-3.5 animate-fadeIn text-left shadow-lg">
                 <div className="flex items-center justify-between border-b border-cyan-500/10 pb-2">
-                  <span className="text-[9px] font-mono text-brand-cyan tracking-wider uppercase font-black flex items-center gap-1.5">
+                  <span className="text-[9px] font-mono text-brand-cyan tracking-wide uppercase font-semibold flex items-center gap-1.5">
                     <RefreshCw className="h-3.5 w-3.5 animate-spin text-brand-cyan" />
                     Mastering & Transit Stream: Step {shippingLogIndex + 1}/{shippingLogs.length}
                   </span>
-                  <span className="text-[9px] font-mono text-white/30 truncate max-w-xs">{releaseTitle}</span>
+                  <span className="text-[9px] font-mono text-brand-ink-muted truncate max-w-xs">{releaseTitle}</span>
                 </div>
 
                 {/* Progressive dynamic logs list styled with Mono */}
-                <div className="space-y-1 bg-black/45 p-3 rounded-xl border border-white/5 max-h-[160px] overflow-y-auto font-mono text-[10px]">
+                <div className="space-y-1 bg-brand-surface-2 p-3 rounded-xl border border-brand-border max-h-[160px] overflow-y-auto font-mono text-[10px]">
                   {shippingLogs.map((log, i) => {
                     const isPassed = i < shippingLogIndex;
                     const isActive = i === shippingLogIndex;
@@ -861,10 +861,10 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                         key={i} 
                         className={`transition-all duration-300 ${
                           isPassed 
-                            ? "text-white/30" 
+                            ? "text-brand-ink-muted" 
                             : isActive 
                             ? "text-brand-cyan font-bold ml-1 flex items-center gap-1.5" 
-                            : "text-white/10"
+                            : "text-brand-ink-muted"
                         }`}
                       >
                         {isActive && <div className="h-1 py-1 w-1 rounded-full bg-brand-cyan animate-ping" />}
@@ -883,37 +883,37 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                 <div className="flex gap-3 items-center">
                   <CheckCircle2 className="h-6 w-6 text-emerald-400 shrink-0" />
                   <div>
-                    <span className="text-[8px] font-mono text-emerald-400 tracking-widest block uppercase font-black">Release Complete</span>
-                    <h4 className="font-display font-black text-sm uppercase text-white leading-tight">
+                    <span className="text-[8px] font-mono text-emerald-400 tracking-wide block uppercase font-semibold">Release Complete</span>
+                    <h4 className="font-display font-semibold text-sm uppercase text-brand-ink leading-tight">
                       "{releaseSuccess.title}" Published Worldwide!
                     </h4>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-black/35 p-3 rounded-2xl border border-white/5 font-mono text-[9px] text-white/60">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-brand-surface-2 p-3 rounded-2xl border border-brand-border font-mono text-[9px] text-brand-ink-muted">
                   <div className="space-y-0.5">
-                    <span className="text-white/30 uppercase block">Copyright Owner</span>
-                    <span className="font-bold text-white">{releaseSuccess.artist}</span>
+                    <span className="text-brand-ink-muted uppercase block">Copyright Owner</span>
+                    <span className="font-bold text-brand-ink">{releaseSuccess.artist}</span>
                   </div>
                   <div className="space-y-0.5">
-                    <span className="text-white/30 uppercase block">Catalog Carrier</span>
+                    <span className="text-brand-ink-muted uppercase block">Catalog Carrier</span>
                     <span className="font-bold text-brand-pink">{releaseSuccess.distributor}</span>
                   </div>
                   <div className="space-y-0.5">
-                    <span className="text-white/30 uppercase block">Mastering Profile</span>
+                    <span className="text-brand-ink-muted uppercase block">Mastering Profile</span>
                     <span className="font-bold text-brand-cyan">{releaseSuccess.masteringIntensity} intensity</span>
                   </div>
                   <div className="space-y-0.5">
-                    <span className="text-white/30 uppercase block">Unique ISRC</span>
+                    <span className="text-brand-ink-muted uppercase block">Unique ISRC</span>
                     <span className="font-bold text-emerald-400 select-all">{releaseSuccess.issrc}</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <span className="text-[9px] font-mono text-white/40 block uppercase">Distributed Outlets Pending Inspection:</span>
+                  <span className="text-[9px] font-mono text-brand-ink-muted block uppercase">Distributed Outlets Pending Inspection:</span>
                   <div className="flex flex-wrap gap-2">
                     {releaseSuccess.platforms.map((plat: string) => (
-                      <span key={plat} className="px-2 py-0.5 bg-white/5 border border-white/5 rounded-md text-[9px] font-mono font-bold text-emerald-400 flex items-center gap-1">
+                      <span key={plat} className="px-2 py-0.5 bg-brand-surface-2 border border-brand-border rounded-md text-[9px] font-mono font-bold text-emerald-400 flex items-center gap-1">
                         <Check className="h-3 w-3" />
                         {plat}
                       </span>
@@ -926,7 +926,7 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({
                     href="https://spotify.com" 
                     target="_blank" 
                     rel="noreferrer"
-                    className="py-2 px-4 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-mono font-bold text-white transition-all text-center flex items-center justify-center gap-1.5"
+                    className="py-2 px-4 bg-brand-surface-2 hover:bg-brand-surface-2 rounded-xl text-[10px] font-mono font-bold text-brand-ink transition-all text-center flex items-center justify-center gap-1.5"
                   >
                     <span>View Spotify Catalog Pending Desk</span>
                     <ExternalLink className="h-3 w-3" />

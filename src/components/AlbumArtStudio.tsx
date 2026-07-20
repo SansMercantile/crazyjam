@@ -362,61 +362,61 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
 
       {/* Toolbar column */}
       <div className="xl:col-span-3 flex flex-col gap-4">
-        <div className="bg-brand-card border border-white/10 rounded-[28px] p-5 flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-brand-pink border-b border-white/5 pb-3">
+        <div className="bg-brand-card border border-brand-border rounded-2xl p-5 flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-brand-pink border-b border-brand-border pb-3">
             <Palette className="h-4.5 w-4.5" />
-            <h2 className="font-display font-black text-sm tracking-widest uppercase text-white">Cover Art Studio</h2>
+            <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">Cover Art Studio</h2>
           </div>
-          <p className="text-[10px] font-mono text-white/40">Exports fixed at 1400 × 1400px for every streaming platform.</p>
+          <p className="text-[10px] font-mono text-brand-ink-muted">Exports fixed at 1400 × 1400px for every streaming platform.</p>
 
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Cover title"
-            className="w-full bg-white/5 hover:bg-white/10 border border-white/10 focus:border-brand-pink/50 text-white px-3 py-2 text-xs rounded-xl outline-none font-bold"
+            className="w-full bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border focus:border-brand-pink/50 text-brand-ink px-3 py-2 text-xs rounded-xl outline-none font-bold"
           />
 
           <div className="grid grid-cols-2 gap-2 mt-1">
-            <button onClick={addTextLayer} className="flex items-center justify-center gap-1.5 bg-white/5 hover:bg-brand-pink/20 border border-white/10 hover:border-brand-pink/40 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-white transition-all">
+            <button onClick={addTextLayer} className="flex items-center justify-center gap-1.5 bg-brand-surface-2 hover:bg-brand-pink/20 border border-brand-border hover:border-brand-pink/40 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all">
               <Type className="h-3.5 w-3.5" /> Text
             </button>
-            <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center gap-1.5 bg-white/5 hover:bg-brand-cyan/20 border border-white/10 hover:border-brand-cyan/40 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-white transition-all">
+            <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center gap-1.5 bg-brand-surface-2 hover:bg-brand-cyan/20 border border-brand-border hover:border-brand-cyan/40 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all">
               <ImageIcon className="h-3.5 w-3.5" /> Image
             </button>
-            <button onClick={() => addShapeLayer("rect")} className="flex items-center justify-center gap-1.5 bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-500/40 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-white transition-all">
+            <button onClick={() => addShapeLayer("rect")} className="flex items-center justify-center gap-1.5 bg-brand-surface-2 hover:bg-purple-500/20 border border-brand-border hover:border-purple-500/40 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all">
               <Square className="h-3.5 w-3.5" /> Rect
             </button>
-            <button onClick={() => addShapeLayer("ellipse")} className="flex items-center justify-center gap-1.5 bg-white/5 hover:bg-emerald-500/20 border border-white/10 hover:border-emerald-500/40 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-white transition-all">
+            <button onClick={() => addShapeLayer("ellipse")} className="flex items-center justify-center gap-1.5 bg-brand-surface-2 hover:bg-emerald-500/20 border border-brand-border hover:border-emerald-500/40 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all">
               <Circle className="h-3.5 w-3.5" /> Circle
             </button>
           </div>
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
 
           <div className="mt-1">
-            <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest font-bold block mb-1.5">Background</span>
+            <span className="text-[9px] font-mono text-brand-ink-muted uppercase tracking-wide font-bold block mb-1.5">Background</span>
             <div className="flex flex-wrap gap-1.5">
               {SWATCHES.map((c) => (
                 <button
                   key={c}
                   onClick={() => setBackground(c)}
-                  className={`h-6 w-6 rounded-lg border-2 transition-all ${background === c ? "border-white scale-110" : "border-white/10"}`}
+                  className={`h-6 w-6 rounded-lg border-2 transition-all ${background === c ? "border-brand-border scale-110" : "border-brand-border"}`}
                   style={{ backgroundColor: c }}
                 />
               ))}
-              <input type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="h-6 w-6 rounded-lg border-2 border-white/10 bg-transparent cursor-pointer" />
+              <input type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="h-6 w-6 rounded-lg border-2 border-brand-border bg-transparent cursor-pointer" />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-white/5">
-            <button onClick={handleSave} disabled={isSaving} className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-brand-purple to-brand-pink rounded-xl py-2.5 text-[10px] font-mono font-black uppercase text-white transition-all disabled:opacity-50">
+          <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-brand-border">
+            <button onClick={handleSave} disabled={isSaving} className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-brand-purple to-brand-pink rounded-xl py-2.5 text-[10px] font-mono font-semibold uppercase text-brand-ink transition-all disabled:opacity-50">
               <Save className="h-3.5 w-3.5" /> {isSaving ? "Saving..." : "Save"}
             </button>
-            <button onClick={handleExportDownload} className="flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-white transition-all">
+            <button onClick={handleExportDownload} className="flex items-center justify-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all">
               <Download className="h-3.5 w-3.5" /> Export
             </button>
           </div>
-          <button onClick={openGallery} className="flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-white transition-all">
+          <button onClick={openGallery} className="flex items-center justify-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl py-2.5 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all">
             <FolderOpen className="h-3.5 w-3.5" /> My Saved Covers
           </button>
           {statusMsg && <p className="text-[10px] font-mono text-brand-cyan text-center">{statusMsg}</p>}
@@ -424,9 +424,9 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
 
         {/* Layer inspector */}
         {selectedLayer && (
-          <div className="bg-brand-card border border-white/10 rounded-[28px] p-5 flex flex-col gap-3 animate-fadeIn">
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <span className="text-[10px] font-mono font-black uppercase text-white/60 tracking-widest">Edit Layer</span>
+          <div className="bg-brand-card border border-brand-border rounded-2xl p-5 flex flex-col gap-3 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-brand-border pb-2">
+              <span className="text-[10px] font-mono font-semibold uppercase text-brand-ink-muted tracking-wide">Edit Layer</span>
               <button onClick={() => deleteLayer(selectedLayer.id)} className="text-red-400 hover:text-red-300">
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -438,10 +438,10 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
                   value={selectedLayer.text}
                   onChange={(e) => updateLayer(selectedLayer.id, { text: e.target.value })}
                   rows={2}
-                  className="w-full bg-white/5 border border-white/10 focus:border-brand-pink/50 text-white px-3 py-2 text-xs rounded-xl outline-none resize-none"
+                  className="w-full bg-brand-surface-2 border border-brand-border focus:border-brand-pink/50 text-brand-ink px-3 py-2 text-xs rounded-xl outline-none resize-none"
                 />
                 <div className="grid grid-cols-2 gap-2">
-                  <select value={selectedLayer.fontFamily} onChange={(e) => updateLayer(selectedLayer.id, { fontFamily: e.target.value })} className="bg-white/5 border border-white/10 text-white text-[10px] rounded-lg px-2 py-1.5">
+                  <select value={selectedLayer.fontFamily} onChange={(e) => updateLayer(selectedLayer.id, { fontFamily: e.target.value })} className="bg-brand-surface-2 border border-brand-border text-brand-ink text-[10px] rounded-lg px-2 py-1.5">
                     {FONT_OPTIONS.map((f) => (
                       <option key={f} value={f}>{f}</option>
                     ))}
@@ -450,25 +450,25 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
                     type="number"
                     value={selectedLayer.fontSize}
                     onChange={(e) => updateLayer(selectedLayer.id, { fontSize: Number(e.target.value) })}
-                    className="bg-white/5 border border-white/10 text-white text-[10px] rounded-lg px-2 py-1.5"
+                    className="bg-brand-surface-2 border border-brand-border text-brand-ink text-[10px] rounded-lg px-2 py-1.5"
                   />
                 </div>
                 <div className="flex items-center gap-1.5">
                   {(["left", "center", "right"] as const).map((a) => {
                     const AlignIcon = a === "left" ? AlignLeft : a === "center" ? AlignCenter : AlignRight;
                     return (
-                      <button key={a} onClick={() => updateLayer(selectedLayer.id, { textAlign: a })} className={`p-1.5 rounded-lg border ${selectedLayer.textAlign === a ? "border-brand-pink bg-brand-pink/10 text-brand-pink" : "border-white/10 text-white/50"}`}>
+                      <button key={a} onClick={() => updateLayer(selectedLayer.id, { textAlign: a })} className={`p-1.5 rounded-lg border ${selectedLayer.textAlign === a ? "border-brand-pink bg-brand-pink/10 text-brand-pink" : "border-brand-border text-brand-ink-muted"}`}>
                         <AlignIcon className="h-3.5 w-3.5" />
                       </button>
                     );
                   })}
-                  <button onClick={() => updateLayer(selectedLayer.id, { fontWeight: selectedLayer.fontWeight === "900" ? "400" : "900" })} className={`p-1.5 rounded-lg border ${selectedLayer.fontWeight === "900" ? "border-brand-pink bg-brand-pink/10 text-brand-pink" : "border-white/10 text-white/50"}`}>
+                  <button onClick={() => updateLayer(selectedLayer.id, { fontWeight: selectedLayer.fontWeight === "900" ? "400" : "900" })} className={`p-1.5 rounded-lg border ${selectedLayer.fontWeight === "900" ? "border-brand-pink bg-brand-pink/10 text-brand-pink" : "border-brand-border text-brand-ink-muted"}`}>
                     <Bold className="h-3.5 w-3.5" />
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {SWATCHES.map((c) => (
-                    <button key={c} onClick={() => updateLayer(selectedLayer.id, { color: c })} className={`h-5 w-5 rounded-md border-2 ${selectedLayer.color === c ? "border-white scale-110" : "border-white/10"}`} style={{ backgroundColor: c }} />
+                    <button key={c} onClick={() => updateLayer(selectedLayer.id, { color: c })} className={`h-5 w-5 rounded-md border-2 ${selectedLayer.color === c ? "border-brand-border scale-110" : "border-brand-border"}`} style={{ backgroundColor: c }} />
                   ))}
                 </div>
               </>
@@ -477,16 +477,16 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
             {selectedLayer.type === "shape" && (
               <div className="flex flex-wrap gap-1.5">
                 {SWATCHES.map((c) => (
-                  <button key={c} onClick={() => updateLayer(selectedLayer.id, { fill: c })} className={`h-6 w-6 rounded-md border-2 ${selectedLayer.fill === c ? "border-white scale-110" : "border-white/10"}`} style={{ backgroundColor: c }} />
+                  <button key={c} onClick={() => updateLayer(selectedLayer.id, { fill: c })} className={`h-6 w-6 rounded-md border-2 ${selectedLayer.fill === c ? "border-brand-border scale-110" : "border-brand-border"}`} style={{ backgroundColor: c }} />
                 ))}
               </div>
             )}
 
-            <div className="flex items-center gap-2 pt-2 border-t border-white/5">
-              <button onClick={() => moveLayerZ(selectedLayer.id, 1)} className="flex-1 flex items-center justify-center gap-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg py-1.5 text-[9px] font-mono font-bold uppercase text-white/60">
+            <div className="flex items-center gap-2 pt-2 border-t border-brand-border">
+              <button onClick={() => moveLayerZ(selectedLayer.id, 1)} className="flex-1 flex items-center justify-center gap-1 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-lg py-1.5 text-[9px] font-mono font-bold uppercase text-brand-ink-muted">
                 <ChevronUp className="h-3 w-3" /> Bring Forward
               </button>
-              <button onClick={() => moveLayerZ(selectedLayer.id, -1)} className="flex-1 flex items-center justify-center gap-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg py-1.5 text-[9px] font-mono font-bold uppercase text-white/60">
+              <button onClick={() => moveLayerZ(selectedLayer.id, -1)} className="flex-1 flex items-center justify-center gap-1 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-lg py-1.5 text-[9px] font-mono font-bold uppercase text-brand-ink-muted">
                 <ChevronDown className="h-3 w-3" /> Send Back
               </button>
             </div>
@@ -499,7 +499,7 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
         <div
           ref={canvasRef}
           onMouseDown={() => setSelectedId(null)}
-          className="relative rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl select-none"
+          className="relative rounded-2xl overflow-hidden border-2 border-brand-border shadow-2xl select-none"
           style={{ width: EDITOR_SIZE, height: EDITOR_SIZE, backgroundColor: background }}
         >
           {sortedLayers.map((layer) => {
@@ -549,7 +549,7 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
                 {selectedId === layer.id && (
                   <div
                     onMouseDown={(e) => onResizeMouseDown(e, layer)}
-                    className="absolute -right-1.5 -bottom-1.5 h-3.5 w-3.5 rounded-full bg-brand-pink border-2 border-white cursor-se-resize"
+                    className="absolute -right-1.5 -bottom-1.5 h-3.5 w-3.5 rounded-full bg-brand-pink border-2 border-brand-border cursor-se-resize"
                   />
                 )}
               </div>
@@ -557,33 +557,33 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
           })}
           {layers.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center text-center px-8">
-              <p className="text-[10px] font-mono text-white/25 uppercase tracking-widest">Add text, images, or shapes from the left panel to start your cover</p>
+              <p className="text-[10px] font-mono text-brand-ink-muted uppercase tracking-wide">Add text, images, or shapes from the left panel to start your cover</p>
             </div>
           )}
         </div>
-        <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest">1400 × 1400px canvas &bull; drag to move &bull; pink dot to resize</span>
+        <span className="text-[9px] font-mono text-brand-ink-muted uppercase tracking-wide">1400 × 1400px canvas &bull; drag to move &bull; pink dot to resize</span>
       </div>
 
       {/* Layers list column */}
       <div className="xl:col-span-3">
-        <div className="bg-brand-card border border-white/10 rounded-[28px] p-5 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-brand-cyan border-b border-white/5 pb-3 mb-1">
+        <div className="bg-brand-card border border-brand-border rounded-2xl p-5 flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-brand-cyan border-b border-brand-border pb-3 mb-1">
             <LayersIcon className="h-4.5 w-4.5" />
-            <h2 className="font-display font-black text-sm tracking-widest uppercase text-white">Layers</h2>
+            <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">Layers</h2>
           </div>
-          {sortedLayers.length === 0 && <p className="text-[10px] font-mono text-white/30 text-center py-6">No layers yet</p>}
+          {sortedLayers.length === 0 && <p className="text-[10px] font-mono text-brand-ink-muted text-center py-6">No layers yet</p>}
           {[...sortedLayers].reverse().map((layer) => (
             <button
               key={layer.id}
               onClick={() => setSelectedId(layer.id)}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl text-left border transition-all ${
-                selectedId === layer.id ? "bg-brand-pink/10 border-brand-pink/40" : "bg-white/5 border-transparent hover:bg-white/10"
+                selectedId === layer.id ? "bg-brand-pink/10 border-brand-pink/40" : "bg-brand-surface-2 border-transparent hover:bg-brand-surface-2"
               }`}
             >
-              {layer.type === "text" && <Type className="h-3.5 w-3.5 text-white/50 shrink-0" />}
-              {layer.type === "image" && <ImageIcon className="h-3.5 w-3.5 text-white/50 shrink-0" />}
-              {layer.type === "shape" && <Square className="h-3.5 w-3.5 text-white/50 shrink-0" />}
-              <span className="text-[10px] font-mono text-white/70 truncate">
+              {layer.type === "text" && <Type className="h-3.5 w-3.5 text-brand-ink-muted shrink-0" />}
+              {layer.type === "image" && <ImageIcon className="h-3.5 w-3.5 text-brand-ink-muted shrink-0" />}
+              {layer.type === "shape" && <Square className="h-3.5 w-3.5 text-brand-ink-muted shrink-0" />}
+              <span className="text-[10px] font-mono text-brand-ink-muted truncate">
                 {layer.type === "text" ? layer.text || "Text" : layer.type === "image" ? "Image" : `Shape (${layer.shape})`}
               </span>
             </button>
@@ -593,23 +593,23 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
 
       {/* Gallery modal */}
       {showGallery && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-6" onClick={() => setShowGallery(false)}>
-          <div onClick={(e) => e.stopPropagation()} className="bg-brand-card border border-white/10 rounded-[28px] p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
-              <h2 className="font-display font-black text-sm tracking-widest uppercase text-white">My Saved Covers</h2>
-              <button onClick={() => setShowGallery(false)}><X className="h-4 w-4 text-white/50" /></button>
+        <div className="fixed inset-0 bg-brand-surface-2 backdrop-blur-sm z-[100] flex items-center justify-center p-6" onClick={() => setShowGallery(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-brand-card border border-brand-border rounded-2xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-brand-border pb-3 mb-4">
+              <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">My Saved Covers</h2>
+              <button onClick={() => setShowGallery(false)}><X className="h-4 w-4 text-brand-ink-muted" /></button>
             </div>
             {loadingGallery ? (
-              <p className="text-center text-white/40 text-xs font-mono py-8">Loading...</p>
+              <p className="text-center text-brand-ink-muted text-xs font-mono py-8">Loading...</p>
             ) : gallery.length === 0 ? (
-              <p className="text-center text-white/40 text-xs font-mono py-8">No saved covers yet.</p>
+              <p className="text-center text-brand-ink-muted text-xs font-mono py-8">No saved covers yet.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {gallery.map((item) => (
-                  <div key={item.id} onClick={() => loadFromGallery(item)} className="relative group cursor-pointer rounded-xl overflow-hidden border border-white/10 hover:border-brand-pink/50 transition-all">
+                  <div key={item.id} onClick={() => loadFromGallery(item)} className="relative group cursor-pointer rounded-xl overflow-hidden border border-brand-border hover:border-brand-pink/50 transition-all">
                     <img src={`data:image/png;base64,${item.renderedImage}`} className="w-full aspect-square object-cover" />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-end p-2">
-                      <span className="text-[9px] font-mono text-white truncate flex-1">{item.title}</span>
+                    <div className="absolute inset-0 bg-brand-surface-2 opacity-0 group-hover:opacity-100 transition-all flex items-end p-2">
+                      <span className="text-[9px] font-mono text-brand-ink truncate flex-1">{item.title}</span>
                       <button onClick={(e) => removeFromGallery(item.id, e)} className="text-red-400 hover:text-red-300 shrink-0">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

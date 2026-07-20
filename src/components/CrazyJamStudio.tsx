@@ -335,61 +335,61 @@ export function CrazyJamStudio({
   };
 
   return (
-    <div className="bg-brand-card border border-white/10 rounded-[32px] p-6 flex flex-col gap-5 mt-6" id="crazyjam-studio-rack">
+    <div className="bg-brand-card border border-brand-border rounded-2xl p-6 flex flex-col gap-5 mt-6" id="crazyjam-studio-rack">
       {/* Brand Header */}
-      <div className="flex flex-wrap items-center justify-between border-b border-white/5 pb-3">
+      <div className="flex flex-wrap items-center justify-between border-b border-brand-border pb-3">
         <div className="flex items-center gap-2.5">
           <div className="relative h-9 w-9 flex items-center justify-center bg-gradient-to-br from-[#db8b27] to-[#e43f11] rounded-xl shadow-[0_0_12px_rgba(228,63,17,0.35)] animate-pulse">
-            <Disc className="h-5 w-5 text-white animate-spin-slow" />
+            <Disc className="h-5 w-5 text-brand-ink animate-spin-slow" />
           </div>
           <div>
-            <h2 className="font-display font-black text-sm tracking-widest uppercase text-white flex items-center gap-2">
+            <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink flex items-center gap-2">
               CrazyJam Studio Ecosystem <span className="text-[10px] font-mono text-[#e59632] font-bold bg-[#e59632]/10 border border-[#e59632]/30 px-1.5 py-0.2 rounded-md">V9</span>
             </h2>
-            <p className="text-[10px] font-mono text-white/40 leading-none">
+            <p className="text-[10px] font-mono text-brand-ink-muted leading-none">
               In-browser Voice Recorder, Pitch Shifting Autotuner, and Multi-Insert Mixer Console
             </p>
           </div>
         </div>
 
         {/* Tab Selection */}
-        <div className="flex items-center bg-brand-dark/80 border border-white/10 p-1 rounded-xl">
+        <div className="flex items-center bg-brand-dark/80 border border-brand-border p-1 rounded-xl">
           <button
             onClick={() => setActiveWorkspaceTab("autotune")}
-            className={`px-4 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer transition-all ${
+            className={`px-4 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wide uppercase cursor-pointer transition-all ${
               activeWorkspaceTab === "autotune"
                 ? "bg-[#e59632] text-brand-dark shadow-[0_0_12px_rgba(229,150,52,0.4)] scale-102"
-                : "text-white/60 hover:text-white"
+                : "text-brand-ink-muted hover:text-brand-ink"
             }`}
           >
             <Mic className="h-3.5 w-3.5 inline mr-1" /> Mic / AutoTune
           </button>
           <button
             onClick={() => setActiveWorkspaceTab("sampler")}
-            className={`px-4 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer transition-all ${
+            className={`px-4 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wide uppercase cursor-pointer transition-all ${
               activeWorkspaceTab === "sampler"
                 ? "bg-[#e59632] text-brand-dark shadow-[0_0_12px_rgba(229,150,52,0.4)] scale-102"
-                : "text-white/60 hover:text-white"
+                : "text-brand-ink-muted hover:text-brand-ink"
             }`}
           >
             <Scissors className="h-3.5 w-3.5 inline mr-1" /> Slicer / Sampler
           </button>
           <button
             onClick={() => setActiveWorkspaceTab("mixer")}
-            className={`px-4 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer transition-all ${
+            className={`px-4 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wide uppercase cursor-pointer transition-all ${
               activeWorkspaceTab === "mixer"
                 ? "bg-[#e59632] text-brand-dark shadow-[0_0_12px_rgba(229,150,52,0.4)] scale-102"
-                : "text-white/60 hover:text-white"
+                : "text-brand-ink-muted hover:text-brand-ink"
             }`}
           >
             <SlidersHorizontal className="h-3.5 w-3.5 inline mr-1" /> CrazyJam Mixer
           </button>
           <button
             onClick={() => setActiveWorkspaceTab("search")}
-            className={`px-4 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer transition-all ${
+            className={`px-4 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wide uppercase cursor-pointer transition-all ${
               activeWorkspaceTab === "search"
                 ? "bg-[#e59632] text-brand-dark shadow-[0_0_12px_rgba(229,150,52,0.4)] scale-102"
-                : "text-white/60 hover:text-white"
+                : "text-brand-ink-muted hover:text-brand-ink"
             }`}
           >
             <Compass className="h-3.5 w-3.5 inline mr-1" /> Global Remix Sync
@@ -398,29 +398,29 @@ export function CrazyJamStudio({
       </div>
 
       {/* Main active workspaces panels */}
-      <div className="bg-brand-dark/30 hover:border-[#e59632]/20 transition-all rounded-2xl border border-white/5 p-5">
+      <div className="bg-brand-dark/30 hover:border-[#e59632]/20 transition-all rounded-2xl border border-brand-border p-5">
         
         {/* TAB 1: VOICES AND AUTOTUNE RECORDING */}
         {activeWorkspaceTab === "autotune" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div className="lg:col-span-5 flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                <h3 className="text-xs font-mono font-black uppercase text-white/80">Voice Recorder Deck</h3>
+              <div className="flex items-center justify-between border-b border-brand-border pb-2">
+                <h3 className="text-xs font-mono font-semibold uppercase text-brand-ink-muted">Voice Recorder Deck</h3>
                 <span className="flex h-2 w-2 relative">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isRecording ? "bg-red-500" : "bg-emerald-400"}`}></span>
                   <span className={`relative inline-flex rounded-full h-2 w-2 ${isRecording ? "bg-red-600" : "bg-emerald-500"}`}></span>
                 </span>
               </div>
               
-              <div className="bg-brand-dark p-6 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center gap-4">
-                <div className={`p-5 rounded-full transition-all border ${isRecording ? "bg-red-500/10 border-red-500/30 text-red-500 scale-105" : "bg-white/5 border-white/10 text-white/60"}`}>
+              <div className="bg-brand-dark p-6 rounded-2xl border border-brand-border flex flex-col items-center justify-center text-center gap-4">
+                <div className={`p-5 rounded-full transition-all border ${isRecording ? "bg-red-500/10 border-red-500/30 text-red-500 scale-105" : "bg-brand-surface-2 border-brand-border text-brand-ink-muted"}`}>
                   <Mic className={`h-8 w-8 ${isRecording ? "animate-pulse" : ""}`} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-white">
+                  <h4 className="text-sm font-semibold text-brand-ink">
                     {isRecording ? "Listening to Mic Input Stream..." : "Microphone Audio Inactive"}
                   </h4>
-                  <p className="text-[10px] text-white/40 font-mono mt-1 leading-normal max-w-xs mx-auto">
+                  <p className="text-[10px] text-brand-ink-muted font-mono mt-1 leading-normal max-w-xs mx-auto">
                     {isRecording ? "Voice frequencies are currently processed by real-time scaling auto pitch processor." : "Ready to record live voice audio to apply autotune filters."}
                   </p>
                 </div>
@@ -429,15 +429,15 @@ export function CrazyJamStudio({
                   {!isRecording ? (
                     <button
                       onClick={startRecording}
-                      className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold font-mono text-xs text-white uppercase tracking-wider cursor-pointer transition-all flex items-center justify-center gap-2"
+                      className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold font-mono text-xs text-brand-ink uppercase tracking-wide cursor-pointer transition-all flex items-center justify-center gap-2"
                     >
-                      <span className="h-2 w-2 rounded-full bg-white block animate-ping" />
+                      <span className="h-2 w-2 rounded-full bg-brand-surface-2 block animate-ping" />
                       <span>Start Recording</span>
                     </button>
                   ) : (
                     <button
                       onClick={stopRecording}
-                      className="flex-1 py-2.5 rounded-xl bg-white text-brand-dark hover:bg-white/90 font-bold font-mono text-xs uppercase tracking-wider cursor-pointer transition-all flex items-center justify-center gap-2"
+                      className="flex-1 py-2.5 rounded-xl bg-brand-surface-2 text-brand-dark hover:bg-brand-surface-2 font-bold font-mono text-xs uppercase tracking-wide cursor-pointer transition-all flex items-center justify-center gap-2"
                     >
                       <Square className="h-3 w-3 fill-current" />
                       <span>Stop & Autotune</span>
@@ -450,8 +450,8 @@ export function CrazyJamStudio({
               {recordedAudioUrl && (
                 <div className="bg-brand-dark/60 p-4 rounded-xl border border-brand-cyan/20 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono text-brand-cyan tracking-wider font-bold">Autotunable Audio Track Layer</span>
-                    <span className="text-[9px] font-mono text-white/40 font-bold">1 Channel / Wave</span>
+                    <span className="text-[10px] font-mono text-brand-cyan tracking-wide font-bold">Autotunable Audio Track Layer</span>
+                    <span className="text-[9px] font-mono text-brand-ink-muted font-bold">1 Channel / Wave</span>
                   </div>
                   
                   <audio src={recordedAudioUrl} controls className="w-full h-8 accent-brand-cyan" />
@@ -459,13 +459,13 @@ export function CrazyJamStudio({
                   <div className="grid grid-cols-2 gap-2 mt-1">
                     <button
                       onClick={handleApplyPostAutotune}
-                      className="py-1.5 rounded-lg bg-gradient-to-r from-brand-purple to-brand-pink text-white font-bold font-mono text-[9px] uppercase tracking-wider cursor-pointer hover:scale-102 transition-all flex items-center justify-center gap-1.5"
+                      className="py-1.5 rounded-lg bg-gradient-to-r from-brand-purple to-brand-pink text-brand-ink font-bold font-mono text-[9px] uppercase tracking-wide cursor-pointer hover:brightness-105 transition-all flex items-center justify-center gap-1.5"
                     >
                       <Wand2 className="h-3 w-3" /> Lock Autotune
                     </button>
                     <button
                       onClick={() => setRecordedAudioUrl(null)}
-                      className="py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 font-bold font-mono text-[9px] uppercase tracking-wider cursor-pointer border border-white/5 transition-all text-center"
+                      className="py-1.5 rounded-lg bg-brand-surface-2 hover:bg-brand-surface-2 text-brand-ink-muted font-bold font-mono text-[9px] uppercase tracking-wide cursor-pointer border border-brand-border transition-all text-center"
                     >
                       Discard Recording
                     </button>
@@ -476,21 +476,21 @@ export function CrazyJamStudio({
 
             {/* AUTOTUNE SETTING CHANGER */}
             <div className="lg:col-span-7 flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                <h3 className="text-xs font-mono font-black uppercase text-white/80">Real-Time Autotune & Pitch Quantization</h3>
-                <span className="text-[9px] font-mono text-brand-pink uppercase tracking-widest bg-brand-pink/10 border border-brand-pink/30 px-2 py-0.5 rounded font-bold">
+              <div className="flex items-center justify-between border-b border-brand-border pb-2">
+                <h3 className="text-xs font-mono font-semibold uppercase text-brand-ink-muted">Real-Time Autotune & Pitch Quantization</h3>
+                <span className="text-[9px] font-mono text-brand-pink uppercase tracking-wide bg-brand-pink/10 border border-brand-pink/30 px-2 py-0.5 rounded font-bold">
                   FL autotuning engine
                 </span>
               </div>
 
               {/* Autotune controls parameters */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-brand-dark p-4 rounded-xl border border-white/5 hover:border-[#e59632]/20 transition-all flex flex-col gap-3">
+                <div className="bg-brand-dark p-4 rounded-xl border border-brand-border hover:border-[#e59632]/20 transition-all flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-[11px] font-mono text-brand-ink-muted font-bold uppercase tracking-wide flex items-center gap-1.5">
                       <Radio className="h-3.5 w-3.5 text-[#e59632]" /> Correction Speed
                     </span>
-                    <span className="text-xs font-black text-[#e59632] font-mono">
+                    <span className="text-xs font-semibold text-[#e59632] font-mono">
                       {pitchCorrectionSpeed} ms
                     </span>
                   </div>
@@ -501,19 +501,19 @@ export function CrazyJamStudio({
                     step="5"
                     value={pitchCorrectionSpeed}
                     onChange={(e) => setPitchCorrectionSpeed(Number(e.target.value))}
-                    className="w-full h-1 bg-white/15 rounded appearance-none cursor-pointer accent-[#e59632]"
+                    className="w-full h-1 bg-brand-surface-2 rounded appearance-none cursor-pointer accent-[#e59632]"
                   />
-                  <p className="text-[9px] text-white/40 leading-normal">
+                  <p className="text-[9px] text-brand-ink-muted leading-normal">
                     {pitchCorrectionSpeed === 0 ? "T-Pain / Robotic Effect: Snaps pitch instantaneously." : `Flexible correction slope (Sway time: ${pitchCorrectionSpeed}ms). Ideal for clean RnB or pop loops.`}
                   </p>
                 </div>
 
-                <div className="bg-brand-dark p-4 rounded-xl border border-white/5 hover:border-brand-purple/20 transition-all flex flex-col gap-3">
+                <div className="bg-brand-dark p-4 rounded-xl border border-brand-border hover:border-brand-purple/20 transition-all flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-[11px] font-mono text-brand-ink-muted font-bold uppercase tracking-wide flex items-center gap-1.5">
                       <Disc className="h-3.5 w-3.5 text-brand-purple" /> Scale Tuning Target
                     </span>
-                    <span className="text-xs font-black text-brand-purple font-mono uppercase">
+                    <span className="text-xs font-semibold text-brand-purple font-mono uppercase">
                       {scale}
                     </span>
                   </div>
@@ -524,55 +524,55 @@ export function CrazyJamStudio({
                         onClick={() => onScaleChange(k)}
                         className={`px-2 py-1 rounded text-[9px] font-mono font-bold uppercase border cursor-pointer transition-all ${
                           scale === k 
-                            ? "bg-brand-purple border-brand-purple/40 text-white"
-                            : "bg-white/5 border-white/5 text-white/40 hover:text-white"
+                            ? "bg-brand-purple border-brand-purple/40 text-brand-ink"
+                            : "bg-brand-surface-2 border-brand-border text-brand-ink-muted hover:text-brand-ink"
                         }`}
                       >
                         {k}
                       </button>
                     ))}
                   </div>
-                  <p className="text-[9px] text-white/40 leading-normal">
+                  <p className="text-[9px] text-brand-ink-muted leading-normal">
                     Locks microphone input pitch to musical frequencies alignment. Eliminates off-key flat notes.
                   </p>
                 </div>
               </div>
 
               {/* Live Tracker display */}
-              <div className="bg-brand-dark/50 border border-white/10 p-5 rounded-xl flex flex-col gap-4">
-                <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                  <span className="text-[10px] font-mono font-bold tracking-widest text-[#e59632] uppercase flex items-center gap-1">
+              <div className="bg-brand-dark/50 border border-brand-border p-5 rounded-xl flex flex-col gap-4">
+                <div className="flex items-center justify-between border-b border-brand-border pb-2">
+                  <span className="text-[10px] font-mono font-bold tracking-wide text-[#e59632] uppercase flex items-center gap-1">
                     <Plus className="h-3 w-3 text-[#e59632] animate-ping" /> Real-Time Signal Analyzer
                   </span>
-                  <span className="text-[9px] font-mono text-white/30 tracking-widest italic">WebAudio API mic line-in</span>
+                  <span className="text-[9px] font-mono text-brand-ink-muted tracking-wide italic">WebAudio API mic line-in</span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 items-center text-center">
-                  <div className="bg-brand-dark/90 p-3 rounded-xl border border-white/5">
-                    <span className="text-[9px] font-mono text-white/40 uppercase block mb-1">Live Mic Freq</span>
-                    <span className={`text-xl font-bold font-mono ${isRecording ? "text-brand-pink" : "text-white/20 animate-pulse"}`}>
+                  <div className="bg-brand-dark/90 p-3 rounded-xl border border-brand-border">
+                    <span className="text-[9px] font-mono text-brand-ink-muted uppercase block mb-1">Live Mic Freq</span>
+                    <span className={`text-xl font-bold font-mono ${isRecording ? "text-brand-pink" : "text-brand-ink-muted animate-pulse"}`}>
                       {isRecording ? micPitch : "--"}
                     </span>
                   </div>
-                  <div className="bg-brand-dark/90 p-3 rounded-xl border border-white/5">
-                    <span className="text-[9px] font-mono text-white/40 uppercase block mb-1">Scale Pitch Snap</span>
-                    <span className={`text-xl font-bold font-mono ${isRecording ? "text-brand-cyan" : "text-white/20"}`}>
+                  <div className="bg-brand-dark/90 p-3 rounded-xl border border-brand-border">
+                    <span className="text-[9px] font-mono text-brand-ink-muted uppercase block mb-1">Scale Pitch Snap</span>
+                    <span className={`text-xl font-bold font-mono ${isRecording ? "text-brand-cyan" : "text-brand-ink-muted"}`}>
                       {isRecording ? targetSnappingPitch : "--"}
                     </span>
                   </div>
-                  <div className="bg-brand-dark/90 p-3 rounded-xl border border-white/5">
-                    <span className="text-[9px] font-mono text-white/40 uppercase block mb-1">Offset Error</span>
-                    <span className={`text-xl font-bold font-mono ${isRecording ? (Math.abs(pitchCentsError) < 10 ? "text-emerald-400" : "text-amber-400") : "text-white/20"}`}>
+                  <div className="bg-brand-dark/90 p-3 rounded-xl border border-brand-border">
+                    <span className="text-[9px] font-mono text-brand-ink-muted uppercase block mb-1">Offset Error</span>
+                    <span className={`text-xl font-bold font-mono ${isRecording ? (Math.abs(pitchCentsError) < 10 ? "text-emerald-400" : "text-amber-400") : "text-brand-ink-muted"}`}>
                       {isRecording ? `${pitchCentsError > 0 ? "+" : ""}${pitchCentsError}¢` : "0¢"}
                     </span>
                   </div>
                 </div>
 
                 {/* Simulated live visual level pitch graph */}
-                <div className="h-10 bg-brand-dark border border-white/5 rounded-lg overflow-hidden relative flex items-center">
+                <div className="h-10 bg-brand-dark border border-brand-border rounded-lg overflow-hidden relative flex items-center">
                   {isRecording ? (
                     <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                      <div className="h-px bg-white/20 w-full" />
+                      <div className="h-px bg-brand-surface-2 w-full" />
                     </div>
                   ) : null}
                   <div className="w-full flex justify-between px-2 gap-0.5 items-end h-8">
@@ -582,7 +582,7 @@ export function CrazyJamStudio({
                       return (
                         <div 
                           key={i} 
-                          className={`flex-1 rounded-sm transition-all duration-150 ${active ? "bg-gradient-to-t from-brand-pink to-[#e59632]" : "bg-white/10"}`} 
+                          className={`flex-1 rounded-sm transition-all duration-150 ${active ? "bg-gradient-to-t from-brand-pink to-[#e59632]" : "bg-brand-surface-2"}`} 
                           style={{ height: `${size}px` }} 
                         />
                       );
@@ -600,10 +600,10 @@ export function CrazyJamStudio({
             {/* Sampling Header Dropzone */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
               <div className="lg:col-span-8">
-                <h3 className="text-sm font-display font-medium text-white flex items-center gap-2">
+                <h3 className="text-sm font-display font-medium text-brand-ink flex items-center gap-2">
                   <Scissors className="h-4 w-4 text-brand-pink" /> CrazyJam Audio Slicer / Granular sampler
                 </h3>
-                <p className="text-[10px] text-white/30 font-mono mt-0.5">
+                <p className="text-[10px] text-brand-ink-muted font-mono mt-0.5">
                   Import static files to decompose audio samples. Map, reverse, or play custom audio slices in real-time.
                 </p>
               </div>
@@ -619,7 +619,7 @@ export function CrazyJamStudio({
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 bg-white/5 border border-white/10 hover:border-[#e59632] rounded-xl text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all"
+                  className="px-4 py-2 bg-brand-surface-2 border border-brand-border hover:border-[#e59632] rounded-xl text-xs font-mono font-bold text-brand-ink uppercase tracking-wide flex items-center gap-2 cursor-pointer transition-all"
                 >
                   <Upload className="h-4 w-4 text-[#e59632]" />
                   <span>{uploadedSample ? "Re-upload track" : "Upload local sample"}</span>
@@ -628,11 +628,11 @@ export function CrazyJamStudio({
             </div>
 
             {/* Wave Slicer Canvas */}
-            <div className="bg-brand-dark rounded-2xl p-5 border border-white/5 flex flex-col gap-4 relative">
+            <div className="bg-brand-dark rounded-2xl p-5 border border-brand-border flex flex-col gap-4 relative">
               {isDecoding && (
                 <div className="absolute inset-0 bg-brand-dark/95 flex flex-col items-center justify-center gap-3 z-10 rounded-2xl">
                   <RefreshCw className="h-7 w-7 text-[#e59632] animate-spin" />
-                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">Decoding sound waves...</span>
+                  <span className="text-xs font-mono font-bold text-brand-ink uppercase tracking-wide">Decoding sound waves...</span>
                 </div>
               )}
 
@@ -640,19 +640,19 @@ export function CrazyJamStudio({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] uppercase font-mono text-[#e59632] font-semibold">Active Sample:</span>
-                  <span className="text-xs font-mono text-white/70 italic max-w-sm truncate">
+                  <span className="text-xs font-mono text-brand-ink-muted italic max-w-sm truncate">
                     {uploadedSample ? uploadedSample.name : "CrazyJam_Default_Snare_Loop.wav (Static Preset)"}
                   </span>
                 </div>
                 {uploadedSample && (
-                  <span className="text-[9px] font-mono text-white/30 uppercase bg-white/5 px-2 py-0.5 rounded border border-white/5 font-bold">
+                  <span className="text-[9px] font-mono text-brand-ink-muted uppercase bg-brand-surface-2 px-2 py-0.5 rounded border border-brand-border font-bold">
                     File Size: {uploadedSample.size}
                   </span>
                 )}
               </div>
 
               {/* Main waveform visual wrapper */}
-              <div className="bg-brand-dark/90 h-32 rounded-xl border border-white/10 relative flex flex-col justify-center overflow-hidden">
+              <div className="bg-brand-dark/90 h-32 rounded-xl border border-brand-border relative flex flex-col justify-center overflow-hidden">
                 <div className="absolute inset-x-0 top-0 bottom-0 flex justify-around items-center px-4 overflow-hidden">
                   {tempWaveform.map((val, idx) => {
                     // Match visual columns dynamically
@@ -676,13 +676,13 @@ export function CrazyJamStudio({
 
                 {/* Slicing Vertical Markers */}
                 <div className="absolute inset-x-0 inset-y-0 flex justify-around pointer-events-none">
-                  <div className="border-r border-dashed border-white/20 h-full" />
-                  <div className="border-r border-dashed border-white/20 h-full" />
-                  <div className="border-r border-dashed border-white/20 h-full" />
+                  <div className="border-r border-dashed border-brand-border h-full" />
+                  <div className="border-r border-dashed border-brand-border h-full" />
+                  <div className="border-r border-dashed border-brand-border h-full" />
                 </div>
 
                 {/* Slice labels */}
-                <div className="absolute inset-x-0 bottom-1.5 flex justify-around text-center select-none text-[8px] font-mono tracking-widest font-black uppercase pointer-events-none">
+                <div className="absolute inset-x-0 bottom-1.5 flex justify-around text-center select-none text-[8px] font-mono tracking-wide font-semibold uppercase pointer-events-none">
                   {slices.map(sl => (
                     <span key={sl.id} style={{ color: sl.color }}>Slice #{sl.id}</span>
                   ))}
@@ -691,7 +691,7 @@ export function CrazyJamStudio({
 
               {/* Play / Sample trigger pads */}
               <div className="flex flex-col gap-3">
-                <span className="text-[9px] uppercase font-mono text-white/30 font-bold tracking-wider">Trigger Sample Stems Slices:</span>
+                <span className="text-[9px] uppercase font-mono text-brand-ink-muted font-bold tracking-wide">Trigger Sample Stems Slices:</span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {slices.map(sl => (
                     <button
@@ -705,11 +705,11 @@ export function CrazyJamStudio({
                         borderColor: sl.color + "30",
                         boxShadow: activeSlice === sl.id ? `0 0 15px ${sl.color}25` : "none"
                       }}
-                      className="py-4 rounded-xl bg-brand-dark/95 border hover:bg-white/5 cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 text-center"
+                      className="py-4 rounded-xl bg-brand-dark/95 border hover:bg-brand-surface-2 cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 text-center"
                     >
                       <Scissors className="h-4 w-4" style={{ color: sl.color }} />
-                      <span className="text-[10px] font-mono font-bold text-white">Trigger Slice #{sl.id}</span>
-                      <span className="text-[8px] font-mono text-white/30 leading-none">
+                      <span className="text-[10px] font-mono font-bold text-brand-ink">Trigger Slice #{sl.id}</span>
+                      <span className="text-[8px] font-mono text-brand-ink-muted leading-none">
                         Pad {(sl.id + 4).toString(16).toUpperCase()} &bull; +{sl.id * 3 - 6} semitones
                       </span>
                     </button>
@@ -718,10 +718,10 @@ export function CrazyJamStudio({
               </div>
 
               {/* Sampler Post Audio Mix Modulators */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-2 border-t border-white/5 pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-2 border-t border-brand-border pt-4">
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest font-bold block">Sampler Master Pitch semitones</span>
-                  <div className="flex items-center justify-between text-xs font-mono text-white/70">
+                  <span className="text-[10px] font-mono text-brand-ink-muted uppercase tracking-wide font-bold block">Sampler Master Pitch semitones</span>
+                  <div className="flex items-center justify-between text-xs font-mono text-brand-ink-muted">
                     <input
                       type="range"
                       min="-12"
@@ -729,9 +729,9 @@ export function CrazyJamStudio({
                       step="1"
                       value={samplerPitch}
                       onChange={(e) => setSamplerPitch(Number(e.target.value))}
-                      className="flex-1 h-1 bg-white/10 rounded accent-brand-pink mr-3 cursor-pointer"
+                      className="flex-1 h-1 bg-brand-surface-2 rounded accent-brand-pink mr-3 cursor-pointer"
                     />
-                    <span className="text-brand-pink font-black w-14 text-right">
+                    <span className="text-brand-pink font-semibold w-14 text-right">
                       {samplerPitch > 0 ? `+${samplerPitch}` : samplerPitch} st
                     </span>
                   </div>
@@ -742,10 +742,10 @@ export function CrazyJamStudio({
                     onClick={() => {
                       setLoopSample(!loopSample);
                     }}
-                    className={`flex-1 py-2.5 rounded-xl border text-[10px] font-mono font-bold uppercase transition-all tracking-wider cursor-pointer text-center ${
+                    className={`flex-1 py-2.5 rounded-xl border text-[10px] font-mono font-bold uppercase transition-all tracking-wide cursor-pointer text-center ${
                       loopSample 
                         ? "bg-brand-cyan text-brand-dark border-brand-cyan/40 shadow-neon-cyan"
-                        : "bg-white/5 border-white/10 text-white/40 hover:text-white"
+                        : "bg-brand-surface-2 border-brand-border text-brand-ink-muted hover:text-brand-ink"
                     }`}
                   >
                     {loopSample ? "Sample Looping Active" : "Sample One-Shot Trigger"}
@@ -753,7 +753,7 @@ export function CrazyJamStudio({
                 </div>
 
                 <div className="flex items-center justify-end gap-3">
-                  <span className="text-[9px] font-mono text-white/30 uppercase leading-snug text-right max-w-[170px]">
+                  <span className="text-[9px] font-mono text-brand-ink-muted uppercase leading-snug text-right max-w-[170px]">
                     Samples are feeded directly to Insert 5 Mixer slot for mastering
                   </span>
                 </div>
@@ -765,21 +765,21 @@ export function CrazyJamStudio({
         {/* TAB 3: DYNAMIC VIRTUAL MIXER AND SATURATOR COMPRESSOR */}
         {activeWorkspaceTab === "mixer" && (
           <div className="flex flex-col gap-5">
-            <div className="flex flex-wrap items-center justify-between border-b border-white/5 pb-2 gap-4">
+            <div className="flex flex-wrap items-center justify-between border-b border-brand-border pb-2 gap-4">
               <div>
-                <h3 className="text-sm font-display font-medium text-white flex items-center gap-2">
+                <h3 className="text-sm font-display font-medium text-brand-ink flex items-center gap-2">
                   <SlidersHorizontal className="h-4 w-4 text-[#e59632]" /> Virtual Channels Mixer Console
                 </h3>
-                <p className="text-[10px] text-white/30 font-mono mt-0.5">
+                <p className="text-[10px] text-brand-ink-muted font-mono mt-0.5">
                   Fine-tune decibel gain, parameter EQ bands, and dynamic peak saturation compression.
                 </p>
               </div>
 
               {/* Master Compressor Slider */}
-              <div className="flex items-center gap-4 bg-brand-dark p-2 px-4 rounded-xl border border-white/10 min-w-[280px]">
+              <div className="flex items-center gap-4 bg-brand-dark p-2 px-4 rounded-xl border border-brand-border min-w-[280px]">
                 <div className="flex-1">
-                  <span className="text-[9px] font-mono text-[#e59632] font-black uppercase tracking-widest block mb-0.5">CrazyJam Soft Limiter</span>
-                  <span className="text-[8px] font-mono text-white/40 leading-none block">Threshold Saturation level</span>
+                  <span className="text-[9px] font-mono text-[#e59632] font-semibold uppercase tracking-wide block mb-0.5">CrazyJam Soft Limiter</span>
+                  <span className="text-[8px] font-mono text-brand-ink-muted leading-none block">Threshold Saturation level</span>
                 </div>
                 <input
                   type="range"
@@ -788,7 +788,7 @@ export function CrazyJamStudio({
                   step="0.05"
                   value={limiterGain}
                   onChange={(e) => setLimiterGain(Number(e.target.value))}
-                  className="w-24 h-1 bg-white/10 rounded accent-[#e59632] cursor-pointer"
+                  className="w-24 h-1 bg-brand-surface-2 rounded accent-[#e59632] cursor-pointer"
                 />
                 <span className="text-[11px] font-mono text-[#e59632] font-bold w-12 text-right">
                   {Math.round(limiterGain * 100)}%
@@ -801,16 +801,16 @@ export function CrazyJamStudio({
               {mixerChannels.map(ch => (
                 <div 
                   key={ch.id} 
-                  className={`p-3.5 bg-brand-dark border rounded-2xl flex flex-col justify-between hover:scale-102 transition-all ${
+                  className={`p-3.5 bg-brand-dark border rounded-2xl flex flex-col justify-between hover:brightness-105 transition-all ${
                     ch.id === "master" 
                       ? "border-brand-pink/30 hover:border-brand-pink" 
-                      : "border-white/5 hover:border-white/10"
+                      : "border-brand-border hover:border-brand-border"
                   }`}
                 >
                   {/* Channel label */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[9px] font-mono text-white/40 font-bold uppercase truncate max-w-[80px]">
+                      <span className="text-[9px] font-mono text-brand-ink-muted font-bold uppercase truncate max-w-[80px]">
                         {ch.id === "master" ? "OUT ST" : `CH ${ch.id === "drum" ? "01" : ch.id === "lead" ? "02" : ch.id === "bass" ? "03" : ch.id === "vocal" ? "04" : "05"}`}
                       </span>
                       {ch.id === "master" ? (
@@ -825,19 +825,19 @@ export function CrazyJamStudio({
                           className={`text-[8px] font-mono font-bold uppercase px-1 py-0.2 border rounded leading-none cursor-pointer transition-all ${
                             ch.muted 
                               ? "bg-red-500/20 border-red-500/30 text-red-500" 
-                              : "bg-white/5 border-white/5 text-white/50 hover:text-white"
+                              : "bg-brand-surface-2 border-brand-border text-brand-ink-muted hover:text-brand-ink"
                           }`}
                         >
                           {ch.muted ? "Muted" : "Active"}
                         </button>
                       )}
                     </div>
-                    <h4 className="text-xs font-bold text-white truncate">{ch.name}</h4>
+                    <h4 className="text-xs font-bold text-brand-ink truncate">{ch.name}</h4>
                   </div>
 
                   {/* VU LEVEL METERS */}
-                  <div className="h-28 bg-brand-dark/90 border border-white/10 rounded-lg p-1.5 flex gap-1 items-end my-3 relative overflow-hidden">
-                    <div className="absolute inset-y-0 right-1 text-[7px] font-mono text-white/20 flex flex-col justify-between pointer-events-none">
+                  <div className="h-28 bg-brand-dark/90 border border-brand-border rounded-lg p-1.5 flex gap-1 items-end my-3 relative overflow-hidden">
+                    <div className="absolute inset-y-0 right-1 text-[7px] font-mono text-brand-ink-muted flex flex-col justify-between pointer-events-none">
                       <span>0</span>
                       <span>-12</span>
                       <span>-24</span>
@@ -855,7 +855,7 @@ export function CrazyJamStudio({
                         return (
                           <div 
                             key={i} 
-                            className={`h-1.5 rounded-xs transition-colors duration-150 ${active ? color : "bg-white/5"}`} 
+                            className={`h-1.5 rounded-xs transition-colors duration-150 ${active ? color : "bg-brand-surface-2"}`} 
                           />
                         );
                       })}
@@ -864,9 +864,9 @@ export function CrazyJamStudio({
 
                   {/* Fader Controller */}
                   <div className="flex flex-col gap-2 mt-1">
-                    <div className="flex items-center justify-between text-[8px] font-mono text-white/40 uppercase">
+                    <div className="flex items-center justify-between text-[8px] font-mono text-brand-ink-muted uppercase">
                       <span>Vol fader</span>
-                      <span className="font-extrabold text-white">{valueToDb(ch.volume)} dB</span>
+                      <span className="font-extrabold text-brand-ink">{valueToDb(ch.volume)} dB</span>
                     </div>
                     <input
                       type="range"
@@ -879,22 +879,22 @@ export function CrazyJamStudio({
                         const val = Number(e.target.value);
                         setMixerChannels(prev => prev.map(m => m.id === ch.id ? { ...m, volume: val } : m));
                       }}
-                      className="w-full h-1 bg-white/15 rounded accent-brand-cyan cursor-pointer disabled:opacity-30"
+                      className="w-full h-1 bg-brand-surface-2 rounded accent-brand-cyan cursor-pointer disabled:opacity-30"
                     />
                   </div>
 
                   {/* Parametric EQ knobs simulator */}
-                  <div className="grid grid-cols-3 gap-1 mt-3 pt-2.5 border-t border-white/5 text-center">
+                  <div className="grid grid-cols-3 gap-1 mt-3 pt-2.5 border-t border-brand-border text-center">
                     <div>
-                      <span className="text-[7px] font-mono text-white/40 block leading-none">LO</span>
+                      <span className="text-[7px] font-mono text-brand-ink-muted block leading-none">LO</span>
                       <span className="text-[8px] font-mono text-brand-pink font-bold">{ch.low > 0 ? `+${ch.low}` : ch.low}</span>
                     </div>
                     <div>
-                      <span className="text-[7px] font-mono text-white/40 block leading-none">MID</span>
+                      <span className="text-[7px] font-mono text-brand-ink-muted block leading-none">MID</span>
                       <span className="text-[8px] font-mono text-brand-cyan font-bold">{ch.mid > 0 ? `+${ch.mid}` : ch.mid}</span>
                     </div>
                     <div>
-                      <span className="text-[7px] font-mono text-white/40 block leading-none">HI</span>
+                      <span className="text-[7px] font-mono text-brand-ink-muted block leading-none">HI</span>
                       <span className="text-[8px] font-mono text-teal-400 font-bold">{ch.high > 0 ? `+${ch.high}` : ch.high}</span>
                     </div>
                   </div>
@@ -908,23 +908,23 @@ export function CrazyJamStudio({
         {activeWorkspaceTab === "search" && (
           <div className="flex flex-col gap-5">
             <div>
-              <h3 className="text-sm font-display font-medium text-white flex items-center gap-2">
+              <h3 className="text-sm font-display font-medium text-brand-ink flex items-center gap-2">
                 <Compass className="h-4 w-4 text-brand-cyan" /> Global Remix Blueprints & Reference Finder
               </h3>
-              <p className="text-[10px] text-white/30 font-mono mt-0.5">
+              <p className="text-[10px] text-brand-ink-muted font-mono mt-0.5">
                 Analyze hit song arrangements and acoustic metadata. Tap on a reference project blueprint to instantly synchronize your environment's tempo, key scale alignment, and AI prompt seeds.
               </p>
             </div>
 
             {/* Global search entry bar */}
             <div className="relative">
-              <Search className="h-4.5 w-4.5 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+              <Search className="h-4.5 w-4.5 text-brand-ink-muted absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search global hit tracks list, genres or artists for reference stems... (e.g. 'Billie', 'Synthwave', 'Minor')"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-brand-dark hover:bg-brand-dark/80 border border-white/10 focus:border-brand-cyan/50 text-white placeholder-white/30 pl-11 pr-5 py-3 rounded-xl outline-none text-xs transition-all focus:ring-1 focus:ring-brand-cyan/25"
+                className="w-full bg-brand-dark hover:bg-brand-dark/80 border border-brand-border focus:border-brand-cyan/50 text-brand-ink placeholder-brand-ink-muted pl-11 pr-5 py-3 rounded-xl outline-none text-xs transition-all focus:ring-1 focus:ring-brand-cyan/25"
               />
             </div>
 
@@ -938,37 +938,37 @@ export function CrazyJamStudio({
                     className={`p-4 bg-brand-dark/80 rounded-2xl border transition-all hover:scale-[1.01] flex flex-col justify-between gap-4 ${
                       isSelected 
                         ? "border-[#e59632] bg-[#e59632]/5" 
-                        : "border-white/5 hover:border-brand-cyan/20"
+                        : "border-brand-border hover:border-brand-cyan/20"
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 bg-white/5 border border-white/10 text-brand-cyan flex items-center justify-center rounded-lg">
+                        <div className="h-9 w-9 bg-brand-surface-2 border border-brand-border text-brand-cyan flex items-center justify-center rounded-lg">
                           <Music className="h-4.5 w-4.5" />
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-white">{track.name}</h4>
-                          <p className="text-[10px] font-mono text-white/40 leading-none mt-0.5">{track.artist}</p>
+                          <h4 className="text-xs font-bold text-brand-ink">{track.name}</h4>
+                          <p className="text-[10px] font-mono text-brand-ink-muted leading-none mt-0.5">{track.artist}</p>
                         </div>
                       </div>
                       
                       <div className="flex flex-col items-end text-right font-mono">
                         <span className="text-[9px] font-bold text-brand-cyan uppercase leading-none">{track.genre}</span>
-                        <span className="text-[8px] text-white/30 leading-none mt-1">ID: {track.id}</span>
+                        <span className="text-[8px] text-brand-ink-muted leading-none mt-1">ID: {track.id}</span>
                       </div>
                     </div>
 
-                    <div className="bg-brand-dark p-3 rounded-xl border border-white/5">
-                      <span className="text-[8px] font-mono text-white/30 uppercase font-black block mb-1">Swarm Prompt Seed Suggestion</span>
-                      <p className="text-[10px] text-white/60 leading-normal italic font-medium">
+                    <div className="bg-brand-dark p-3 rounded-xl border border-brand-border">
+                      <span className="text-[8px] font-mono text-brand-ink-muted uppercase font-semibold block mb-1">Swarm Prompt Seed Suggestion</span>
+                      <p className="text-[10px] text-brand-ink-muted leading-normal italic font-medium">
                         "{track.prompt}"
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-white/5 pt-3">
-                      <div className="flex gap-4 font-mono text-[9px] uppercase font-bold text-white/40">
-                        <span>BPM: <strong className="text-white font-black">{track.bpm}</strong></span>
-                        <span>Scale: <strong className="text-white font-black">{track.key}</strong></span>
+                    <div className="flex items-center justify-between border-t border-brand-border pt-3">
+                      <div className="flex gap-4 font-mono text-[9px] uppercase font-bold text-brand-ink-muted">
+                        <span>BPM: <strong className="text-brand-ink font-semibold">{track.bpm}</strong></span>
+                        <span>Scale: <strong className="text-brand-ink font-semibold">{track.key}</strong></span>
                       </div>
                       
                       <button
@@ -976,7 +976,7 @@ export function CrazyJamStudio({
                         className={`px-3 py-1.5 rounded-lg text-[9px] font-mono font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer border ${
                           isSelected 
                             ? "bg-[#e59632] text-brand-dark border-[#e59632]/30 scale-102"
-                            : "bg-brand-cyan/20 hover:bg-brand-cyan text-white border-brand-cyan/30"
+                            : "bg-brand-cyan/20 hover:bg-brand-cyan text-brand-ink border-brand-cyan/30"
                         }`}
                       >
                         <RefreshCw className="h-3.5 w-3.5" />
@@ -988,12 +988,12 @@ export function CrazyJamStudio({
               })}
               
               {filteredReferences.length === 0 && (
-                <div className="col-span-full py-8 text-center bg-brand-dark/50 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center gap-2">
-                  <FileAudio className="h-8 w-8 text-white/20 animate-bounce" />
-                  <span className="text-[11px] font-mono font-bold text-white/40 uppercase tracking-widest">
+                <div className="col-span-full py-8 text-center bg-brand-dark/50 border border-dashed border-brand-border rounded-2xl flex flex-col items-center justify-center gap-2">
+                  <FileAudio className="h-8 w-8 text-brand-ink-muted animate-bounce" />
+                  <span className="text-[11px] font-mono font-bold text-brand-ink-muted uppercase tracking-wide">
                     No matching global track blueprints found in cache
                   </span>
-                  <span className="text-[9px] text-white/30 font-mono">
+                  <span className="text-[9px] text-brand-ink-muted font-mono">
                     Try searching for hit terms like Weeknd, Pop, Minor, Lights...
                   </span>
                 </div>

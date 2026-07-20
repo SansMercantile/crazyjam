@@ -60,6 +60,15 @@ export interface MusicBlueprint {
   genre: string;
   tempo: number;
   scale: string;
+  lyrics?: string;
   tracks: TrackState[];
   debates: AgentLog[];
+}
+
+// A single block in the arrangement timeline (Intro/Verse/Chorus/etc.) -
+// each section carries its own full 4-lane pattern snapshot.
+export interface SongSection {
+  id: string;
+  name: string;
+  tracks: TrackState[];
 }

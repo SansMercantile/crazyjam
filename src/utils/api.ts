@@ -80,15 +80,43 @@ export async function fetchCurrentUser() {
   return res.json();
 }
 
+export async function exchangeAuth0Token(idToken: string) {
+  const res = await apiFetch("/auth/auth0-exchange", {
+    method: "POST",
+    body: JSON.stringify({ id_token: idToken }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Social login failed");
+  }
+  const data = await res.json();
+  setToken(data.access_token);
+  return data.user;
+}
+
 export function logout() {
   clearToken();
 }
 
 // --- Composition ---
-export async function generateBlueprint(prompt: string, agentsSettings: any[]) {
+export interface GenerateOptions {
+  mode?: "simple" | "custom";
+  style?: string;
+  lyrics?: string;
+  userTitle?: string;
+}
+
+export async function generateBlueprint(prompt: string, agentsSettings: any[], options: GenerateOptions = {}) {
   const res = await apiFetch("/api/generate-blueprint", {
     method: "POST",
-    body: JSON.stringify({ prompt, agentsSettings }),
+    body: JSON.stringify({
+      prompt,
+      agentsSettings,
+      mode: options.mode || "simple",
+      style: options.style,
+      lyrics: options.lyrics,
+      userTitle: options.userTitle,
+    }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -166,4 +194,112 @@ export async function deleteAlbumArt(id: string) {
   const res = await apiFetch(`/api/album-art/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Could not delete album art");
   return res.json();
+}
+
+// --- Music Videos ---
+export async function saveVideo(title: string, clips: any[], renderedVideoBase64: string, mimeType: string = "video/webm") {
+  const res = await apiFetch("/api/videos", {
+    method: "POST",
+    body: JSON.stringify({ title, clips, renderedVideoBase64, mimeType }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Could not save video");
+  }
+  return res.json();
+}
+
+export async function listVideos() {
+  const res = await apiFetch("/api/videos");
+  if (!res.ok) throw new Error("Could not load videos");
+  return res.json();
+}
+
+export function videoFileUrl(id: string): string {
+  const token = getToken();
+  return `${API_BASE_URL}/api/videos/${id}/file${token ? `?_t=${Date.now()}` : ""}`;
+}
+
+export async function fetchVideoBlob(id: string): Promise<string> {
+  const res = await apiFetch(`/api/videos/${id}/file`);
+  if (!res.ok) throw new Error("Could not load video file");
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+export async function deleteVideo(id: string) {
+  const res = await apiFetch(`/api/videos/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Could not delete video");
+  return res.json();
+}
+
+// --- Artist Page ---
+export interface SocialLink { label: string; url: string; }
+
+export async function getMyArtistPage() {
+  const res = await apiFetch("/api/artist-page/mine");
+  if (!res.ok) throw new Error("Could not load artist page");
+  return res.json();
+}
+
+export async function saveMyArtistPage(data: {
+  slug: string; displayName: string; tagline?: string; bio?: string;
+  avatarUrl?: string; bannerImageBase64?: string; accentColor?: string; links: SocialLink[];
+}) {
+  const res = await apiFetch("/api/artist-page/mine", {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Could not save artist page");
+  }
+  return res.json();
+}
+
+export async function getPublicArtistPage(slug: string) {
+  const res = await fetch(`${API_BASE_URL}/api/artist-page/public/${slug}`);
+  if (!res.ok) throw new Error("Artist page not found");
+  return res.json();
+}
+
+// --- Releases (CrazyJam Music) ---
+export async function publishRelease(trackId: string, options: { albumArtId?: string; videoId?: string; description?: string; marketingBlurb?: string } = {}) {
+  const res = await apiFetch("/api/releases", {
+    method: "POST",
+    body: JSON.stringify({ trackId, ...options }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Could not publish release");
+  }
+  return res.json();
+}
+
+export async function listMyReleases() {
+  const res = await apiFetch("/api/releases/mine");
+  if (!res.ok) throw new Error("Could not load your releases");
+  return res.json();
+}
+
+export async function unpublishRelease(id: string) {
+  const res = await apiFetch(`/api/releases/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Could not unpublish release");
+  return res.json();
+}
+
+export async function discoverReleases(limit: number = 30, skip: number = 0) {
+  const res = await fetch(`${API_BASE_URL}/api/releases/discover?limit=${limit}&skip=${skip}`);
+  if (!res.ok) throw new Error("Could not load CrazyJam Music feed");
+  return res.json();
+}
+
+export async function getPublicRelease(id: string) {
+  const res = await fetch(`${API_BASE_URL}/api/releases/public/${id}`);
+  if (!res.ok) throw new Error("Release not found");
+  return res.json();
+}
+
+export function publicReleaseVideoUrl(id: string): string {
+  return `${API_BASE_URL}/api/releases/public/${id}/video`;
 }
