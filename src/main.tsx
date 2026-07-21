@@ -1,6 +1,7 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Auth0Provider} from '@auth0/auth0-react';
+import {Analytics} from '@vercel/analytics/react';
 import App from './App.tsx';
 import {PublicArtistPage} from './components/PublicArtistPage.tsx';
 import './index.css';
@@ -28,7 +29,10 @@ const pathMatch = window.location.pathname.match(/^\/a\/([a-z0-9-]+)\/?$/);
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     {pathMatch ? (
-      <PublicArtistPage slug={pathMatch[1]} />
+      <>
+        <PublicArtistPage slug={pathMatch[1]} />
+        <Analytics />
+      </>
     ) : (
       <Auth0Provider
         domain={AUTH0_DOMAIN}
@@ -39,6 +43,7 @@ createRoot(document.getElementById('root')!).render(
         cacheLocation="localstorage"
       >
         <App />
+        <Analytics />
       </Auth0Provider>
     )}
   </StrictMode>,
