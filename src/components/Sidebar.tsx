@@ -157,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => onThemeModeChange(mode)}
                 title={mode.charAt(0).toUpperCase() + mode.slice(1)}
                 className={`flex-1 flex items-center justify-center py-1.5 rounded-md transition-all ${
-                  themeMode === mode ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"
+                  themeMode === mode ? "bg-brand-gold" : "text-brand-ink-muted hover:text-brand-ink"
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />

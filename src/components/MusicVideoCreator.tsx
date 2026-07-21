@@ -359,7 +359,7 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
       <button
         onClick={handleRender}
         disabled={isRendering || clips.length === 0}
-        className="w-full h-11 flex items-center justify-center gap-2 bg-brand-gold hover:brightness-110 rounded-xl text-brand-bg font-semibold text-sm transition-all disabled:opacity-40"
+        className="w-full h-11 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-40"
       >
         {isRendering ? <Loader2 className="h-4 w-4 animate-spin" /> : <Film className="h-4 w-4" />}
         {isRendering ? "Rendering..." : "Render Video"}
@@ -373,7 +373,7 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
             <button onClick={handleDownload} className="flex-1 flex items-center justify-center gap-2 bg-brand-surface-2 hover:bg-brand-border/30 border border-brand-border rounded-lg py-2.5 text-[12px] font-medium text-brand-ink transition-all">
               <Download className="h-3.5 w-3.5" /> Download
             </button>
-            <button onClick={handleSave} disabled={isSaving} className="flex-1 flex items-center justify-center gap-2 bg-brand-gold hover:brightness-110 rounded-lg py-2.5 text-[12px] font-semibold text-brand-bg transition-all disabled:opacity-50">
+            <button onClick={handleSave} disabled={isSaving} className="flex-1 flex items-center justify-center gap-2 metal-gold rounded-lg py-2.5 text-[12px] font-semibold transition-all disabled:opacity-50">
               <Save className="h-3.5 w-3.5" /> {isSaving ? "Saving..." : "Save to Library"}
             </button>
           </div>

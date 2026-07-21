@@ -36,16 +36,22 @@
 }
 
 :root {
-  /* Dark theme (default) - true black canvas, warm gold finishes. */
+  /* Dark theme (default) - true black canvas, brass/bronze gold finishes.
+     Pulled away from a saturated yellow toward a warmer, more desaturated
+     brass tone - flat yellow-gold reads as "highlighter", metal needs more
+     brown/olive undertone and a gradient (see .metal-gold below) to read
+     as reflective rather than painted. */
   --bg: #0a0a0a;
   --surface: #141210;
   --surface-2: #1c1a16;
   --ink: #f5f2ea;
   --ink-muted: rgba(245, 242, 234, 0.58);
-  --border: rgba(212, 175, 55, 0.16);
-  --gold: #c9a227;
-  --gold-soft: #e6cd7a;
-  --gold-deep: #8a6d1f;
+  --border: rgba(196, 162, 90, 0.18);
+  --gold: #a9863f;
+  --gold-soft: #d9c48f;
+  --gold-deep: #6b5423;
+  --gold-highlight: #f2e2b8;
+  --gold-shadow: #4a3a17;
   --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 
@@ -57,10 +63,12 @@
     --surface-2: #f2f0ea;
     --ink: #17140f;
     --ink-muted: rgba(23, 20, 15, 0.6);
-    --border: rgba(180, 140, 30, 0.22);
-    --gold: #a9822a;
-    --gold-soft: #7a5f1e;
-    --gold-deep: #c9a227;
+    --border: rgba(150, 120, 60, 0.25);
+    --gold: #8a6a2d;
+    --gold-soft: #6b5420;
+    --gold-deep: #a9863f;
+    --gold-highlight: #c9ab5f;
+    --gold-shadow: #5c491e;
     --shadow-soft: 0 8px 30px rgba(23, 20, 15, 0.08);
   }
 }
@@ -71,10 +79,12 @@
   --surface-2: #f2f0ea;
   --ink: #17140f;
   --ink-muted: rgba(23, 20, 15, 0.6);
-  --border: rgba(180, 140, 30, 0.22);
-  --gold: #a9822a;
-  --gold-soft: #7a5f1e;
-  --gold-deep: #c9a227;
+  --border: rgba(150, 120, 60, 0.25);
+  --gold: #8a6a2d;
+  --gold-soft: #6b5420;
+  --gold-deep: #a9863f;
+  --gold-highlight: #c9ab5f;
+  --gold-shadow: #5c491e;
   --shadow-soft: 0 8px 30px rgba(23, 20, 15, 0.08);
 }
 
@@ -84,14 +94,41 @@
   --surface-2: #1c1a16;
   --ink: #f5f2ea;
   --ink-muted: rgba(245, 242, 234, 0.58);
-  --border: rgba(212, 175, 55, 0.16);
-  --gold: #c9a227;
-  --gold-soft: #e6cd7a;
-  --gold-deep: #8a6d1f;
+  --border: rgba(196, 162, 90, 0.18);
+  --gold: #a9863f;
+  --gold-soft: #d9c48f;
+  --gold-deep: #6b5423;
+  --gold-highlight: #f2e2b8;
+  --gold-shadow: #4a3a17;
   --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 
 body {
   background-color: var(--bg);
   color: var(--ink);
+}
+
+/* Real metallic gold: a highlight-to-shadow gradient band (like light
+   raking across brushed metal) instead of a flat fill, which is what was
+   reading as plain yellow. Used on primary buttons/CTAs. */
+.metal-gold {
+  background: linear-gradient(135deg, var(--gold-highlight) 0%, var(--gold) 30%, var(--gold-shadow) 55%, var(--gold) 75%, var(--gold-highlight) 100%);
+  background-size: 220% 220%;
+  background-position: 30% 30%;
+  color: var(--gold-shadow);
+  border: 1px solid var(--gold-shadow);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: background-position 0.5s ease, filter 0.2s ease;
+}
+.metal-gold:hover {
+  background-position: 70% 70%;
+  filter: brightness(1.06);
+}
+
+/* Same treatment for text (headings/wordmarks) via background-clip. */
+.metal-gold-text {
+  background: linear-gradient(135deg, var(--gold-highlight) 0%, var(--gold) 35%, var(--gold-shadow) 55%, var(--gold) 75%, var(--gold-highlight) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

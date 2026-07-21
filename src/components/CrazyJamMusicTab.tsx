@@ -60,7 +60,7 @@ const ReleaseCard: React.FC<{ release: any; onUnpublish?: (id: string) => void }
           onClick={togglePlay}
           className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all"
         >
-          <span className={`h-12 w-12 rounded-full bg-brand-gold text-brand-bg flex items-center justify-center transition-all ${isPlaying ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+          <span className={`h-12 w-12 rounded-full bg-brand-gold flex items-center justify-center transition-all ${isPlaying ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
             {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
           </span>
         </button>
@@ -87,7 +87,7 @@ const ReleaseCard: React.FC<{ release: any; onUnpublish?: (id: string) => void }
 };
 
 // --- Publish dialog ---
-const PublishPanel: React.FC<{ addLog?: (l: any) => void; onPublished: () => void }> = ({ addLog, onPublished }) => {
+export const PublishPanel: React.FC<{ addLog?: (l: any) => void; onPublished: () => void }> = ({ addLog, onPublished }) => {
   const [myTracks, setMyTracks] = useState<any[]>([]);
   const [myArt, setMyArt] = useState<any[]>([]);
   const [myVideos, setMyVideos] = useState<any[]>([]);
@@ -172,7 +172,7 @@ const PublishPanel: React.FC<{ addLog?: (l: any) => void; onPublished: () => voi
         <textarea value={marketingBlurb} onChange={(e) => setMarketingBlurb(e.target.value)} rows={2} className="bg-brand-surface-2 border border-brand-border text-brand-ink text-sm rounded-lg px-3 py-2 outline-none resize-none" placeholder="A punchy line to hook listeners" />
       </div>
 
-      <button onClick={handlePublish} disabled={isPublishing} className="w-full h-11 flex items-center justify-center gap-2 bg-brand-gold hover:brightness-110 rounded-xl text-brand-bg font-semibold text-sm transition-all disabled:opacity-50">
+      <button onClick={handlePublish} disabled={isPublishing} className="w-full h-11 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-50">
         {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
         {isPublishing ? "Publishing..." : "Publish to CrazyJam Music"}
       </button>
@@ -219,10 +219,10 @@ export const CrazyJamMusicTab: React.FC<CrazyJamMusicTabProps> = ({ tracks, temp
   return (
     <div className="flex flex-col gap-6 mt-6 animate-fadeIn">
       <div className="flex items-center gap-1 bg-brand-surface-2 border border-brand-border rounded-lg p-1 w-fit">
-        <button onClick={() => setSection("discover")} className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[12px] font-medium transition-all ${section === "discover" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
+        <button onClick={() => setSection("discover")} className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[12px] font-medium transition-all ${section === "discover" ? "bg-brand-gold" : "text-brand-ink-muted hover:text-brand-ink"}`}>
           <Compass className="h-3.5 w-3.5" /> Discover
         </button>
-        <button onClick={() => setSection("studio")} className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[12px] font-medium transition-all ${section === "studio" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
+        <button onClick={() => setSection("studio")} className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[12px] font-medium transition-all ${section === "studio" ? "bg-brand-gold" : "text-brand-ink-muted hover:text-brand-ink"}`}>
           <Rocket className="h-3.5 w-3.5" /> My Studio
         </button>
       </div>

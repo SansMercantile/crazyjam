@@ -150,7 +150,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
               <button
                 onClick={handleExportSession}
                 disabled={isRecording}
-                className="bg-brand-gold hover:brightness-110 disabled:opacity-50 text-brand-bg px-4 py-2 font-semibold text-[12px] rounded-lg transition flex items-center gap-1.5"
+                className="metal-gold disabled:opacity-50 px-4 py-2 font-semibold text-[12px] rounded-lg transition flex items-center gap-1.5"
               >
                 {isRecording ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
                 {isRecording ? "Rendering..." : "Export WAV"}

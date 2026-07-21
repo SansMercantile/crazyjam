@@ -92,12 +92,12 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
       {/* Top Advisory Deck with Agreement Matrix */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Swarm Agreement Matrix */}
-        <div className="lg:col-span-7 bg-brand-card border border-brand-border rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-brand-surface border border-brand-border rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 border-b border-brand-border pb-3 mb-4">
-              <BrainCircuit className="h-5 w-5 text-purple-400" />
+              <BrainCircuit className="h-5 w-5 text-brand-gold" />
               <div>
-                <span className="text-[9px] uppercase font-mono tracking-wide text-purple-400 font-bold">Consensus telemetry</span>
+                <span className="text-[9px] uppercase font-mono tracking-wide text-brand-gold font-medium">Consensus telemetry</span>
                 <h3 className="font-display font-semibold text-sm uppercase text-brand-ink leading-tight">Neural Swarm Consensus Status</h3>
               </div>
             </div>
@@ -111,13 +111,13 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
               {[
                 { name: "Zeitgeist A&R Critic", rate: 94, status: "Optimal Concept", color: "bg-emerald-500" },
                 { name: "Groove Rhythm Spezialist", rate: 89, status: "High Swing Alignment", color: "bg-cyan-400" },
-                { name: "Harmonic Architect Progressions", rate: 91, status: "Scales Verified", color: "bg-purple-500" },
-                { name: "Sonic mastering EQ Coordinator", rate: 86, status: "Limiter Threshold Calibrated", color: "bg-brand-pink" },
+                { name: "Harmonic Architect Progressions", rate: 91, status: "Scales Verified", color: "bg-brand-gold" },
+                { name: "Sonic mastering EQ Coordinator", rate: 86, status: "Limiter Threshold Calibrated", color: "bg-brand-gold" },
               ].map((ag) => (
                 <div key={ag.name} className="flex justify-between items-center text-[10px] bg-brand-surface-2 border border-brand-border p-2.5 rounded-xl">
                   <div className="flex items-center gap-2.5">
                     <span className={`h-2 w-2 rounded-full ${ag.color}`} />
-                    <span className="font-bold text-brand-ink-muted">{ag.name}</span>
+                    <span className="font-medium text-brand-ink-muted">{ag.name}</span>
                   </div>
                   <div className="flex items-center gap-3 font-mono">
                     <span className="text-[9px] text-brand-ink-muted uppercase">{ag.status}</span>
@@ -129,15 +129,15 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
           </div>
 
           <div className="mt-4 pt-3 border-t border-brand-border flex items-center justify-between text-[10px] font-mono text-brand-ink-muted">
-            <span className="flex items-center gap-1 font-bold text-brand-pink">
+            <span className="flex items-center gap-1 font-medium text-brand-gold">
               ● Active Channels: 4 Swarms online
             </span>
-            <span className="font-bold select-none text-right">Master Synchrony Index: 92.5%</span>
+            <span className="font-medium select-none text-right">Master Synchrony Index: 92.5%</span>
           </div>
         </div>
 
         {/* Direct Advisory Console */}
-        <div className="lg:col-span-5 bg-brand-card border border-brand-border rounded-2xl p-6 relative flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-brand-surface border border-brand-border rounded-2xl p-6 relative flex flex-col justify-between">
           <form onSubmit={submitDirectInstruction} className="space-y-4">
             <div className="flex items-center gap-2 border-b border-brand-border pb-3">
               <MessageSquareCode className="h-5 w-5 text-[#e59632]" />
@@ -157,10 +157,10 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
               <select
                 value={selectedAgentId}
                 onChange={(e) => setSelectedAgentId(e.target.value)}
-                className="w-full bg-brand-surface-2 border border-brand-border py-2 px-3 rounded-xl text-xs text-brand-ink uppercase font-bold outline-none focus:border-[#e59632]"
+                className="w-full bg-brand-surface-2 border border-brand-border py-2 px-3 rounded-xl text-xs text-brand-ink uppercase font-medium outline-none focus:border-[#e59632]"
               >
                 {agents.map((a) => (
-                  <option key={a.id} value={a.id} className="bg-brand-card text-brand-ink uppercase text-xs">
+                  <option key={a.id} value={a.id} className="bg-brand-surface text-brand-ink uppercase text-xs">
                     {a.name}
                   </option>
                 ))}
@@ -182,11 +182,11 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
             <button
               type="submit"
               disabled={!directMessage.trim() || isAnswering}
-              className="w-full py-2 bg-[#e59632] hover:bg-[#c97f26] disabled:bg-neutral-800 text-brand-dark font-display font-semibold uppercase text-[10px] tracking-wide rounded-xl transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+              className="w-full py-2 bg-[#e59632] hover:bg-[#c97f26] disabled:bg-neutral-800 font-display font-semibold uppercase text-[10px] tracking-wide rounded-xl transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
             >
               {isAnswering ? (
                 <>
-                  <span className="h-3 w-3 border-2 border-brand-dark border-t-transparent animate-spin rounded-full" />
+                  <span className="h-3 w-3 border-2 border-brand-bg border-t-transparent animate-spin rounded-full" />
                   Node Syncing...
                 </>
               ) : (

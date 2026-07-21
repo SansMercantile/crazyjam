@@ -215,29 +215,29 @@ export function Visualizer({ analyser, isPlaying, scaleKey }: VisualizerProps) {
   }, [analyser, isPlaying]);
 
   return (
-    <div className="bg-brand-card border border-brand-border rounded-2xl p-5 flex flex-col gap-3 relative overflow-hidden h-72">
+    <div className="bg-brand-surface border border-brand-border rounded-2xl p-5 flex flex-col gap-3 relative overflow-hidden h-72">
       {/* Visualizer header tabs */}
       <div className="flex items-center justify-between border-b border-brand-border pb-2.5 z-10">
-        <div className="flex items-center gap-2 text-brand-pink">
+        <div className="flex items-center gap-2 text-brand-gold">
           <Activity className="h-4 w-4" />
-          <span className="text-xs font-mono font-bold tracking-wide uppercase text-brand-ink-muted">
+          <span className="text-xs font-mono font-medium tracking-wide uppercase text-brand-ink-muted">
             Oscilloscope & Spectral Power
           </span>
         </div>
         <div className="flex items-center gap-4 text-[10px] font-mono text-brand-ink-muted">
-          <div className="flex items-center gap-1 font-bold">
-            <Radio className="h-3 w-3 text-brand-cyan animate-pulse" />
+          <div className="flex items-center gap-1 font-medium">
+            <Radio className="h-3 w-3 text-brand-gold animate-pulse" />
             <span>Scale: {scaleKey || "N/A"}</span>
           </div>
-          <div className="flex items-center gap-1 font-bold">
-            <Zap className="h-3 w-3 text-brand-pink" />
+          <div className="flex items-center gap-1 font-medium">
+            <Zap className="h-3 w-3 text-brand-gold" />
             <span>STFT: Live</span>
           </div>
         </div>
       </div>
 
       {/* Embedded Canvas */}
-      <div className="flex-1 w-full bg-brand-dark/80 rounded-2xl overflow-hidden border border-brand-border">
+      <div className="flex-1 w-full bg-brand-bg/80 rounded-2xl overflow-hidden border border-brand-border">
         <canvas ref={canvasRef} className="w-full h-full block" />
       </div>
 

@@ -221,14 +221,14 @@ export const MultitrackTimeline: React.FC<MultitrackTimelineProps> = ({
   };
 
   return (
-    <div className="bg-brand-card border border-brand-border rounded-2xl p-6 relative overflow-hidden">
+    <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 relative overflow-hidden">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-brand-border pb-4 mb-4">
         <div className="flex items-center gap-3">
-          <div className="bg-brand-pink/15 p-2 rounded-xl text-brand-pink border border-brand-pink/20">
+          <div className="bg-brand-gold/15 p-2 rounded-xl text-brand-gold border border-brand-gold/20">
             <ListMusic className="h-5 w-5" />
           </div>
           <div>
-            <span className="text-[9px] uppercase font-mono tracking-wide text-brand-pink font-bold">Arrangement Timeline</span>
+            <span className="text-[9px] uppercase font-mono tracking-wide text-brand-gold font-medium">Arrangement Timeline</span>
             <h2 className="font-display font-semibold text-lg uppercase text-brand-ink leading-tight">CrazyJam Studio</h2>
           </div>
         </div>
@@ -236,13 +236,13 @@ export const MultitrackTimeline: React.FC<MultitrackTimelineProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => addSection(true)}
-            className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl px-3 py-2 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all"
+            className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl px-3 py-2 text-[10px] font-mono font-medium uppercase text-brand-ink transition-all"
           >
             <Copy className="h-3.5 w-3.5" /> Duplicate
           </button>
           <button
             onClick={() => addSection(false)}
-            className="flex items-center gap-1.5 bg-brand-pink/15 hover:bg-brand-pink/25 border border-brand-pink/30 text-brand-pink rounded-xl px-3 py-2 text-[10px] font-mono font-bold uppercase transition-all"
+            className="flex items-center gap-1.5 bg-brand-gold/15 hover:bg-brand-gold/25 border border-brand-gold/30 text-brand-gold rounded-xl px-3 py-2 text-[10px] font-mono font-medium uppercase transition-all"
           >
             <Plus className="h-3.5 w-3.5" /> Add Section
           </button>
@@ -267,7 +267,7 @@ export const MultitrackTimeline: React.FC<MultitrackTimelineProps> = ({
                 isPlayingThis
                   ? "border-emerald-400 bg-emerald-400/10"
                   : isActive
-                  ? "border-brand-pink bg-brand-pink/10"
+                  ? "border-brand-gold bg-brand-gold/10"
                   : "border-brand-border bg-brand-surface-2 hover:border-brand-border"
               }`}
             >
@@ -291,7 +291,7 @@ export const MultitrackTimeline: React.FC<MultitrackTimelineProps> = ({
               />
               <div className="grid gap-[2px]" style={{ gridTemplateColumns: "repeat(16, 1fr)" }}>
                 {preview.map((hit, i) => (
-                  <span key={i} className={`h-2.5 rounded-sm ${hit ? "bg-brand-cyan" : "bg-brand-surface-2"}`} />
+                  <span key={i} className={`h-2.5 rounded-sm ${hit ? "bg-brand-gold" : "bg-brand-surface-2"}`} />
                 ))}
               </div>
             </div>
@@ -304,7 +304,7 @@ export const MultitrackTimeline: React.FC<MultitrackTimelineProps> = ({
         <button
           onClick={handleExportStems}
           disabled={isExporting}
-          className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl px-3.5 py-2 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl px-3.5 py-2 text-[10px] font-mono font-medium uppercase text-brand-ink transition-all disabled:opacity-50"
         >
           {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
           Export Stems (Drums / Bass / Lead / Pad)
@@ -312,11 +312,11 @@ export const MultitrackTimeline: React.FC<MultitrackTimelineProps> = ({
         <button
           onClick={handleExportMix}
           disabled={isExporting}
-          className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl px-3.5 py-2 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl px-3.5 py-2 text-[10px] font-mono font-medium uppercase text-brand-ink transition-all disabled:opacity-50"
         >
           <Music2 className="h-3.5 w-3.5" /> Export Full Mix
         </button>
-        {exportStatus && <span className="text-[10px] font-mono text-brand-cyan">{exportStatus}</span>}
+        {exportStatus && <span className="text-[10px] font-mono text-brand-gold">{exportStatus}</span>}
       </div>
       <p className="text-[9px] font-mono text-brand-ink-muted mt-2">
         Drag section cards to reorder &bull; click a card to edit it below &bull; Play cycles through the whole arrangement in order.

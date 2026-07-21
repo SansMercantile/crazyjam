@@ -190,24 +190,24 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
       />
 
       {/* Top Console Command Dashboard */}
-      <div className="bg-brand-card border border-brand-border rounded-2xl p-6 relative overflow-hidden">
+      <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 relative overflow-hidden">
         {/* glowing trace lights */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-brand-cyan/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-brand-gold/5 rounded-full blur-2xl pointer-events-none" />
 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 border-b border-brand-border pb-4 mb-4">
           <div className="flex items-center gap-3">
-            <div className="bg-brand-cyan/15 p-2 rounded-xl text-brand-cyan border border-brand-cyan/20">
+            <div className="bg-brand-gold/15 p-2 rounded-xl text-brand-gold border border-brand-gold/20">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <span className="text-[9px] uppercase font-mono tracking-wide text-brand-cyan font-bold">Sequenser Groove Controllers</span>
+              <span className="text-[9px] uppercase font-mono tracking-wide text-brand-gold font-medium">Sequenser Groove Controllers</span>
               <h2 className="font-display font-semibold text-lg uppercase text-brand-ink leading-tight">Advanced Groove & Timing Console</h2>
             </div>
           </div>
 
           {/* Quick Helper Chip */}
           <div className="flex items-center gap-2 bg-brand-surface-2 border border-brand-border px-3.5 py-1.5 rounded-xl text-[10px] font-mono text-brand-ink-muted">
-            <Info className="h-3.5 w-3.5 text-brand-pink" />
+            <Info className="h-3.5 w-3.5 text-brand-gold" />
             <span>Click any block below to hear instant notes & build drum loop.</span>
           </div>
         </div>
@@ -224,7 +224,7 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
                   onClick={() => setSelectedTrackId(t.id)}
                   className={`flex-1 py-2 rounded-lg text-[10px] font-display font-semibold uppercase text-center transition cursor-pointer ${
                     selectedTrackId === t.id
-                      ? "bg-brand-pink text-brand-ink shadow-md shadow-brand-pink/20"
+                      ? "bg-brand-gold text-brand-ink shadow-md shadow-brand-gold/20"
                       : "text-brand-ink-muted hover:text-brand-ink-muted hover:bg-brand-surface-2"
                   }`}
                 >
@@ -241,7 +241,7 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
               <div className="flex gap-2">
                 <button
                   onClick={handleRandomizeTrack}
-                  className="flex-1 bg-brand-cyan hover:bg-cyan-600 font-display font-semibold text-brand-dark px-3 py-2.5 text-[10px] uppercase tracking-wide rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 bg-brand-gold hover:bg-cyan-600 font-display font-semibold px-3 py-2.5 text-[10px] uppercase tracking-wide rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
                   title="Randomize selected track patterns"
                 >
                   <Dices className="h-4.5 w-4.5" />
@@ -271,9 +271,9 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
                     max="80"
                     value={grooveSwing}
                     onChange={(e) => setGrooveSwing(Number(e.target.value))}
-                    className="flex-1 h-1 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-brand-cyan"
+                    className="flex-1 h-1 bg-brand-surface-2 rounded-lg appearance-none cursor-pointer accent-brand-gold"
                   />
-                  <span className="text-[9px] font-mono font-bold text-brand-cyan">{grooveSwing}%</span>
+                  <span className="text-[9px] font-mono font-medium text-brand-gold">{grooveSwing}%</span>
                 </div>
               </div>
 
@@ -282,14 +282,14 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
                 <div className="flex gap-2 mt-1">
                   <button
                     onClick={() => handleShiftSequence("left")}
-                    className="flex-1 p-2 rounded-lg border border-brand-border hover:border-brand-pink/40 hover:text-brand-pink text-brand-ink-muted bg-brand-surface-2 transition text-center flex items-center justify-center cursor-pointer"
+                    className="flex-1 p-2 rounded-lg border border-brand-border hover:border-brand-gold/40 hover:text-brand-gold text-brand-ink-muted bg-brand-surface-2 transition text-center flex items-center justify-center cursor-pointer"
                     title="Slide steps backwards"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleShiftSequence("right")}
-                    className="flex-1 p-2 rounded-lg border border-brand-border hover:border-brand-pink/40 hover:text-brand-pink text-brand-ink-muted bg-brand-surface-2 transition text-center flex items-center justify-center cursor-pointer"
+                    className="flex-1 p-2 rounded-lg border border-brand-border hover:border-brand-gold/40 hover:text-brand-gold text-brand-ink-muted bg-brand-surface-2 transition text-center flex items-center justify-center cursor-pointer"
                     title="Slide steps forwards"
                   >
                     <ChevronRight className="h-4 w-4" />

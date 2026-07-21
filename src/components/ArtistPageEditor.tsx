@@ -171,7 +171,7 @@ export const ArtistPageEditor: React.FC = () => {
       <button
         onClick={handleSave}
         disabled={isSaving}
-        className="w-full h-11 flex items-center justify-center gap-2 bg-brand-gold hover:brightness-110 rounded-xl text-brand-bg font-semibold text-sm transition-all disabled:opacity-50 mt-2"
+        className="w-full h-11 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-50 mt-2"
       >
         <Save className="h-4 w-4" /> {isSaving ? "Saving..." : "Save Artist Page"}
       </button>

@@ -96,7 +96,7 @@ export function Header({
           <button
             onClick={onGenerate}
             disabled={isGenerating || !prompt.trim()}
-            className="lg:col-span-4 h-full flex items-center justify-center gap-2 bg-brand-gold hover:brightness-110 disabled:opacity-40 text-brand-bg font-semibold text-sm px-6 py-3 rounded-xl transition-all disabled:cursor-not-allowed"
+            className="lg:col-span-4 h-full flex items-center justify-center gap-2 metal-gold disabled:opacity-40 font-semibold text-sm px-6 py-3 rounded-xl transition-all disabled:cursor-not-allowed"
           >
             {isGenerating ? (
               <>
@@ -133,7 +133,7 @@ export function Header({
               onClick={onPlayToggle}
               className={`h-11 w-11 rounded-full flex items-center justify-center transition-all ${
                 isPlaying
-                  ? "bg-brand-gold text-brand-bg"
+                  ? "bg-brand-gold"
                   : "bg-brand-surface border border-brand-gold/40 text-brand-gold hover:bg-brand-gold/10"
               }`}
             >

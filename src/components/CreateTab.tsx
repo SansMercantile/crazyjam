@@ -127,7 +127,7 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
             <button
               onClick={() => setMode("simple")}
               className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[12px] font-medium transition-all ${
-                mode === "simple" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"
+                mode === "simple" ? "bg-brand-gold" : "text-brand-ink-muted hover:text-brand-ink"
               }`}
             >
               <Sparkles className="h-3.5 w-3.5" /> Simple
@@ -135,7 +135,7 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
             <button
               onClick={() => setMode("custom")}
               className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[12px] font-medium transition-all ${
-                mode === "custom" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"
+                mode === "custom" ? "bg-brand-gold" : "text-brand-ink-muted hover:text-brand-ink"
               }`}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" /> Custom
@@ -232,7 +232,7 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
           <button
             onClick={handleGenerateClick}
             disabled={!canGenerate || isGenerating}
-            className="w-full h-12 flex items-center justify-center gap-2 bg-brand-gold hover:brightness-110 rounded-xl text-brand-bg font-semibold text-sm transition-all disabled:opacity-40"
+            className="w-full h-12 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-40"
           >
             {isGenerating ? (
               <>

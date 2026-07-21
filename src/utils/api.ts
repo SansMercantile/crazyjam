@@ -80,6 +80,18 @@ export async function fetchCurrentUser() {
   return res.json();
 }
 
+export async function updateProfile(updates: { name?: string; handle?: string; bio?: string; avatar?: string; styleAlign?: string }) {
+  const res = await apiFetch("/auth/me", {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Could not update profile");
+  }
+  return res.json();
+}
+
 export async function exchangeAuth0Token(idToken: string) {
   const res = await apiFetch("/auth/auth0-exchange", {
     method: "POST",

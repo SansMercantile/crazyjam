@@ -233,7 +233,7 @@ export function UserProfile({
               ].map((s) => (
                 <div key={s.n} className={`p-3.5 rounded-xl border transition-all ${onboardingStep === s.n ? "bg-brand-gold/10 border-brand-gold/30 text-brand-ink" : "bg-brand-surface-2 border-transparent text-brand-ink-muted"}`}>
                   <div className="flex items-center gap-3">
-                    <span className={`h-6 w-6 rounded-full text-xs flex items-center justify-center shrink-0 ${onboardingStep === s.n ? "bg-brand-gold text-brand-bg" : "bg-brand-surface-2"}`}>{s.n}</span>
+                    <span className={`h-6 w-6 rounded-full text-xs flex items-center justify-center shrink-0 ${onboardingStep === s.n ? "bg-brand-gold" : "bg-brand-surface-2"}`}>{s.n}</span>
                     <div>
                       <h4 className="text-[13px] font-medium">{s.label}</h4>
                       <p className="text-[11px] text-brand-ink-muted mt-0.5">{s.desc}</p>
@@ -367,7 +367,7 @@ export function UserProfile({
 
               <button
                 onClick={handleProceedOnboarding}
-                className="w-fit self-end flex items-center gap-2 bg-brand-gold hover:brightness-110 text-brand-bg px-6 py-2.5 font-semibold text-sm rounded-xl transition-all h-10"
+                className="w-fit self-end flex items-center gap-2 metal-gold px-6 py-2.5 font-semibold text-sm rounded-xl transition-all h-10"
               >
                 <span>{onboardingStep === 3 ? "Complete setup & launch studio" : "Continue"}</span>
                 <Sparkles className="h-4 w-4" />
@@ -380,13 +380,13 @@ export function UserProfile({
             <div className="flex items-center justify-center gap-1 border-b border-brand-border pb-3">
               <button
                 onClick={() => { setAuthMode("login"); setValidationError(""); }}
-                className={`flex-1 py-2 rounded-lg text-[13px] font-medium transition ${authMode === "login" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted"}`}
+                className={`flex-1 py-2 rounded-lg text-[13px] font-medium transition ${authMode === "login" ? "bg-brand-gold" : "text-brand-ink-muted"}`}
               >
                 Log In
               </button>
               <button
                 onClick={() => { setAuthMode("register"); setValidationError(""); }}
-                className={`flex-1 py-2 rounded-lg text-[13px] font-medium transition ${authMode === "register" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted"}`}
+                className={`flex-1 py-2 rounded-lg text-[13px] font-medium transition ${authMode === "register" ? "bg-brand-gold" : "text-brand-ink-muted"}`}
               >
                 Create Account
               </button>
@@ -427,7 +427,7 @@ export function UserProfile({
               <button
                 type="submit"
                 disabled={isAuthenticating || !emailForm || !passwordForm}
-                className="w-full h-10 bg-brand-gold hover:brightness-110 rounded-lg text-brand-bg font-semibold text-sm transition-all flex items-center justify-center disabled:opacity-50"
+                className="w-full h-10 metal-gold rounded-lg font-semibold text-sm transition-all flex items-center justify-center disabled:opacity-50"
               >
                 {isAuthenticating ? (
                   <span className="h-4 w-4 rounded-full border-2 border-brand-bg border-t-transparent animate-spin" />

@@ -11,5 +11,9 @@ _restart_frontend.ps1
 _theme_migrate.ps1
 _theme_migrate2.ps1
 _fix_albumart.ps1
+_fix_launchpad.ps1
+_fix_profiletab.ps1
+_theme_migrate3.ps1
+_apply_metal_gold.ps1
 build_error.log
 build_out.txt
