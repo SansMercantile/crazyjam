@@ -222,23 +222,21 @@ export function MidiStudio({
       <div className="xl:col-span-6 flex flex-col gap-4">
         <div className="flex items-center justify-between border-b border-brand-border pb-3">
           <div className="flex items-center gap-2 text-brand-gold">
-            <Plug className="h-4.5 w-4.5 text-brand-gold animate-pulse" />
-            <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">
-              USB Instrument & MIDI Controller Station
-            </h2>
+            <Plug className="h-4.5 w-4.5" />
+            <h2 className="font-display text-[15px] text-brand-ink">MIDI &amp; USB controllers</h2>
           </div>
-          <span className="text-[9px] font-mono text-brand-gold uppercase bg-brand-gold/10 border border-brand-gold/30 px-2 py-0.5 rounded font-medium">
-            Keyboard Interface
+          <span className="text-[10px] text-brand-gold bg-brand-gold/10 border border-brand-gold/25 px-2 py-0.5 rounded">
+            Keyboard input
           </span>
         </div>
 
         {/* Device Sync Matrix */}
         <div className="bg-brand-bg p-4 rounded-2xl border border-brand-border flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-medium text-brand-ink-muted uppercase">Connection Status</span>
+            <span className="text-[10px] font-mono font-medium text-brand-ink-muted">Connection Status</span>
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald-500 block animate-pulse" />
-              <span className="text-[10px] font-mono text-emerald-400 font-medium uppercase">MIDI Engine Active</span>
+              <span className="text-[10px] font-mono text-emerald-400 font-medium">MIDI Engine Active</span>
             </div>
           </div>
 
@@ -258,8 +256,8 @@ export function MidiStudio({
                     setMidiDevices([]);
                   }
                 }}
-                className={`px-2.5 py-1 text-[9px] font-mono font-medium uppercase rounded border cursor-pointer transition-all ${
-                  usbConnected ? "bg-emerald-500 border-emerald-500/30" : "bg-brand-surface-2 border-brand-border text-brand-ink hover:border-[#e59632]"
+                className={`px-2.5 py-1 text-[9px] font-mono font-medium rounded border cursor-pointer transition-all ${
+                  usbConnected ? "bg-emerald-500 border-emerald-500/30" : "bg-brand-surface-2 border-brand-border text-brand-ink hover:border-[var(--gold)]"
                 }`}
               >
                 {usbConnected ? "Disconnect USB" : "Connect Dummy Keyb"}
@@ -276,7 +274,7 @@ export function MidiStudio({
                       <p className="text-[9px] font-mono text-brand-gold">{device.manufacturer} &bull; Type: Input</p>
                     </div>
                   </div>
-                  <span className="text-[8px] font-mono text-emerald-400 font-semibold tracking-wide bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase leading-none border border-emerald-500/20">
+                  <span className="text-[8px] font-mono text-emerald-400 font-semibold tracking-wide bg-emerald-500/10 px-1.5 py-0.5 rounded leading-none border border-emerald-500/20">
                     Online
                   </span>
                 </div>
@@ -288,15 +286,15 @@ export function MidiStudio({
         {/* Visual virtual music key controller */}
         <div className="bg-brand-bg/40 p-4 border border-brand-border rounded-2xl flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-brand-ink-muted uppercase font-semibold">Interactive Virtual Keydeck</span>
+            <span className="text-[10px] font-mono text-brand-ink-muted font-semibold">Interactive Virtual Keydeck</span>
             <div className="flex items-center gap-1 font-mono text-[9px]">
-              <span className="text-brand-ink-muted uppercase mr-1">Octave</span>
+              <span className="text-brand-ink-muted mr-1">Octave</span>
               {[3, 4, 5].map(oct => (
                 <button
                   key={oct}
                   onClick={() => setVirtualKeyboardOctave(oct)}
                   className={`w-5 h-5 rounded flex items-center justify-center font-medium cursor-pointer transition-all ${
-                    virtualKeyboardOctave === oct ? "bg-[#e59632] font-semibold" : "bg-brand-surface-2 text-brand-ink-muted hover:bg-brand-surface-2"
+                    virtualKeyboardOctave === oct ? "bg-[var(--gold)] font-semibold" : "bg-brand-surface-2 text-brand-ink-muted hover:bg-brand-surface-2"
                   }`}
                 >
                   {oct}
@@ -312,23 +310,23 @@ export function MidiStudio({
               <button
                 key={note}
                 onClick={() => handleVirtualKeyPress(note)}
-                className={`flex-1 bg-brand-surface-2 hover:bg-brand-surface-2 active:bg-brand-gold border border-brand-bg/20 text-[10px] font-mono font-extrabold text-[#0c0e17] flex items-end justify-center pb-1.5 rounded-sm transition-all shadow-[0_3px_5px_rgba(0,0,0,0.35)] cursor-pointer`}
+                className={`flex-1 bg-brand-surface-2 hover:bg-brand-surface-2 active:bg-brand-gold border border-brand-bg/20 text-[10px] font-mono font-extrabold text-[var(--bg)] flex items-end justify-center pb-1.5 rounded-sm transition-all shadow-[0_3px_5px_rgba(0,0,0,0.35)] cursor-pointer`}
               >
                 {note}
               </button>
             ))}
 
             {/* Simulated Black Keys */}
-            <button onClick={() => handleVirtualKeyPress("C#")} className="absolute h-12 w-4 cursor-pointer bg-[#0c0e17] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "11.5%" }} >C#</button>
-            <button onClick={() => handleVirtualKeyPress("D#")} className="absolute h-12 w-4 cursor-pointer bg-[#0c0e17] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "25.5%" }} >D#</button>
-            <button onClick={() => handleVirtualKeyPress("F#")} className="absolute h-12 w-4 cursor-pointer bg-[#0c0e17] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "54.5%" }} >F#</button>
-            <button onClick={() => handleVirtualKeyPress("G#")} className="absolute h-12 w-4 cursor-pointer bg-[#0c0e17] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "68.5%" }} >G#</button>
-            <button onClick={() => handleVirtualKeyPress("A#")} className="absolute h-12 w-4 cursor-pointer bg-[#0c0e17] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "82.5%" }} >A#</button>
+            <button onClick={() => handleVirtualKeyPress("C#")} className="absolute h-12 w-4 cursor-pointer bg-[var(--bg)] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "11.5%" }} >C#</button>
+            <button onClick={() => handleVirtualKeyPress("D#")} className="absolute h-12 w-4 cursor-pointer bg-[var(--bg)] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "25.5%" }} >D#</button>
+            <button onClick={() => handleVirtualKeyPress("F#")} className="absolute h-12 w-4 cursor-pointer bg-[var(--bg)] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "54.5%" }} >F#</button>
+            <button onClick={() => handleVirtualKeyPress("G#")} className="absolute h-12 w-4 cursor-pointer bg-[var(--bg)] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "68.5%" }} >G#</button>
+            <button onClick={() => handleVirtualKeyPress("A#")} className="absolute h-12 w-4 cursor-pointer bg-[var(--bg)] hover:bg-slate-800 active:bg-brand-gold text-[7px] font-mono font-medium text-brand-ink flex items-end justify-center pb-1 rounded-sm border-r border-b border-brand-border" style={{ left: "82.5%" }} >A#</button>
           </div>
 
           <div className="flex items-center justify-between text-[9px] font-mono">
             <span className="text-brand-ink-muted italic">Tip: Key triggers are polyphonic and fully mapped dynamically.</span>
-            <span className="text-brand-gold font-medium block uppercase tracking-wide">
+            <span className="text-brand-gold font-medium block tracking-wide">
               {lastKeyPressed ? `Last Trigger: ${lastKeyPressed}` : "Idle"}
             </span>
           </div>
@@ -336,7 +334,7 @@ export function MidiStudio({
 
         {/* Real-time MIDI data steam log block */}
         <div className="bg-brand-bg/60 p-3 rounded-xl border border-brand-border flex flex-col gap-1.5 h-32 overflow-hidden">
-          <span className="text-[9px] font-mono text-brand-ink-muted tracking-wide font-semibold uppercase">Hardware signal console logs</span>
+          <span className="text-[9px] font-mono text-brand-ink-muted tracking-wide font-semibold">Hardware signal console logs</span>
           <div className="flex-1 flex flex-col gap-1 overflow-y-auto pr-1">
             {activeMidiLog.map((log, index) => (
               <div key={index} className="text-[10px] font-mono text-emerald-400/90 leading-tight border-b border-brand-border pb-1 flex items-start gap-1.5">
@@ -353,11 +351,11 @@ export function MidiStudio({
         <div className="flex items-center justify-between border-b border-brand-border pb-3">
           <div className="flex items-center gap-2 text-brand-gold">
             <Cpu className="h-4.5 w-4.5 text-brand-gold animate-pulse" />
-            <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">
-              CrazyJam AI Intelligent Master Engineer
+            <h2 className="font-display font-semibold text-sm tracking-wide text-brand-ink">
+              AI master engineer
             </h2>
           </div>
-          <span className="text-[9px] font-mono text-brand-gold uppercase bg-brand-gold/10 border border-brand-gold/30 px-2 py-0.5 rounded font-medium">
+          <span className="text-[9px] font-mono text-brand-gold bg-brand-gold/10 border border-brand-gold/30 px-2 py-0.5 rounded font-medium">
             Auto-Mix Suite
           </span>
         </div>
@@ -366,20 +364,20 @@ export function MidiStudio({
         <div className="bg-brand-bg p-4 rounded-2xl border border-brand-border flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[9px] font-mono text-brand-ink-muted uppercase tracking-wide font-semibold block">Mixing & Loudness Health</span>
+              <span className="text-[9px] font-mono text-brand-ink-muted tracking-wide font-semibold block">Mixing & Loudness Health</span>
               <h3 className="text-xs font-medium text-brand-ink">Neural Analytical Health Score</h3>
             </div>
 
             <div className="h-12 w-12 rounded-full border border-brand-border flex flex-col justify-center items-center backdrop-blur-md relative" style={{ boxShadow: optimizationScore > 90 ? "0 0 15px rgba(16,185,129,0.25)" : "0 0 15px rgba(239,68,68,0.15)" }}>
-              <span className={`text-base font-semibold font-mono leading-none ${optimizationScore > 90 ? "text-emerald-400" : "text-[#e59632]"}`}>
+              <span className={`text-base font-semibold font-mono leading-none ${optimizationScore > 90 ? "text-emerald-400" : "text-[var(--gold)]"}`}>
                 {optimizationScore}%
               </span>
-              <span className="text-[7px] font-mono text-brand-ink-muted uppercase mt-0.5 font-medium">Acoustic</span>
+              <span className="text-[7px] font-mono text-brand-ink-muted mt-0.5 font-medium">Acoustic</span>
             </div>
           </div>
 
           {/* Progress analyzer levels bar */}
-          <div className="grid grid-cols-3 gap-3 border-t border-b border-brand-border py-3 font-mono text-[9px] uppercase font-medium text-brand-ink-muted">
+          <div className="grid grid-cols-3 gap-3 border-t border-b border-brand-border py-3 font-mono text-[9px] font-medium text-brand-ink-muted">
             <div>
               <span className="block text-brand-ink-muted mb-0.5">Bass Clutter</span>
               <div className="w-full bg-brand-surface-2 h-1.5 rounded overflow-hidden">
@@ -395,7 +393,7 @@ export function MidiStudio({
             <div>
               <span className="block text-brand-ink-muted mb-0.5">Loudness Target</span>
               <div className="w-full bg-brand-surface-2 h-1.5 rounded overflow-hidden">
-                <div className={`h-full ${optimizationScore > 90 ? "bg-emerald-500 w-[94%]" : "bg-[#e59632] w-[45%]"}`} />
+                <div className={`h-full ${optimizationScore > 90 ? "bg-emerald-500 w-[94%]" : "bg-[var(--gold)] w-[45%]"}`} />
               </div>
             </div>
           </div>
@@ -418,7 +416,7 @@ export function MidiStudio({
                 <div>
                   <h4 className="text-[11px] font-medium text-brand-ink leading-normal">{diag.message}</h4>
                   <p className="text-[9px] font-mono text-brand-ink-muted mt-1">
-                    <strong className="text-brand-ink-muted font-semibold uppercase">Correction target:</strong> {diag.fix}
+                    <strong className="text-brand-ink-muted font-semibold">Correction target:</strong> {diag.fix}
                   </p>
                 </div>
               </div>
@@ -430,17 +428,17 @@ export function MidiStudio({
         <button
           onClick={handleEngineerOptimize}
           disabled={isAnalyzing}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-brand-purple to-brand-gold hover:scale-[1.01] text-brand-ink font-semibold text-xs uppercase tracking-wide flex items-center justify-center gap-2 cursor-pointer transition-all border-t border-brand-border select-none shadow-neon-glow"
+          className="w-full py-4 rounded-xl metal-gold font-semibold text-sm flex items-center justify-center gap-2 transition-all"
         >
           {isAnalyzing ? (
             <>
               <ListRestart className="h-4 w-4 animate-spin text-brand-ink" />
-              <span>CRAZYJAM COMPUTING MASTER ACOUSTICS EQUALIZER...</span>
+              <span>Computing optimizations...</span>
             </>
           ) : (
             <>
               <Zap className="h-4 w-4 text-yellow-300 animate-pulse" />
-              <span>ENGAGE AI MASTER SOUND ENGINE OPTIMIZATION</span>
+              <span>Run AI master optimization</span>
             </>
           )}
         </button>
