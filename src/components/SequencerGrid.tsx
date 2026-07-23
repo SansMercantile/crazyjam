@@ -23,6 +23,49 @@ const LEAD_NOTES = ["A5", "G5", "E5", "D5", "C5", "B4", "A4"];
 const BASS_NOTES = ["A3", "G3", "E3", "D3", "C3", "A2"];
 const PAD_NOTES = ["A4", "E4", "C4", "G3", "E3", "C3"];
 
+/** Compact 6-band EQ panel for one track, reads/writes the audio engine
+ * directly since these are real-time DSP settings, not app-level state. */
+const TrackEQPanel: React.FC<{ trackId: string }> = ({ trackId }) => {
+  const [bands, setBands] = useState<number[]>(audioEngine.getTrackEQ(trackId));
+
+  const handleChange = (bandIndex: number, value: number) => {
+    audioEngine.setTrackEQBand(trackId, bandIndex, value);
+    setBands((prev) => prev.map((b, i) => (i === bandIndex ? value : b)));
+  };
+
+  const handleReset = () => {
+    audioEngine.resetTrackEQ(trackId);
+    setBands([0, 0, 0, 0, 0, 0]);
+  };
+
+  return (
+    <div className="bg-brand-surface-2 border border-brand-border rounded-xl p-4 flex flex-col gap-3 animate-fadeIn">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] text-brand-ink-muted">6-band EQ &bull; real-time, affects live playback and exports</span>
+        <button onClick={handleReset} className="flex items-center gap-1 text-[10px] text-brand-ink-muted hover:text-brand-gold transition-all">
+          <RotateCcw className="h-3 w-3" /> Flat
+        </button>
+      </div>
+      <div className="grid grid-cols-6 gap-2">
+        {AudioEngine.EQ_BANDS.map((band, i) => (
+          <div key={band.label} className="flex flex-col items-center gap-1.5">
+            <span className={`text-[10px] ${bands[i] !== 0 ? "text-brand-gold" : "text-brand-ink-muted"}`}>{bands[i] > 0 ? `+${bands[i]}` : bands[i]}</span>
+            <input
+              type="range"
+              min={-15} max={15} step={1}
+              value={bands[i]}
+              onChange={(e) => handleChange(i, Number(e.target.value))}
+              className="w-24 accent-brand-gold"
+              style={{ writingMode: "vertical-lr" as any, direction: "rtl", height: "80px" }}
+            />
+            <span className="text-[9px] text-brand-ink-muted">{band.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export function SequencerGrid({
   tracks,
   currentStep,
@@ -34,6 +77,7 @@ export function SequencerGrid({
   onTracksUpdate,
 }: SequencerGridProps) {
   const [activeTab, setActiveTab] = useState<string>("drums");
+  const [showEQFor, setShowEQFor] = useState<string | null>(null);
 
   const isSynthNoteActive = (track: TrackState, note: string, step: number): boolean => {
     if (!track.melodyNotes) return false;
@@ -235,6 +279,14 @@ export function SequencerGrid({
 
                   <div className="flex items-center gap-4 flex-wrap">
                     <button
+                      onClick={() => setShowEQFor(showEQFor === track.id ? null : track.id)}
+                      className={`p-2 rounded-lg border transition-colors flex items-center gap-1.5 ${
+                        showEQFor === track.id ? "bg-brand-gold/15 text-brand-gold border-brand-gold/40" : "bg-brand-surface text-brand-ink-muted border-brand-border hover:text-brand-ink"
+                      }`}
+                    >
+                      <Sliders className="h-4 w-4" /> <span className="text-[11px]">EQ</span>
+                    </button>
+                    <button
                       onClick={() => onTrackMuteToggle(track.id)}
                       className={`p-2 rounded-lg border transition-colors ${
                         track.muted ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-brand-surface text-brand-ink-muted border-brand-border hover:text-brand-ink"
@@ -255,6 +307,8 @@ export function SequencerGrid({
                     </div>
                   </div>
                 </div>
+
+                {showEQFor === track.id && <TrackEQPanel trackId={track.id} />}
 
                 <div className="rounded-xl overflow-hidden border border-brand-border bg-brand-bg">
                   <div className="grid grid-cols-12 md:grid-cols-20 items-center border-b border-brand-border p-2 bg-brand-surface-2">
@@ -339,6 +393,14 @@ export function SequencerGrid({
 
                   <div className="flex items-center gap-4">
                     <button
+                      onClick={() => setShowEQFor(showEQFor === track.id ? null : track.id)}
+                      className={`p-2 rounded-lg border transition-colors flex items-center gap-1.5 ${
+                        showEQFor === track.id ? "bg-brand-gold/15 text-brand-gold border-brand-gold/40" : "bg-brand-surface text-brand-ink-muted border-brand-border hover:text-brand-ink"
+                      }`}
+                    >
+                      <Sliders className="h-4 w-4" /> <span className="text-[11px]">EQ</span>
+                    </button>
+                    <button
                       onClick={() => onTrackMuteToggle(track.id)}
                       className={`p-2 rounded-lg border transition-colors ${
                         track.muted ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-brand-surface text-brand-ink-muted border-brand-border hover:text-brand-ink"
@@ -360,6 +422,8 @@ export function SequencerGrid({
                   </div>
                 </div>
               </div>
+
+              {showEQFor === track.id && <TrackEQPanel trackId={track.id} />}
 
               <div className="rounded-xl overflow-hidden border border-brand-border bg-brand-bg">
                 <div className="grid grid-cols-12 md:grid-cols-20 items-center border-b border-brand-border p-2 bg-brand-surface-2">

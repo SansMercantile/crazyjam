@@ -7,7 +7,10 @@ import {PublicArtistPage} from './components/PublicArtistPage.tsx';
 import './index.css';
 
 const AUTH0_DOMAIN = "dev-b78ozdt6veybztac.us.auth0.com";
-const AUTH0_CLIENT_ID = "Eh332HZDxEfIZ2drnDfqFaHceacaMOfu";
+// Dedicated CrazyJam SPA app (Single Page Application type - required for
+// public-client PKCE flow, unlike the Nexus site's Regular Web App which
+// needed a secret). Configured with Google, Microsoft, X, and Apple.
+const AUTH0_CLIENT_ID = "ZGrL6wQYYEPLH2c6C9254wRLQvWJUw6T";
 
 // Apply the saved/system theme immediately, even on public pages that
 // never touch App.tsx's theme effect (avoids a flash of the wrong theme).
