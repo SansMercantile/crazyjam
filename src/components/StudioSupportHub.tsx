@@ -1,17 +1,18 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   Mic,
   Send,
   Sparkles,
-  HelpCircle,
   MessageSquare,
-  Volume2,
   AlertTriangle,
   Loader2,
   Square,
   CheckCircle,
-  X,
-  Play
 } from "lucide-react";
 import { customerSupport, humToBeat } from "../utils/api";
 
@@ -26,21 +27,30 @@ interface StudioSupportHubProps {
   onTriggerComposition: (prompt: string) => void;
   onLoadAudioBlueprint: (blueprint: any) => void;
   isGeneratingTracks: boolean;
+  audioCtx?: AudioContext | null;
+  micGain?: number;       // 0-100
+  highpassFreq?: number;  // Hz
+  noiseGateEnabled?: boolean;
+  reverbWet?: number;     // 0-100
 }
 
 export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
   onTriggerComposition,
   onLoadAudioBlueprint,
   isGeneratingTracks,
+  audioCtx,
+  micGain = 85,
+  highpassFreq = 80,
+  noiseGateEnabled = true,
+  reverbWet = 40,
 }) => {
   const [activeTab, setActiveTab] = useState<"support" | "voice">("support");
 
-  // Chat Support State
   const [messages, setMessages] = useState<SpeechBubble[]>([
     {
       id: "init",
       sender: "ai",
-      text: "Welcome to **CrazyJam Studio Support Hub**! 🎛️ I have direct access to our 100+ multi-agent synthesizer engine. You can ask me how to use the DAW controllers, or simply **ask me to make you a song** (e.g., *'Create a nostalgic lofi beat'*), and I will arrange it instantly!",
+      text: "Welcome to **CrazyJam Studio Support**! I have direct access to the composition swarm. Ask how to use the DAW, or **ask me to make you a song** (e.g., *'Create a nostalgic lofi beat'*).",
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     }
   ]);
@@ -48,24 +58,21 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
   const [isSending, setIsSending] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Audio Recording State
   const [micState, setMicState] = useState<"idle" | "recording" | "processing" | "success" | "error">("idle");
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [micErrorMessage, setMicErrorMessage] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<any>(null);
+  const rawStreamRef = useRef<MediaStream | null>(null);
+  const processingNodesRef = useRef<AudioNode[]>([]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isSending]);
 
-  // Handle Quick Assistance Chips
-  const handleQuickChip = (chipText: string) => {
-    sendMessage(chipText);
-  };
+  const handleQuickChip = (chipText: string) => sendMessage(chipText);
 
-  // Chat Client Call
   const sendMessage = async (textToSend: string) => {
     if (!textToSend.trim() || isSending) return;
 
@@ -87,7 +94,7 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
       }));
 
       const replyData = await customerSupport(textToSend, historyPayload);
-      
+
       const aiMsg: SpeechBubble = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
@@ -97,14 +104,10 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
 
       setMessages((prev) => [...prev, aiMsg]);
 
-      // If user requested AI to make a track, trigger modular sequencer blueprint generation
       if (replyData.triggerComposition && replyData.triggerCompositionPrompt) {
         const promptToCompose = replyData.triggerCompositionPrompt;
-        setTimeout(() => {
-          onTriggerComposition(promptToCompose);
-        }, 1200);
+        setTimeout(() => onTriggerComposition(promptToCompose), 1200);
       }
-
     } catch (error: any) {
       console.error("Support chat error:", error);
       setMessages((prev) => [
@@ -121,41 +124,106 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
     }
   };
 
-  // Microphone hum/sing/beatbox recording capture
+  /** Builds a real-time Web Audio processing chain (gain -> high-pass ->
+   * compressor-as-noise-reduction -> simple delay-based space) and routes
+   * it into a MediaStreamDestination, so the mic gain/high-pass/noise
+   * reduction/reverb sliders in SupportTab genuinely shape what gets
+   * recorded, instead of being decorative. */
+  const buildProcessedStream = (rawStream: MediaStream): MediaStream => {
+    if (!audioCtx) return rawStream;
+
+    const source = audioCtx.createMediaStreamSource(rawStream);
+
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = Math.max(0.1, (micGain / 100) * 1.8);
+
+    const highpass = audioCtx.createBiquadFilter();
+    highpass.type = "highpass";
+    highpass.frequency.value = highpassFreq;
+
+    const compressor = audioCtx.createDynamicsCompressor();
+    if (noiseGateEnabled) {
+      compressor.threshold.value = -45;
+      compressor.knee.value = 6;
+      compressor.ratio.value = 12;
+      compressor.attack.value = 0.003;
+      compressor.release.value = 0.15;
+    } else {
+      compressor.threshold.value = -100;
+      compressor.ratio.value = 1;
+    }
+
+    const dry = audioCtx.createGain();
+    dry.gain.value = 1 - reverbWet / 200; // keep dry signal dominant even at 100% wet
+
+    const delay = audioCtx.createDelay(1.0);
+    delay.delayTime.value = 0.18;
+    const feedback = audioCtx.createGain();
+    feedback.gain.value = 0.3;
+    const wet = audioCtx.createGain();
+    wet.gain.value = reverbWet / 100;
+
+    const destination = audioCtx.createMediaStreamDestination();
+
+    source.connect(gainNode);
+    gainNode.connect(highpass);
+    highpass.connect(compressor);
+
+    compressor.connect(dry);
+    dry.connect(destination);
+
+    compressor.connect(delay);
+    delay.connect(feedback);
+    feedback.connect(delay);
+    delay.connect(wet);
+    wet.connect(destination);
+
+    processingNodesRef.current = [source, gainNode, highpass, compressor, dry, delay, feedback, wet];
+
+    return destination.stream;
+  };
+
+  const cleanupProcessingChain = () => {
+    processingNodesRef.current.forEach((n) => {
+      try { n.disconnect(); } catch {}
+    });
+    processingNodesRef.current = [];
+  };
+
   const startRecording = async () => {
     audioChunksRef.current = [];
     setMicErrorMessage("");
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const options = { mimeType: "audio/webm" };
-      
+      const rawStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      rawStreamRef.current = rawStream;
+
+      if (audioCtx?.state === "suspended") await audioCtx.resume();
+      const streamToRecord = buildProcessedStream(rawStream);
+
       let recorder: MediaRecorder;
       try {
-        recorder = new MediaRecorder(stream, options);
+        recorder = new MediaRecorder(streamToRecord, { mimeType: "audio/webm" });
       } catch (e) {
-        // Fallback for Safari/unsupported formats
-        recorder = new MediaRecorder(stream);
+        recorder = new MediaRecorder(streamToRecord);
       }
-      
+
       mediaRecorderRef.current = recorder;
 
       recorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
+        if (event.data && event.data.size > 0) audioChunksRef.current.push(event.data);
       };
 
       recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
-        stream.getTracks().forEach((track) => track.stop());
+        rawStreamRef.current?.getTracks().forEach((t) => t.stop());
+        cleanupProcessingChain();
         await uploadVocalAudio(audioBlob);
       };
 
       setMicState("recording");
       setRecordingSeconds(0);
-      recorder.start(250); // Get chunks every 250ms
+      recorder.start(250);
 
-      // Set recording countdown (hard limit 8s for speed & tokens)
       timerRef.current = setInterval(() => {
         setRecordingSeconds((prev) => {
           if (prev >= 7) {
@@ -165,13 +233,10 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
           return prev + 1;
         });
       }, 1000);
-
     } catch (err: any) {
       console.error("Mic access denied:", err);
       setMicState("error");
-      setMicErrorMessage(
-        err.message || "Microphone access denied. Please grant iframe permissions."
-      );
+      setMicErrorMessage(err.message || "Microphone access denied. Please grant permissions.");
     }
   };
 
@@ -188,14 +253,11 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
   const uploadVocalAudio = async (blob: Blob) => {
     setMicState("processing");
     try {
-      // Convert Blob to Base64
       const reader = new FileReader();
       reader.readAsDataURL(blob);
       reader.onloadend = async () => {
         const base64data = reader.result as string;
-        // Strip data url format
         const cleanBase64 = base64data.split(",")[1];
-
         const blueprint = await humToBeat(cleanBase64, blob.type || "audio/webm");
         onLoadAudioBlueprint(blueprint);
         setMicState("success");
@@ -215,119 +277,84 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
 
   return (
     <div id="studio-support-container" className="h-full min-h-[460px] bg-brand-surface border border-brand-border rounded-2xl overflow-hidden flex flex-col justify-between">
-      {/* Sub-Header Tabs */}
       <div className="flex border-b border-brand-border bg-brand-surface-2">
         <button
           onClick={() => setActiveTab("support")}
-          className={`flex-1 py-4 text-xs font-display font-semibold uppercase tracking-wide flex items-center justify-center gap-2 transition ${
-            activeTab === "support"
-              ? "text-brand-gold border-b-2 border-brand-gold bg-brand-surface-2"
-              : "text-brand-ink-muted hover:text-brand-ink-muted"
+          className={`flex-1 py-4 text-[12px] font-medium flex items-center justify-center gap-2 transition-all ${
+            activeTab === "support" ? "text-brand-gold border-b-2 border-brand-gold" : "text-brand-ink-muted hover:text-brand-ink"
           }`}
         >
-          <MessageSquare className="h-4 w-4" />
-          AI Studio Guide & Support
+          <MessageSquare className="h-4 w-4" /> Studio guide &amp; support
         </button>
         <button
           onClick={() => setActiveTab("voice")}
-          className={`flex-1 py-4 text-xs font-display font-semibold uppercase tracking-wide flex items-center justify-center gap-2 transition ${
-            activeTab === "voice"
-              ? "text-brand-gold border-b-2 border-brand-gold bg-brand-surface-2"
-              : "text-brand-ink-muted hover:text-brand-ink-muted"
+          className={`flex-1 py-4 text-[12px] font-medium flex items-center justify-center gap-2 transition-all ${
+            activeTab === "voice" ? "text-brand-gold border-b-2 border-brand-gold" : "text-brand-ink-muted hover:text-brand-ink"
           }`}
         >
-          <Mic className="h-4 w-4" />
-          Hum-To-Beat Vocal Mic
+          <Mic className="h-4 w-4" /> Hum-to-beat
         </button>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 p-5 overflow-y-auto max-h-[340px] scrollbar-thin flex flex-col justify-between">
+      <div className="flex-1 p-5 overflow-y-auto max-h-[340px] flex flex-col justify-between">
         {activeTab === "support" ? (
-          /* SUPPORT CHAT LAYOUT */
           <div className="flex flex-col gap-4 h-full justify-between">
-            {/* Scrollable messages panel */}
             <div className="flex-1 space-y-3 pr-1 overflow-y-auto max-h-[200px]">
               {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex flex-col max-w-[85%] ${
-                    m.sender === "user" ? "ml-auto items-end" : "mr-auto items-start"
-                  }`}
-                >
-                  <span className="text-[9px] text-brand-ink-muted font-mono mb-1">
-                    {m.sender === "user" ? "Producer" : "Studio Support"} • {m.timestamp}
+                <div key={m.id} className={`flex flex-col max-w-[85%] ${m.sender === "user" ? "ml-auto items-end" : "mr-auto items-start"}`}>
+                  <span className="text-[10px] text-brand-ink-muted mb-1">
+                    {m.sender === "user" ? "You" : "Studio support"} &bull; {m.timestamp}
                   </span>
-                  <div
-                    className={`rounded-2xl p-3 text-[11px] leading-relaxed font-sans ${
-                      m.sender === "user"
-                        ? "bg-brand-gold text-brand-ink rounded-tr-none font-semibold text-right"
-                        : "bg-brand-surface-2 border border-brand-border text-brand-ink-muted rounded-tl-none font-medium text-left"
-                    }`}
-                  >
-                    {/* Render minimal formatting/bold terms */}
+                  <div className={`rounded-2xl p-3 text-[12px] leading-relaxed ${
+                    m.sender === "user" ? "bg-brand-gold text-brand-bg rounded-tr-sm" : "bg-brand-surface-2 border border-brand-border text-brand-ink rounded-tl-sm"
+                  }`}>
                     {m.text.split("**").map((chunk, i) =>
-                      i % 2 === 1 ? <strong key={i} className="text-brand-gold font-medium">{chunk}</strong> : chunk
+                      i % 2 === 1 ? <strong key={i} className={m.sender === "user" ? "" : "text-brand-gold font-medium"}>{chunk}</strong> : chunk
                     )}
                   </div>
                 </div>
               ))}
               {isSending && (
-                <div className="flex mr-auto items-start max-w-[85%] animate-pulse">
-                  <div className="bg-brand-surface-2 border border-brand-border text-brand-ink-muted rounded-2xl rounded-tl-none p-3 text-[11px] font-mono flex items-center gap-2">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-gold" />
-                    AI Swarm formulation...
+                <div className="flex mr-auto items-start max-w-[85%]">
+                  <div className="bg-brand-surface-2 border border-brand-border text-brand-ink-muted rounded-2xl rounded-tl-sm p-3 text-[11px] flex items-center gap-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-gold" /> Thinking...
                   </div>
                 </div>
               )}
               <div ref={chatEndRef} />
             </div>
 
-            {/* Quick Helper Assistance Chips */}
             {messages.length < 3 && !isSending && (
               <div className="flex flex-wrap gap-1.5 pt-2">
-                <button
-                  onClick={() => handleQuickChip("Explain Synth Controllers & LFOs")}
-                  className="bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-full px-2.5 py-1 text-[10px] text-brand-gold font-sans font-medium transition"
-                >
-                  ❓ Synth Knobs
+                <button onClick={() => handleQuickChip("Explain the synth controllers and LFOs")} className="bg-brand-surface-2 hover:bg-brand-border/20 border border-brand-border rounded-full px-2.5 py-1 text-[11px] text-brand-gold transition-all">
+                  Synth knobs
                 </button>
-                <button
-                  onClick={() => handleQuickChip("Compose a slow lofi ambient melody")}
-                  className="bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-full px-2.5 py-1 text-[10px] text-brand-gold font-sans font-medium transition"
-                >
-                  🎵 Make Ambient Track
+                <button onClick={() => handleQuickChip("Compose a slow lofi ambient melody")} className="bg-brand-surface-2 hover:bg-brand-border/20 border border-brand-border rounded-full px-2.5 py-1 text-[11px] text-brand-gold transition-all">
+                  Make an ambient track
                 </button>
-                <button
-                  onClick={() => handleQuickChip("How do I record human voice or samplers?")}
-                  className="bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-full px-2.5 py-1 text-[10px] text-blue-450 font-sans font-medium transition"
-                >
-                  🎙️ Recording Guide
+                <button onClick={() => handleQuickChip("How do I record with my voice or samplers?")} className="bg-brand-surface-2 hover:bg-brand-border/20 border border-brand-border rounded-full px-2.5 py-1 text-[11px] text-brand-gold transition-all">
+                  Recording guide
                 </button>
               </div>
             )}
           </div>
         ) : (
-          /* HUM-TO-BEAT MICROPHONE LAYOUT */
           <div className="flex flex-col items-center justify-center py-4 text-center h-full gap-3">
             {micState === "idle" && (
               <>
-                <div className="bg-brand-gold/10 border border-brand-gold/20 h-14 w-14 rounded-full flex items-center justify-center text-brand-gold animate-pulse mb-1">
+                <div className="bg-brand-gold/10 border border-brand-gold/20 h-14 w-14 rounded-full flex items-center justify-center text-brand-gold">
                   <Mic className="h-7 w-7" />
                 </div>
-                <h4 className="text-xs font-display font-semibold text-brand-ink uppercase tracking-wide">
-                  Deploy Voice to Sequencer Grid
-                </h4>
-                <p className="text-[10px] text-brand-ink-muted leading-relaxed max-w-[280px] font-medium font-sans">
-                  Hum melodies, sing basslines, or beatbox a kick/snare pattern! CrazyJam will listen, analyze frequency transients recursively, and fabricate custom steps on the sequencer.
+                <h4 className="text-[13px] text-brand-ink">Microphone idle</h4>
+                <p className="text-[11px] text-brand-ink-muted leading-relaxed max-w-[280px]">
+                  Hum a melody, sing a bassline, or beatbox a pattern - the swarm listens and translates it into sequencer steps.
                 </p>
                 <button
                   onClick={startRecording}
                   disabled={isGeneratingTracks}
-                  className="mt-2 bg-gradient-to-r from-brand-gold to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-brand-ink text-[11px] font-display font-semibold uppercase tracking-wide py-2 px-6 rounded-full transition shadow-lg shadow-brand-gold/20 flex items-center gap-2"
+                  className="mt-2 metal-gold text-[12px] font-semibold py-2 px-6 rounded-full transition-all flex items-center gap-2 disabled:opacity-40"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Initialize Mic Capture
+                  <Sparkles className="h-3.5 w-3.5" /> Start recording
                 </button>
               </>
             )}
@@ -336,89 +363,58 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
               <>
                 <div className="relative mb-2">
                   <div className="absolute inset-0 bg-red-500/30 rounded-full animate-ping h-14 w-14" />
-                  <div className="bg-red-500 border border-red-400 h-14 w-14 rounded-full flex items-center justify-center text-brand-ink relative">
-                    <Square className="h-5 w-5 fill-current text-brand-ink animate-pulse" />
+                  <div className="bg-red-500 border border-red-400 h-14 w-14 rounded-full flex items-center justify-center text-white relative">
+                    <Square className="h-5 w-5 fill-current" />
                   </div>
                 </div>
-                <h4 className="text-xs font-display font-semibold text-red-400 uppercase tracking-wide animate-pulse">
-                  Vocal Track Capturing...
-                </h4>
-                <p className="text-[11px] font-mono text-brand-ink-muted">
-                  {recordingSeconds}s / 8s Limit
-                </p>
-                <div className="w-[180px] h-3 bg-brand-surface-2 rounded-full overflow-hidden border border-brand-border mt-1">
-                  <div
-                    className="h-full bg-red-500 transition-all duration-300"
-                    style={{ width: `${(recordingSeconds / 8) * 100}%` }}
-                  />
+                <h4 className="text-[13px] text-red-400">Recording...</h4>
+                <p className="text-[11px] text-brand-ink-muted">{recordingSeconds}s / 8s limit</p>
+                <div className="w-[180px] h-2 bg-brand-surface-2 rounded-full overflow-hidden border border-brand-border mt-1">
+                  <div className="h-full bg-red-500 transition-all duration-300" style={{ width: `${(recordingSeconds / 8) * 100}%` }} />
                 </div>
-                <button
-                  onClick={stopRecording}
-                  className="mt-3 bg-brand-surface-2 hover:bg-neutral-100 text-black text-[10px] font-display font-semibold uppercase tracking-wide py-1.5 px-5 rounded-full transition"
-                >
-                  Finish & Synthesize
+                <button onClick={stopRecording} className="mt-3 bg-brand-surface-2 border border-brand-border hover:bg-brand-border/20 text-brand-ink text-[11px] font-medium py-1.5 px-5 rounded-full transition-all">
+                  Finish
                 </button>
               </>
             )}
 
             {micState === "processing" && (
               <>
-                <div className="bg-brand-surface-2 border border-brand-border h-14 w-14 rounded-full flex items-center justify-center text-brand-gold mb-1">
+                <div className="bg-brand-surface-2 border border-brand-border h-14 w-14 rounded-full flex items-center justify-center text-brand-gold">
                   <Loader2 className="h-7 w-7 animate-spin" />
                 </div>
-                <h4 className="text-xs font-display font-semibold text-brand-ink uppercase tracking-wide">
-                  Analyzing Audio Harmonics
-                </h4>
-                <p className="text-[10px] text-brand-ink-muted max-w-[240px] font-mono">
-                  The CrazyJam swarm is listening and extracting rhythm transients + vocal formant chords...
+                <h4 className="text-[13px] text-brand-ink">Analyzing recording</h4>
+                <p className="text-[11px] text-brand-ink-muted max-w-[240px]">
+                  The CrazyJam swarm is listening and extracting rhythm and pitch...
                 </p>
               </>
             )}
 
             {micState === "success" && (
               <>
-                <div className="bg-green-500/10 border border-green-500/20 h-14 w-14 rounded-full flex items-center justify-center text-green-400 mb-1">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 h-14 w-14 rounded-full flex items-center justify-center text-emerald-400">
                   <CheckCircle className="h-7 w-7" />
                 </div>
-                <h4 className="text-xs font-display font-semibold text-green-400 uppercase tracking-wide">
-                  Rhythm Structure Deployed!
-                </h4>
-                <p className="text-[10px] text-brand-ink-muted leading-relaxed max-w-[260px] font-medium font-sans">
-                  The sequencer triggers have been updated to replicate your hummed patterns! Check out the updated grid.
+                <h4 className="text-[13px] text-emerald-400">Sequencer updated</h4>
+                <p className="text-[11px] text-brand-ink-muted leading-relaxed max-w-[260px]">
+                  Your recording has been translated into sequencer steps. Check the studio grid.
                 </p>
-                <button
-                  onClick={resetMicState}
-                  className="mt-2 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border text-brand-ink text-[10px] font-display font-semibold uppercase tracking-wide py-1.5 px-5 rounded-full transition"
-                >
-                  Record Another
+                <button onClick={resetMicState} className="mt-2 bg-brand-surface-2 hover:bg-brand-border/20 border border-brand-border text-brand-ink text-[11px] font-medium py-1.5 px-5 rounded-full transition-all">
+                  Record another
                 </button>
               </>
             )}
 
             {micState === "error" && (
               <>
-                <div className="bg-red-500/10 border border-red-500/20 h-14 w-14 rounded-full flex items-center justify-center text-red-500 mb-1">
+                <div className="bg-red-500/10 border border-red-500/20 h-14 w-14 rounded-full flex items-center justify-center text-red-400">
                   <AlertTriangle className="h-7 w-7" />
                 </div>
-                <h4 className="text-xs font-display font-semibold text-red-500 uppercase tracking-wide">
-                  Microphone Capture Failed
-                </h4>
-                <p className="text-[10px] text-brand-ink-muted max-w-[240px] font-mono leading-relaxed">
-                  {micErrorMessage || "Capture terminated raw."}
-                </p>
+                <h4 className="text-[13px] text-red-400">Recording failed</h4>
+                <p className="text-[11px] text-brand-ink-muted max-w-[240px] leading-relaxed">{micErrorMessage || "Something interrupted the capture."}</p>
                 <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={startRecording}
-                    className="bg-brand-gold text-brand-ink text-[10px] font-display font-semibold uppercase tracking-wide py-1.5 px-4 rounded-full transition"
-                  >
-                    Retry Record
-                  </button>
-                  <button
-                    onClick={resetMicState}
-                    className="bg-brand-surface-2 border border-brand-border text-brand-ink text-[10px] font-display font-semibold uppercase tracking-wide py-1.5 px-4 rounded-full transition"
-                  >
-                    Reset
-                  </button>
+                  <button onClick={startRecording} className="metal-gold text-[11px] font-semibold py-1.5 px-4 rounded-full transition-all">Retry</button>
+                  <button onClick={resetMicState} className="bg-brand-surface-2 border border-brand-border text-brand-ink text-[11px] font-medium py-1.5 px-4 rounded-full transition-all">Reset</button>
                 </div>
               </>
             )}
@@ -426,31 +422,23 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
         )}
       </div>
 
-      {/* Input Tray for Support Chat (Only displayed under support tab) */}
       {activeTab === "support" && (
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            sendMessage(inputVal);
-          }}
+          onSubmit={(e) => { e.preventDefault(); sendMessage(inputVal); }}
           className="border-t border-brand-border p-3 bg-brand-surface-2 flex items-center gap-2"
         >
           <input
             type="text"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            placeholder={
-              isGeneratingTracks
-                ? "Studio composing in progress..."
-                : "Ask support or type: 'Make a tech-house beat'..."
-            }
+            placeholder={isGeneratingTracks ? "Studio composing in progress..." : "Ask support or type: 'Make a tech-house beat'..."}
             disabled={isSending || isGeneratingTracks}
-            className="flex-1 bg-brand-surface-2 border border-brand-border rounded-full px-4 py-2.5 text-xs text-brand-ink placeholder-brand-ink-muted focus:outline-none focus:border-brand-gold transition font-medium font-sans"
+            className="flex-1 bg-brand-surface border border-brand-border rounded-full px-4 py-2.5 text-[12px] text-brand-ink placeholder-brand-ink-muted focus:outline-none focus:border-brand-gold/50 transition-all"
           />
           <button
             type="submit"
             disabled={!inputVal.trim() || isSending || isGeneratingTracks}
-            className="bg-brand-gold hover:bg-pink-600 disabled:bg-neutral-800 disabled:text-brand-ink-muted text-brand-ink h-9 w-9 rounded-full flex items-center justify-center transition shrink-0 shadow-md shadow-brand-gold/20"
+            className="metal-gold h-9 w-9 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-40"
           >
             <Send className="h-3.5 w-3.5" />
           </button>

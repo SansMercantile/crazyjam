@@ -76,8 +76,8 @@ export function AgentControl({
         <div className="flex items-center justify-between border-b border-brand-border pb-4">
           <div className="flex items-center gap-2 text-brand-gold">
             <Users className="h-4.5 w-4.5" />
-            <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">
-              Swarm Agent Cluster (Active Controllers)
+            <h2 className="font-display font-semibold text-sm tracking-wide text-brand-ink">
+              Agent roster
             </h2>
           </div>
           <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ export function AgentControl({
             {onAddAgent && (
               <button
                 onClick={() => setShowForm(!showForm)}
-                className="px-3 py-1.5 rounded-lg text-[10px] font-mono font-medium bg-brand-gold/20 hover:bg-brand-gold text-brand-ink border border-[#ff00ff]/30 uppercase tracking-wide flex items-center gap-1 cursor-pointer transition-all"
+                className="px-3 py-1.5 rounded-lg text-[10px] font-mono font-medium bg-brand-gold/20 hover:bg-brand-gold text-brand-ink border border-brand-gold/30 tracking-wide flex items-center gap-1 cursor-pointer transition-all"
               >
                 {showForm ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                 <span>{showForm ? "Cancel Space" : "Spawn Agent"}</span>
@@ -101,12 +101,12 @@ export function AgentControl({
           <form onSubmit={handleSubmit} className="p-4 bg-brand-bg rounded-2xl border border-brand-gold/30 flex flex-col gap-3.5 animate-fadeIn">
             <div className="flex items-center gap-2 border-b border-brand-border pb-2 text-brand-gold">
               <Sparkles className="h-4 w-4" opacity={0.8} />
-              <h4 className="text-xs font-mono font-medium uppercase tracking-wide">Configure Swarm Node</h4>
+              <h4 className="text-xs font-mono font-medium tracking-wide">Configure new agent</h4>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="text-[10px] font-mono text-brand-ink-muted font-medium uppercase block mb-1">Agent Name</label>
+                <label className="text-[10px] font-mono text-brand-ink-muted font-medium block mb-1">Agent Name</label>
                 <input
                   type="text"
                   required
@@ -118,7 +118,7 @@ export function AgentControl({
               </div>
 
               <div>
-                <label className="text-[10px] font-mono text-brand-ink-muted font-medium uppercase block mb-1">Specialist Role</label>
+                <label className="text-[10px] font-mono text-brand-ink-muted font-medium block mb-1">Specialist Role</label>
                 <select
                   value={agentRole}
                   onChange={(e) => setAgentRole(e.target.value)}
@@ -133,7 +133,7 @@ export function AgentControl({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="text-[10px] font-mono text-brand-ink-muted font-medium uppercase block mb-1">Core Specialty</label>
+                <label className="text-[10px] font-mono text-brand-ink-muted font-medium block mb-1">Core Specialty</label>
                 <input
                   type="text"
                   placeholder="e.g. Resonant Glitch Sweeps"
@@ -144,7 +144,7 @@ export function AgentControl({
               </div>
 
               <div>
-                <label className="text-[10px] font-mono text-brand-ink-muted font-medium uppercase block mb-1">Select Avatar Node</label>
+                <label className="text-[10px] font-mono text-brand-ink-muted font-medium block mb-1">Select Avatar Node</label>
                 <div className="flex flex-wrap gap-1 bg-brand-surface-2 p-1.5 rounded-xl border border-brand-border">
                   {PRESET_EMOJIS.map((em) => (
                     <button
@@ -163,7 +163,7 @@ export function AgentControl({
             </div>
 
             <div>
-              <label className="text-[10px] font-mono text-brand-ink-muted font-medium uppercase block mb-1">Functional Description</label>
+              <label className="text-[10px] font-mono text-brand-ink-muted font-medium block mb-1">Functional Description</label>
               <textarea
                 placeholder="What parameters or style loops does this AI specialize in managing?"
                 rows={2}
@@ -175,9 +175,9 @@ export function AgentControl({
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-brand-purple to-brand-gold hover:brightness-105 text-brand-ink font-semibold text-xs uppercase tracking-wide py-2 rounded-xl cursor-pointer transition-all border-t border-brand-border"
+              className="w-full bg-gradient-to-r from-brand-purple to-brand-gold hover:brightness-105 text-brand-ink font-semibold text-xs tracking-wide py-2 rounded-xl cursor-pointer transition-all border-t border-brand-border"
             >
-              SPAWN SWARM SPECIALIST NODE
+              Spawn agent
             </button>
           </form>
         )}
@@ -189,7 +189,7 @@ export function AgentControl({
               key={agent.id}
               className={`p-4 rounded-2xl border transition-all ${
                 agent.enabled
-                  ? "bg-brand-bg/50 border-brand-gold/20 shadow-neon-glow"
+                  ? "bg-brand-bg/50 border-brand-gold/20 "
                   : "bg-brand-bg/20 border-brand-border opacity-50"
               }`}
             >
@@ -198,19 +198,19 @@ export function AgentControl({
                   <div className="relative shrink-0">
                     <AnimatedAvatar avatar={agent.avatar} size={40} />
                     {agent.enabled && (
-                      <span className="absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full bg-brand-gold border border-brand-bg animate-pulse shadow-neon-cyan" />
+                      <span className="absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full bg-brand-gold border border-brand-bg animate-pulse " />
                     )}
                   </div>
                   <div>
                     <h3 className="font-medium text-sm text-brand-ink flex items-center gap-2">
                       {agent.name}
                       {agent.id.startsWith("custom-") && (
-                        <span className="text-[8px] font-mono bg-brand-gold/20 text-brand-gold border border-brand-gold/30 px-1 py-0.2 rounded uppercase font-medium text-slate-100">
+                        <span className="text-[8px] font-mono bg-brand-gold/20 text-brand-gold border border-brand-gold/30 px-1 py-0.2 rounded font-medium ">
                           Spawned
                         </span>
                       )}
                     </h3>
-                    <p className="text-[10px] font-mono text-brand-gold uppercase tracking-wide font-medium">
+                    <p className="text-[10px] font-mono text-brand-gold tracking-wide font-medium">
                       {agent.role} &bull; {agent.specialty}
                     </p>
                   </div>
@@ -222,7 +222,7 @@ export function AgentControl({
                     <button
                       onClick={() => onRemoveAgent(agent.id)}
                       className="text-brand-ink-muted hover:text-red-400 p-1 rounded hover:bg-brand-surface-2 cursor-pointer transition-all"
-                      title="Decommission Custom Agent"
+                      title="Remove agent"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -230,7 +230,7 @@ export function AgentControl({
                   <button
                     onClick={() => onToggleAgent(agent.id)}
                     className={`w-11 h-6 rounded-full p-1 transition-colors duration-200 cursor-pointer ${
-                      agent.enabled ? "bg-brand-gold shadow-neon-glow" : "bg-brand-surface-2"
+                      agent.enabled ? "bg-brand-gold " : "bg-brand-surface-2"
                     }`}
                   >
                     <div
@@ -251,7 +251,7 @@ export function AgentControl({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-3.5 border-t border-brand-border">
                   {/* Agency Slider */}
                   <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between text-[10px] font-mono text-brand-ink-muted font-medium uppercase tracking-wide">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-brand-ink-muted font-medium tracking-wide">
                       <span className="flex items-center gap-1">
                         <Flame className="h-3 w-3 text-brand-gold" /> Autonomy Level
                       </span>
@@ -271,7 +271,7 @@ export function AgentControl({
 
                   {/* Bias Slider */}
                   <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between text-[10px] font-mono text-brand-ink-muted font-medium uppercase tracking-wide">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-brand-ink-muted font-medium tracking-wide">
                       <span className="flex items-center gap-1">
                         <Sliders className="h-3 w-3 text-brand-gold" /> Parameter Bias
                       </span>
@@ -300,12 +300,12 @@ export function AgentControl({
         <div className="flex items-center justify-between border-b border-brand-border pb-4">
           <div className="flex items-center gap-2 text-brand-gold">
             <MessageSquare className="h-4.5 w-4.5 animate-pulse" />
-            <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">
-              Swarm Debates & logs
+            <h2 className="font-display font-semibold text-sm tracking-wide text-brand-ink">
+              Swarm activity log
             </h2>
           </div>
-          <span className="text-[10px] font-mono bg-brand-gold/15 text-brand-gold px-2 py-0.5 rounded-md border border-brand-gold/30 font-medium uppercase tracking-wide">
-            Live Diagnostics
+          <span className="text-[10px] font-mono bg-brand-gold/15 text-brand-gold px-2 py-0.5 rounded-md border border-brand-gold/30 font-medium tracking-wide">
+            Live
           </span>
         </div>
 
@@ -346,7 +346,7 @@ export function AgentControl({
                         {log.agentName}
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <span className={`text-[9px] font-medium font-mono px-1.5 py-0.5 rounded uppercase border ${phaseStyles.bg} ${phaseStyles.text} ${phaseStyles.border} tracking-wide`}>
+                        <span className={`text-[9px] font-medium font-mono px-1.5 py-0.5 rounded border ${phaseStyles.bg} ${phaseStyles.text} ${phaseStyles.border} tracking-wide`}>
                           {log.phase}
                         </span>
                         <span className="text-[9px] font-mono text-brand-ink-muted font-medium">

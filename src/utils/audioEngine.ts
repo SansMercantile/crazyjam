@@ -32,6 +32,60 @@ export class AudioEngine {
   // Track data cache
   private tracks: TrackState[] = [];
 
+  // Per-track 6-band EQ (gain in dB, -15 to +15, default flat). Applied at
+  // note-trigger time rather than via a persistent bus - cheap enough at
+  // 16th-note resolution, and it means the exact same code path works for
+  // both live playback and offline stem/mix rendering.
+  private trackEQSettings: Record<string, number[]> = {};
+
+  public static readonly EQ_BANDS: { freq: number; type: BiquadFilterType; label: string }[] = [
+    { freq: 60, type: "lowshelf", label: "60 Hz" },
+    { freq: 150, type: "peaking", label: "150 Hz" },
+    { freq: 500, type: "peaking", label: "500 Hz" },
+    { freq: 2000, type: "peaking", label: "2 kHz" },
+    { freq: 6000, type: "peaking", label: "6 kHz" },
+    { freq: 12000, type: "highshelf", label: "12 kHz" },
+  ];
+
+  public setTrackEQBand(trackId: string, bandIndex: number, gainDb: number) {
+    if (!this.trackEQSettings[trackId]) this.trackEQSettings[trackId] = [0, 0, 0, 0, 0, 0];
+    this.trackEQSettings[trackId][bandIndex] = Math.max(-15, Math.min(15, gainDb));
+  }
+
+  public getTrackEQ(trackId: string): number[] {
+    return this.trackEQSettings[trackId] ? [...this.trackEQSettings[trackId]] : [0, 0, 0, 0, 0, 0];
+  }
+
+  public resetTrackEQ(trackId: string) {
+    this.trackEQSettings[trackId] = [0, 0, 0, 0, 0, 0];
+  }
+
+  /** Builds a fresh 6-band filter chain for this trigger and returns its
+   * input node, or `destination` unchanged if every band is flat (skips
+   * the extra nodes entirely - most triggers, most of the time). */
+  private routeThroughTrackEQ(trackId: string, ctx: BaseAudioContext, destination: AudioNode): AudioNode {
+    const bands = this.trackEQSettings[trackId];
+    if (!bands || bands.every((g) => g === 0)) return destination;
+
+    let previous: AudioNode | null = null;
+    let firstNode: AudioNode | null = null;
+
+    AudioEngine.EQ_BANDS.forEach((band, i) => {
+      const filter = ctx.createBiquadFilter();
+      filter.type = band.type;
+      filter.frequency.value = band.freq;
+      filter.gain.value = bands[i];
+      if (band.type === "peaking") filter.Q.value = 1;
+
+      if (!firstNode) firstNode = filter;
+      if (previous) previous.connect(filter);
+      previous = filter;
+    });
+
+    (previous as unknown as AudioNode).connect(destination);
+    return firstNode as unknown as AudioNode;
+  }
+
   constructor() {
     // Lazy initialized on first user interaction
   }
@@ -200,12 +254,13 @@ export class AudioEngine {
 
     for (const track of tracks) {
       if (track.muted) continue;
+      const trackDestination = this.routeThroughTrackEQ(track.id, ctx, destination);
 
       if (track.type === "drums" && track.drumLanes) {
         const volumeFactor = track.volume;
         for (const lane of track.drumLanes) {
           if (lane.pattern[step]) {
-            this.playDrum(lane.id as any, now, volumeFactor, ctx, destination);
+            this.playDrum(lane.id as any, now, volumeFactor, ctx, trackDestination);
           }
         }
       }
@@ -213,7 +268,7 @@ export class AudioEngine {
       if (track.type === "synth" && track.melodyNotes) {
         const matchedNote = track.melodyNotes.find((n) => n.step === step);
         if (matchedNote) {
-          this.playSynthNote(track.id, matchedNote.note, now, track.volume, track.instrumentType || "saw", ctx, destination);
+          this.playSynthNote(track.id, matchedNote.note, now, track.volume, track.instrumentType || "saw", ctx, trackDestination);
         }
       }
     }

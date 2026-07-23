@@ -392,23 +392,31 @@ export function UserProfile({
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5 pb-3 border-b border-brand-border">
+            <div className="grid grid-cols-1 gap-2.5 pb-3 border-b border-brand-border">
               <button onClick={() => startSocialLogin("google-oauth2")} disabled={isExchangingSocial} className="p-2.5 bg-brand-surface-2 hover:bg-brand-border/20 rounded-lg border border-brand-border flex items-center justify-center gap-2 transition-all disabled:opacity-40">
                 <Chrome className="h-3.5 w-3.5 text-brand-gold" />
-                <span className="text-[12px] font-medium text-brand-ink">Google</span>
+                <span className="text-[12px] font-medium text-brand-ink">Continue with Google</span>
               </button>
-              <button onClick={() => startSocialLogin("windowslive")} disabled={isExchangingSocial} className="p-2.5 bg-brand-surface-2 hover:bg-brand-border/20 rounded-lg border border-brand-border flex items-center justify-center gap-2 transition-all disabled:opacity-40">
-                <Mail className="h-3.5 w-3.5 text-brand-gold" />
-                <span className="text-[12px] font-medium text-brand-ink">Microsoft</span>
-              </button>
-              <button onClick={() => startSocialLogin("twitter")} disabled={isExchangingSocial} className="p-2.5 bg-brand-surface-2 hover:bg-brand-border/20 rounded-lg border border-brand-border flex items-center justify-center gap-2 transition-all disabled:opacity-40">
-                <Twitter className="h-3.5 w-3.5 text-brand-gold" />
-                <span className="text-[12px] font-medium text-brand-ink">X</span>
-              </button>
-              <button onClick={() => startSocialLogin("apple")} disabled={isExchangingSocial} className="p-2.5 bg-brand-surface-2 hover:bg-brand-border/20 rounded-lg border border-brand-border flex items-center justify-center gap-2 transition-all disabled:opacity-40">
-                <Apple className="h-3.5 w-3.5 text-brand-gold" />
-                <span className="text-[12px] font-medium text-brand-ink">Apple</span>
-              </button>
+              {/* Microsoft / X / Apple are wired (startSocialLogin("windowslive"|"twitter"|"apple")
+                  already works code-side) but hidden until each provider's app is actually
+                  registered and configured in Auth0 - unhide by removing this comment block
+                  and the surrounding {false && (...)} wrapper below once ready. */}
+              {false && (
+                <>
+                  <button onClick={() => startSocialLogin("windowslive")} disabled={isExchangingSocial} className="p-2.5 bg-brand-surface-2 hover:bg-brand-border/20 rounded-lg border border-brand-border flex items-center justify-center gap-2 transition-all disabled:opacity-40">
+                    <Mail className="h-3.5 w-3.5 text-brand-gold" />
+                    <span className="text-[12px] font-medium text-brand-ink">Microsoft</span>
+                  </button>
+                  <button onClick={() => startSocialLogin("twitter")} disabled={isExchangingSocial} className="p-2.5 bg-brand-surface-2 hover:bg-brand-border/20 rounded-lg border border-brand-border flex items-center justify-center gap-2 transition-all disabled:opacity-40">
+                    <Twitter className="h-3.5 w-3.5 text-brand-gold" />
+                    <span className="text-[12px] font-medium text-brand-ink">X</span>
+                  </button>
+                  <button onClick={() => startSocialLogin("apple")} disabled={isExchangingSocial} className="p-2.5 bg-brand-surface-2 hover:bg-brand-border/20 rounded-lg border border-brand-border flex items-center justify-center gap-2 transition-all disabled:opacity-40">
+                    <Apple className="h-3.5 w-3.5 text-brand-gold" />
+                    <span className="text-[12px] font-medium text-brand-ink">Apple</span>
+                  </button>
+                </>
+              )}
             </div>
             {isExchangingSocial && <p className="text-[11px] text-brand-gold text-center -mt-1">Completing sign-in...</p>}
 

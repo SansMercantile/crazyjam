@@ -923,6 +923,7 @@ export default function App() {
               onLoadAudioBlueprint={(blueprint) => handleLoadAudioBlueprint(blueprint, "VOCAL HUM-TO-BEAT TRANSIENTS SYNTHESIZED SUCCESSFULLY!")}
               isGeneratingTracks={isGenerating}
               addLog={addLog}
+              audioCtx={audioEngine.getContext()}
             />
           )}
 

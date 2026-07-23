@@ -16,5 +16,6 @@ _fix_profiletab.ps1
 _theme_migrate3.ps1
 _apply_metal_gold.ps1
 _fix_midistudio.ps1
+_fix_agentcontrol.ps1
 build_error.log
 build_out.txt

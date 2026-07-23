@@ -17,13 +17,14 @@ import {
   Trash2,
   GripVertical,
   Music2,
-  Drum,
   Download,
   Loader2,
   ListMusic,
+  FileMusic,
 } from "lucide-react";
 import { TrackState, SongSection } from "../types";
 import { audioEngine } from "../utils/audioEngine";
+import { exportArrangementAsMidi } from "../utils/midiExport";
 
 interface MultitrackTimelineProps {
   tracks: TrackState[];
@@ -220,6 +221,29 @@ export const MultitrackTimeline: React.FC<MultitrackTimelineProps> = ({
     }
   };
 
+  const handleExportMidi = () => {
+    try {
+      const blob = exportArrangementAsMidi(sections, tempo);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "crazyjam-arrangement.mid";
+      a.click();
+      URL.revokeObjectURL(url);
+      setExportStatus(`MIDI arrangement exported (${sections.length} section${sections.length > 1 ? "s" : ""}).`);
+      addLog?.({
+        agentName: "Arranger",
+        role: "Export",
+        avatar: "🎼",
+        message: `Exported the full ${sections.length}-section arrangement as a MIDI file.`,
+        phase: "Mixdown",
+        status: "completed",
+      });
+    } catch (e: any) {
+      setExportStatus(e.message || "MIDI export failed.");
+    }
+  };
+
   return (
     <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 relative overflow-hidden">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-brand-border pb-4 mb-4">
@@ -304,21 +328,27 @@ export const MultitrackTimeline: React.FC<MultitrackTimelineProps> = ({
         <button
           onClick={handleExportStems}
           disabled={isExporting}
-          className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl px-3.5 py-2 text-[10px] font-mono font-medium uppercase text-brand-ink transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-border/20 border border-brand-border rounded-xl px-3.5 py-2 text-[11px] font-medium text-brand-ink transition-all disabled:opacity-50"
         >
           {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-          Export Stems (Drums / Bass / Lead / Pad)
+          Export stems (drums / bass / lead / pad)
         </button>
         <button
           onClick={handleExportMix}
           disabled={isExporting}
-          className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-surface-2 border border-brand-border rounded-xl px-3.5 py-2 text-[10px] font-mono font-medium uppercase text-brand-ink transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-border/20 border border-brand-border rounded-xl px-3.5 py-2 text-[11px] font-medium text-brand-ink transition-all disabled:opacity-50"
         >
-          <Music2 className="h-3.5 w-3.5" /> Export Full Mix
+          <Music2 className="h-3.5 w-3.5" /> Export full mix
         </button>
-        {exportStatus && <span className="text-[10px] font-mono text-brand-gold">{exportStatus}</span>}
+        <button
+          onClick={handleExportMidi}
+          className="flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-border/20 border border-brand-border rounded-xl px-3.5 py-2 text-[11px] font-medium text-brand-ink transition-all"
+        >
+          <FileMusic className="h-3.5 w-3.5 text-brand-gold" /> Export arrangement MIDI
+        </button>
+        {exportStatus && <span className="text-[11px] text-brand-gold">{exportStatus}</span>}
       </div>
-      <p className="text-[9px] font-mono text-brand-ink-muted mt-2">
+      <p className="text-[10px] text-brand-ink-muted mt-2">
         Drag section cards to reorder &bull; click a card to edit it below &bull; Play cycles through the whole arrangement in order.
       </p>
     </div>

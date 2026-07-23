@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { Visualizer } from "./Visualizer";
 import { EffectsRack } from "./EffectsRack";
 import { MidiStudio } from "./MidiStudio";
-import { Download, Radio, Compass, Loader2 } from "lucide-react";
+import { Download, Radio, Compass, Loader2, FileMusic } from "lucide-react";
 import { audioEngine } from "../utils/audioEngine";
+import { exportLoopAsMidi } from "../utils/midiExport";
 
 interface DashboardTabProps {
   analyser: AnalyserNode | null;
@@ -89,6 +90,21 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
     }
   };
 
+  const handleExportMidi = () => {
+    try {
+      const blob = exportLoopAsMidi(tracks, tempo);
+      const name = `CrazyJam-${genre.replace(/\s+/g, "-")}-${tempo}BPM.mid`;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = name;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      setExportError(e.message || "MIDI export failed.");
+    }
+  };
+
   return (
     <div className="space-y-5 animate-fadeIn text-left">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -156,6 +172,12 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
                 {isRecording ? "Rendering..." : "Export WAV"}
               </button>
             </div>
+            <button
+              onClick={handleExportMidi}
+              className="w-full flex items-center justify-center gap-1.5 bg-brand-surface-2 hover:bg-brand-border/20 border border-brand-border text-brand-ink px-4 py-2 font-medium text-[12px] rounded-lg transition-all mb-2"
+            >
+              <FileMusic className="h-3.5 w-3.5 text-brand-gold" /> Export MIDI (.mid)
+            </button>
             {exportError && <p className="text-[11px] text-red-400">{exportError}</p>}
 
             {recordedFiles.length > 0 && (

@@ -5,7 +5,8 @@
 
 import React, { useState } from "react";
 import { TrackState, DrumLane, NoteEvent } from "../types";
-import { VolumeX, Volume2, Bolt, Trash2, RefreshCw, Sparkles } from "lucide-react";
+import { VolumeX, Volume2, Bolt, Trash2, RefreshCw, Sparkles, Sliders, RotateCcw } from "lucide-react";
+import { audioEngine, AudioEngine } from "../utils/audioEngine";
 
 interface SequencerGridProps {
   tracks: TrackState[];
