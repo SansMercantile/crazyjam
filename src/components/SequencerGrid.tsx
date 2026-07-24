@@ -5,7 +5,7 @@
 
 import React, { useState } from "react";
 import { TrackState, DrumLane, NoteEvent } from "../types";
-import { VolumeX, Volume2, Bolt, Trash2, RefreshCw, Sparkles, Sliders, RotateCcw } from "lucide-react";
+import { VolumeX, Volume2, Bolt, Trash2, RefreshCw, Sparkles, Sliders, RotateCcw, Plus, X } from "lucide-react";
 import { audioEngine, AudioEngine } from "../utils/audioEngine";
 
 interface SequencerGridProps {
@@ -22,6 +22,18 @@ interface SequencerGridProps {
 const LEAD_NOTES = ["A5", "G5", "E5", "D5", "C5", "B4", "A4"];
 const BASS_NOTES = ["A3", "G3", "E3", "D3", "C3", "A2"];
 const PAD_NOTES = ["A4", "E4", "C4", "G3", "E3", "C3"];
+const DEFAULT_MELODY_NOTES = ["A5", "F5", "D5", "A4", "F4", "D4", "A3"]; // for custom split tracks
+
+const CORE_TRACK_IDS = ["drums", "bass", "lead", "pad"];
+
+function notesSetFor(trackId: string): string[] {
+  if (trackId === "lead") return LEAD_NOTES;
+  if (trackId === "bass") return BASS_NOTES;
+  if (trackId === "pad") return PAD_NOTES;
+  return DEFAULT_MELODY_NOTES;
+}
+
+const CUSTOM_TRACK_ICONS = ["🎸", "🎹", "🎤", "🎻", "🎷", "🪕", "🎺", "🪘"];
 
 /** Compact 6-band EQ panel for one track, reads/writes the audio engine
  * directly since these are real-time DSP settings, not app-level state. */
@@ -78,10 +90,43 @@ export function SequencerGrid({
 }: SequencerGridProps) {
   const [activeTab, setActiveTab] = useState<string>("drums");
   const [showEQFor, setShowEQFor] = useState<string | null>(null);
+  const [showAddTrack, setShowAddTrack] = useState(false);
+  const [newTrackName, setNewTrackName] = useState("");
+  const [newTrackIcon, setNewTrackIcon] = useState(CUSTOM_TRACK_ICONS[0]);
 
   const isSynthNoteActive = (track: TrackState, note: string, step: number): boolean => {
     if (!track.melodyNotes) return false;
     return track.melodyNotes.some((item) => item.step === step && item.note === note);
+  };
+
+  const handleAddTrack = () => {
+    if (!onTracksUpdate || !newTrackName.trim()) return;
+    const id = `custom-${Date.now()}`;
+    const newTrack: TrackState = {
+      id,
+      name: newTrackName.trim(),
+      type: "synth",
+      volume: 0.65,
+      pan: 0,
+      muted: false,
+      soloed: false,
+      color: "bg-brand-gold",
+      instrumentType: "pluck",
+      melodyNotes: [],
+    };
+    onTracksUpdate([...tracks, newTrack]);
+    setActiveTab(id);
+    setNewTrackName("");
+    setShowAddTrack(false);
+  };
+
+  const handleRemoveTrack = (e: React.MouseEvent, trackId: string) => {
+    e.stopPropagation();
+    if (!onTracksUpdate) return;
+    const next = tracks.filter((t) => t.id !== trackId);
+    onTracksUpdate(next);
+    if (activeTab === trackId) setActiveTab(next[0]?.id || "drums");
+    audioEngine.resetTrackEQ(trackId);
   };
 
   const handleMutate = () => {
@@ -100,7 +145,7 @@ export function SequencerGrid({
       }
       if (t.type === "synth" && t.melodyNotes) {
         let pattern = [...t.melodyNotes];
-        const notesSet = t.id === "lead" ? LEAD_NOTES : t.id === "bass" ? BASS_NOTES : PAD_NOTES;
+        const notesSet = notesSetFor(t.id);
         for (let s = 0; s < 16; s++) {
           const rand = Math.random();
           if (rand < 0.1) {
@@ -123,9 +168,9 @@ export function SequencerGrid({
     const next = tracks.map((t) => {
       if (t.id !== activeTab) return t;
       if (t.type === "synth" && t.melodyNotes) {
+        const notesSet = notesSetFor(t.id);
         const pattern = t.melodyNotes.map((n) => {
           if (Math.random() < 0.15) {
-            const notesSet = t.id === "lead" ? LEAD_NOTES : t.id === "bass" ? BASS_NOTES : PAD_NOTES;
             const idx = notesSet.indexOf(n.note);
             if (idx !== -1) {
               const shift = Math.random() < 0.5 ? -1 : 1;
@@ -167,12 +212,10 @@ export function SequencerGrid({
         return { ...t, drumLanes: upLanes };
       }
       if (t.type === "synth") {
-        const notesSet = t.id === "lead" ? LEAD_NOTES : t.id === "bass" ? BASS_NOTES : PAD_NOTES;
+        const notesSet = notesSetFor(t.id);
         const newNotes: NoteEvent[] = [];
         const stepsToTrigger = t.id === "lead"
           ? [0, 2, 4, 7, 8, 10, 12, 14]
-          : t.id === "bass"
-          ? [0, 4, 8, 12]
           : [0, 4, 8, 12];
         stepsToTrigger.forEach((s) => {
           if (Math.random() < 0.7) {
@@ -245,24 +288,79 @@ export function SequencerGrid({
             </div>
           )}
 
-          <div className="flex items-center bg-brand-bg border border-brand-border p-1 rounded-lg">
-            {tracks.map((track) => {
-              const isActive = activeTab === track.id;
-              return (
-                <button
-                  key={track.id}
-                  onClick={() => setActiveTab(track.id)}
-                  className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${
-                    isActive ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"
-                  }`}
-                >
-                  {track.name}
-                </button>
-              );
-            })}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center bg-brand-bg border border-brand-border p-1 rounded-lg gap-0.5">
+              {tracks.map((track) => {
+                const isActive = activeTab === track.id;
+                const isCustom = !CORE_TRACK_IDS.includes(track.id);
+                return (
+                  <button
+                    key={track.id}
+                    onClick={() => setActiveTab(track.id)}
+                    className={`group px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all flex items-center gap-1.5 ${
+                      isActive ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"
+                    }`}
+                  >
+                    {track.name}
+                    {isCustom && onTracksUpdate && (
+                      <span
+                        onClick={(e) => handleRemoveTrack(e, track.id)}
+                        className={`opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? "hover:text-brand-bg/70" : "hover:text-red-400"}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {onTracksUpdate && (
+              <button
+                onClick={() => setShowAddTrack(!showAddTrack)}
+                title="Split off a new instrument track (guitar, keyboard, extra vocal, etc.)"
+                className={`p-2 rounded-lg border transition-all ${
+                  showAddTrack ? "bg-brand-gold/15 text-brand-gold border-brand-gold/40" : "bg-brand-surface-2 text-brand-ink-muted border-brand-border hover:text-brand-gold"
+                }`}
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {showAddTrack && onTracksUpdate && (
+        <div className="bg-brand-surface-2 border border-brand-border rounded-xl p-4 flex flex-wrap items-center gap-3 animate-fadeIn">
+          <span className="text-[12px] text-brand-ink-muted">New track:</span>
+          <div className="flex items-center gap-1">
+            {CUSTOM_TRACK_ICONS.map((icon) => (
+              <button
+                key={icon}
+                onClick={() => setNewTrackIcon(icon)}
+                className={`h-8 w-8 rounded-lg flex items-center justify-center text-base border transition-all ${newTrackIcon === icon ? "border-brand-gold bg-brand-gold/10" : "border-transparent hover:bg-brand-surface"}`}
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
+          <input
+            type="text"
+            value={newTrackName}
+            onChange={(e) => setNewTrackName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddTrack()}
+            placeholder="e.g. Guitar, Keyboard, Voice 1..."
+            className="flex-1 min-w-[160px] bg-brand-surface border border-brand-border focus:border-brand-gold/50 text-brand-ink px-3 py-2 text-sm rounded-lg outline-none"
+          />
+          <button
+            onClick={handleAddTrack}
+            disabled={!newTrackName.trim()}
+            className="metal-gold font-semibold text-[12px] px-4 py-2 rounded-lg transition-all disabled:opacity-40"
+          >
+            Add track
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-col gap-6">
         {tracks.map((track) => {
@@ -365,7 +463,7 @@ export function SequencerGrid({
             );
           }
 
-          const notesSet = track.id === "lead" ? LEAD_NOTES : track.id === "bass" ? BASS_NOTES : PAD_NOTES;
+          const notesSet = notesSetFor(track.id);
 
           return (
             <div key={track.id} className="flex flex-col gap-4 animate-fadeIn">

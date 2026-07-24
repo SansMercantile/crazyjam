@@ -13,7 +13,7 @@ export function blueprintToTracks(blueprint: any): TrackState[] {
   const toNotes = (arr: any[] | undefined): NoteEvent[] =>
     (arr || []).map((n: any) => ({ step: n.step, note: n.note, duration: 1 }));
 
-  return [
+  const coreTracks: TrackState[] = [
     {
       id: "drums",
       name: "Beats Matrix",
@@ -67,4 +67,10 @@ export function blueprintToTracks(blueprint: any): TrackState[] {
       melodyNotes: toNotes(blueprint?.padNotes),
     },
   ];
+
+  // Split-off tracks (guitar/keyboard/extra vocals/etc) saved alongside the
+  // core 4 - already in full TrackState shape, just appended as-is.
+  const customTracks: TrackState[] = Array.isArray(blueprint?.customTracks) ? blueprint.customTracks : [];
+
+  return [...coreTracks, ...customTracks];
 }

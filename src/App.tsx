@@ -833,6 +833,7 @@ export default function App() {
               onGenerate={handleGenerate}
               currentBlueprint={{ title, genre, tempo, scale, lyrics, tracks, debates: logs }}
               onSaveTrack={async (trackTitle: string) => {
+                const CORE_IDS = ["drums", "lead", "bass", "pad"];
                 await saveTrack(trackTitle, {
                   title, genre, tempo, scale,
                   drumPatterns: Object.fromEntries(
@@ -841,6 +842,9 @@ export default function App() {
                   leadNotes: tracks.find(t => t.id === "lead")?.melodyNotes || [],
                   bassNotes: tracks.find(t => t.id === "bass")?.melodyNotes || [],
                   padNotes: tracks.find(t => t.id === "pad")?.melodyNotes || [],
+                  // Any split-off tracks (guitar/keyboard/extra vocals/etc) beyond
+                  // the core 4 - stored as-is so playback can reconstruct them.
+                  customTracks: tracks.filter(t => !CORE_IDS.includes(t.id)),
                 }, lyrics);
               }}
               addLog={addLog}
