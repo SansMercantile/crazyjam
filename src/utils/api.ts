@@ -4,8 +4,11 @@
  */
 
 // Base URL of the CrazyJam backend (constellation/crazyjam/backend).
-// Set VITE_API_BASE_URL in .env.local for local dev / your deployment.
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:8000";
+// Set VITE_API_BASE_URL in .env.local to override for local dev.
+// Fallback below points at the live ECS Fargate task (crazyjam-cluster/crazyjam-backend-svc).
+// NOTE: this is a bare public IP with no ALB in front of it, so it WILL change on the
+// next task restart/redeploy — see the follow-up about adding a stable ALB/Elastic IP.
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || "http://52.91.101.175:8000";
 
 const TOKEN_KEY = "crazyjam_token";
 
