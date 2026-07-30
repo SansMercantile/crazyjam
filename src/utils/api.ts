@@ -4,11 +4,12 @@
  */
 
 // Base URL of the CrazyJam backend (constellation/crazyjam/backend).
-// Set VITE_API_BASE_URL in .env.local to override for local dev.
-// Fallback below points at the live ECS Fargate task (crazyjam-cluster/crazyjam-backend-svc).
-// NOTE: this is a bare public IP with no ALB in front of it, so it WILL change on the
-// next task restart/redeploy — see the follow-up about adding a stable ALB/Elastic IP.
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || "http://52.91.101.175:8000";
+// Set VITE_API_BASE_URL in .env.local to override for local dev (e.g. http://localhost:8000).
+// Production leaves this empty (same-origin): vercel.json rewrites /auth/* and /api/*
+// server-side to the ALB in front of ECS Fargate (crazyjam-cluster/crazyjam-backend-svc).
+// This avoids mixed-content blocks (HTTPS page -> HTTP backend) since the browser only
+// ever talks to crazyjam.sansmercantile.com; Vercel's edge does the HTTP hop server-side.
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || "";
 
 const TOKEN_KEY = "crazyjam_token";
 
