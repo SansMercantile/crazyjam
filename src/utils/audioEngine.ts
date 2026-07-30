@@ -29,6 +29,10 @@ export class AudioEngine {
   private synthReleaseTime: number = 0.28;
   private masterFilterNode: BiquadFilterNode | null = null;
 
+  // Volume set via setVolume() before the AudioContext exists (e.g. on mount,
+  // before any user gesture); applied to masterGain once init() actually runs.
+  private pendingVolume: number = 0.8;
+
   // Track data cache
   private tracks: TrackState[] = [];
 
@@ -106,7 +110,7 @@ export class AudioEngine {
 
     this.ctx = new AudioContextClass();
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = 0.8;
+    this.masterGain.gain.value = this.pendingVolume;
 
     this.analyser = this.ctx.createAnalyser();
     this.analyser.fftSize = 256;
@@ -136,7 +140,12 @@ export class AudioEngine {
   }
 
   public setVolume(val: number) {
-    this.init();
+    // Don't force-create the AudioContext here — this is called on mount to sync
+    // UI state, before any user gesture, and Chrome/Edge block context creation/
+    // resume outside a gesture (logs a console warning, though harmless). Cache
+    // the value; init() applies it once the context is actually created by a
+    // real interaction (e.g. hitting Play).
+    this.pendingVolume = val;
     if (this.masterGain && this.ctx) {
       this.masterGain.gain.setValueAtTime(val, this.ctx.currentTime);
     }
