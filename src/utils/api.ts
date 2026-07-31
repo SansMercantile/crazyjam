@@ -160,10 +160,23 @@ export async function humToBeat(audioBase64: string, mimeType: string) {
 }
 
 // --- Tracks ---
-export async function saveTrack(title: string, blueprint: any, lyrics?: string, albumArtId?: string) {
+export interface SaveTrackOptions {
+  renderedAudioBase64?: string;
+  audioMimeType?: string;
+  source?: "generated" | "upload" | "remix" | "cover";
+  remixOfTrackId?: string;
+}
+
+export async function saveTrack(
+  title: string,
+  blueprint: any,
+  lyrics?: string,
+  albumArtId?: string,
+  options?: SaveTrackOptions
+) {
   const res = await apiFetch("/api/tracks", {
     method: "POST",
-    body: JSON.stringify({ title, blueprint, lyrics, albumArtId }),
+    body: JSON.stringify({ title, blueprint, lyrics, albumArtId, ...options }),
   });
   if (!res.ok) throw new Error("Could not save track");
   return res.json();
@@ -179,6 +192,36 @@ export async function deleteTrack(id: string) {
   const res = await apiFetch(`/api/tracks/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Could not delete track");
   return res.json();
+}
+
+export async function fetchTrackAudioBlob(id: string): Promise<string> {
+  const res = await apiFetch(`/api/tracks/${id}/audio`);
+  if (!res.ok) throw new Error("No audio available for this track");
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+export async function registerTrackPlay(id: string) {
+  // Fire-and-forget play count - never let this block/break playback.
+  try {
+    await apiFetch(`/api/tracks/${id}/plays`, { method: "POST" });
+  } catch {
+    /* non-critical */
+  }
+}
+
+/** Converts a rendered/uploaded audio Blob to base64 for saveTrack()'s renderedAudioBase64. */
+export function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      // Strip the "data:<mime>;base64," prefix - backend expects raw base64.
+      resolve(result.split(",")[1] || "");
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 // --- Album Art ---
@@ -318,4 +361,8 @@ export async function getPublicRelease(id: string) {
 
 export function publicReleaseVideoUrl(id: string): string {
   return `${API_BASE_URL}/api/releases/public/${id}/video`;
+}
+
+export function publicReleaseAudioUrl(id: string): string {
+  return `${API_BASE_URL}/api/releases/public/${id}/audio`;
 }

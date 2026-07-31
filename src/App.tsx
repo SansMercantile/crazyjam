@@ -27,7 +27,8 @@ import { LaunchpadTab } from "./components/LaunchpadTab";
 import { AlbumArtStudio } from "./components/AlbumArtStudio";
 import { CreateTab } from "./components/CreateTab";
 import { CrazyJamMusicTab } from "./components/CrazyJamMusicTab";
-import { saveTrack } from "./utils/api";
+import { PlayerBar } from "./components/PlayerBar";
+import { saveTrack, blobToBase64 } from "./utils/api";
 import { Sparkles, Library, AlertCircle, RefreshCw, Volume2, Moon, Sliders } from "lucide-react";
 
 // Shared audio engine singleton (imported from utils/audioEngine)
@@ -834,6 +835,15 @@ export default function App() {
               currentBlueprint={{ title, genre, tempo, scale, lyrics, tracks, debates: logs }}
               onSaveTrack={async (trackTitle: string) => {
                 const CORE_IDS = ["drums", "lead", "bass", "pad"];
+                // Render a real playable audio file for the persistent player/queue,
+                // so this track works outside the interactive sequencer view too.
+                let renderedAudioBase64: string | undefined;
+                try {
+                  const mixBlob = await audioEngine.exportMixWav(tracks, tempo, 4);
+                  renderedAudioBase64 = await blobToBase64(mixBlob);
+                } catch (err) {
+                  console.warn("Could not render audio for playback; saving blueprint only.", err);
+                }
                 await saveTrack(trackTitle, {
                   title, genre, tempo, scale,
                   drumPatterns: Object.fromEntries(
@@ -845,7 +855,7 @@ export default function App() {
                   // Any split-off tracks (guitar/keyboard/extra vocals/etc) beyond
                   // the core 4 - stored as-is so playback can reconstruct them.
                   customTracks: tracks.filter(t => !CORE_IDS.includes(t.id)),
-                }, lyrics);
+                }, lyrics, undefined, renderedAudioBase64 ? { renderedAudioBase64, audioMimeType: "audio/wav", source: "generated" } : undefined);
               }}
               addLog={addLog}
             />
@@ -958,6 +968,7 @@ export default function App() {
           )}
         </main>
       </div>
+      <PlayerBar />
     </div>
   );
 }
