@@ -645,6 +645,97 @@ export class AudioEngine {
     }
     return new Blob([arrayBuffer], { type: "audio/wav" });
   }
+
+  // --- Live pitch correction ("autotune") monitor: real AudioWorklet-based
+  // pitch detection (autocorrelation) + real granular pitch shifting, snapped
+  // to a given musical scale. See src/worklets/pitchCorrectionProcessor.js. ---
+  private pitchWorkletReady: Promise<void> | null = null;
+  private pitchNode: AudioWorkletNode | null = null;
+  private pitchMicStream: MediaStream | null = null;
+  private pitchMicSource: MediaStreamAudioSourceNode | null = null;
+  private pitchListeners: Array<(info: { freq: number; note: string | null; confidence: number }) => void> = [];
+
+  private freqToNoteName(freq: number): string | null {
+    if (!freq || freq <= 0) return null;
+    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const midi = Math.round(69 + 12 * Math.log2(freq / 440));
+    const name = notes[((midi % 12) + 12) % 12];
+    const octave = Math.floor(midi / 12) - 1;
+    return `${name}${octave}`;
+  }
+
+  public async startPitchCorrection(
+    scalePitchClasses: number[],
+    onUpdate?: (info: { freq: number; note: string | null; confidence: number }) => void
+  ): Promise<{ ok: boolean; error?: string }> {
+    this.init();
+    if (!this.ctx) return { ok: false, error: "Audio engine not initialized" };
+
+    try {
+      if (!this.pitchWorkletReady) {
+        const workletUrl = new URL("../worklets/pitchCorrectionProcessor.js", import.meta.url);
+        this.pitchWorkletReady = this.ctx.audioWorklet.addModule(workletUrl);
+      }
+      await this.pitchWorkletReady;
+
+      if (!this.pitchMicStream) {
+        this.pitchMicStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true },
+        });
+      }
+
+      if (!this.pitchNode) {
+        this.pitchNode = new AudioWorkletNode(this.ctx, "pitch-correction-processor", {
+          numberOfInputs: 1,
+          numberOfOutputs: 1,
+          outputChannelCount: [1],
+        });
+        this.pitchNode.port.onmessage = (e: MessageEvent) => {
+          if (e.data?.type === "pitch") {
+            const info = {
+              freq: e.data.freq as number,
+              note: this.freqToNoteName(e.data.freq),
+              confidence: e.data.confidence as number,
+            };
+            for (const l of this.pitchListeners) l(info);
+          }
+        };
+        this.pitchMicSource = this.ctx.createMediaStreamSource(this.pitchMicStream);
+        this.pitchMicSource.connect(this.pitchNode);
+        this.pitchNode.connect(this.ctx.destination);
+        this.pitchNode.port.postMessage({ type: "scale", value: scalePitchClasses });
+      }
+
+      this.pitchNode.port.postMessage({ type: "enabled", value: true });
+      if (onUpdate) this.pitchListeners.push(onUpdate);
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, error: e?.message || String(e) };
+    }
+  }
+
+  public setPitchCorrectionAmount(amount: number) {
+    this.pitchNode?.port.postMessage({ type: "amount", value: Math.max(0, Math.min(1, amount)) });
+  }
+
+  public setPitchCorrectionScale(scalePitchClasses: number[]) {
+    this.pitchNode?.port.postMessage({ type: "scale", value: scalePitchClasses });
+  }
+
+  public stopPitchCorrection() {
+    this.pitchNode?.port.postMessage({ type: "enabled", value: false });
+    this.pitchMicStream?.getTracks().forEach((t) => t.stop());
+    this.pitchMicStream = null;
+    if (this.pitchMicSource) {
+      this.pitchMicSource.disconnect();
+      this.pitchMicSource = null;
+    }
+    if (this.pitchNode) {
+      this.pitchNode.disconnect();
+      this.pitchNode = null;
+    }
+    this.pitchListeners = [];
+  }
 }
 
 // Singleton instance shared across the whole app.

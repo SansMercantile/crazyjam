@@ -21,6 +21,24 @@ import {
 } from "lucide-react";
 import { TrackState } from "../types";
 import { MixerPanel } from "./MixerPanel";
+import { audioEngine } from "../utils/audioEngine";
+
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const MODE_INTERVALS: Record<string, number[]> = {
+  major: [0, 2, 4, 5, 7, 9, 11],
+  minor: [0, 2, 3, 5, 7, 8, 10],
+};
+
+/** Parses a "F Minor" / "A# Major" style key string (as used by the reference-sync
+ * tracks) into the set of allowed pitch classes (0=C..11=B) for that scale. */
+function scaleStringToPitchClasses(scale: string): number[] {
+  const parts = scale.trim().split(/\s+/);
+  const root = parts[0] || "C";
+  const mode = (parts[1] || "Major").toLowerCase();
+  const rootIndex = Math.max(0, NOTE_NAMES.indexOf(root));
+  const intervals = MODE_INTERVALS[mode] || MODE_INTERVALS.major;
+  return intervals.map((i) => (rootIndex + i) % 12);
+}
 
 interface CrazyJamStudioProps {
   tempo: number;
@@ -149,6 +167,48 @@ export function CrazyJamStudio({
     setIsRecording(false);
   };
 
+  // --- Live pitch correction ("autotune"): real AudioWorklet pitch detection +
+  // real granular pitch shifting, snapped to the current reference-sync scale.
+  const [isPitchOn, setIsPitchOn] = useState(false);
+  const [pitchAmount, setPitchAmount] = useState(1.0);
+  const [pitchError, setPitchError] = useState<string | null>(null);
+  const [detectedNote, setDetectedNote] = useState<{ note: string | null; confidence: number }>({ note: null, confidence: 0 });
+
+  const togglePitchCorrection = async () => {
+    if (isPitchOn) {
+      audioEngine.stopPitchCorrection();
+      setIsPitchOn(false);
+      setDetectedNote({ note: null, confidence: 0 });
+      return;
+    }
+    setPitchError(null);
+    const result = await audioEngine.startPitchCorrection(scaleStringToPitchClasses(scale), (info) => {
+      setDetectedNote({ note: info.confidence > 0.3 ? info.note : null, confidence: info.confidence });
+    });
+    if (result.ok) {
+      audioEngine.setPitchCorrectionAmount(pitchAmount);
+      setIsPitchOn(true);
+    } else {
+      setPitchError(result.error || "Could not access the microphone.");
+    }
+  };
+
+  const handlePitchAmountChange = (val: number) => {
+    setPitchAmount(val);
+    audioEngine.setPitchCorrectionAmount(val);
+  };
+
+  useEffect(() => {
+    if (isPitchOn) audioEngine.setPitchCorrectionScale(scaleStringToPitchClasses(scale));
+  }, [scale, isPitchOn]);
+
+  useEffect(() => {
+    return () => {
+      if (isPitchOn) audioEngine.stopPitchCorrection();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col gap-5 mt-6" id="crazyjam-studio-rack">
       <div className="flex flex-wrap items-center justify-between border-b border-brand-border pb-3">
@@ -207,12 +267,52 @@ export function CrazyJamStudio({
                 <audio src={recordedAudioUrl} controls className="w-full h-8" />
               </div>
             )}
-            <div className="w-full bg-brand-surface-2 border border-brand-border rounded-lg p-3 flex gap-2 items-start text-left">
-              <AlertCircle className="h-3.5 w-3.5 text-brand-ink-muted shrink-0 mt-0.5" />
-              <p className="text-[11px] text-brand-ink-muted leading-relaxed">
-                Real-time pitch analysis and autotune-style pitch correction aren't built yet - that needs real
-                pitch-detection DSP, which is a separate piece of work. Recording and playback above are genuine.
-              </p>
+            <div className="w-full bg-brand-surface-2 border border-brand-border rounded-xl p-3.5 text-left">
+              <div className="flex items-center justify-between">
+                <h5 className="text-[12px] text-brand-ink flex items-center gap-1.5">
+                  <SlidersHorizontal className="h-3.5 w-3.5 text-brand-gold" /> Live pitch correction
+                </h5>
+                <button
+                  onClick={togglePitchCorrection}
+                  className={`px-3 py-1 rounded-md text-[11px] font-medium transition-all ${isPitchOn ? "bg-brand-gold text-brand-bg" : "bg-brand-bg border border-brand-border text-brand-ink-muted hover:text-brand-ink"}`}
+                >
+                  {isPitchOn ? "On" : "Off"}
+                </button>
+              </div>
+
+              {isPitchOn && (
+                <div className="mt-3 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-brand-ink-muted">Correction amount</span>
+                    <span className="text-[10px] text-brand-ink-muted">{Math.round(pitchAmount * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={pitchAmount}
+                    onChange={(e) => handlePitchAmountChange(parseFloat(e.target.value))}
+                    className="w-full h-1.5 accent-brand-gold cursor-pointer"
+                  />
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-brand-ink-muted">Detected note (snapping to {scale})</span>
+                    <span className="text-[13px] font-display text-brand-gold">{detectedNote.note || "—"}</span>
+                  </div>
+                </div>
+              )}
+
+              {pitchError && <p className="text-[10px] text-red-400 mt-2">{pitchError}</p>}
+
+              <div className="flex gap-2 items-start mt-3 pt-3 border-t border-brand-border">
+                <AlertCircle className="h-3.5 w-3.5 text-brand-ink-muted shrink-0 mt-0.5" />
+                <p className="text-[10px] text-brand-ink-muted leading-relaxed">
+                  Real pitch detection (autocorrelation) and real pitch shifting (granular resynthesis), snapped to
+                  the current scale - not a simulated effect. It's a lightweight real-time shifter, not
+                  formant-preserving studio-grade autotune, so heavy corrections can sound slightly grainy. Use
+                  headphones: this monitors your mic live and will feed back through open speakers.
+                </p>
+              </div>
             </div>
           </div>
         )}
