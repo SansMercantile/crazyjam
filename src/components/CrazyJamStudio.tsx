@@ -18,9 +18,11 @@ import {
   RefreshCw,
   FileAudio,
   AlertCircle,
+  Wand2,
 } from "lucide-react";
 import { TrackState } from "../types";
 import { MixerPanel } from "./MixerPanel";
+import { CompingPanel } from "./CompingPanel";
 import { audioEngine } from "../utils/audioEngine";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -61,7 +63,7 @@ export function CrazyJamStudio({
   tracks,
   onTracksUpdate
 }: CrazyJamStudioProps) {
-  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<"recorder" | "sampler" | "mixer" | "search">("search");
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<"recorder" | "sampler" | "mixer" | "comping" | "search">("search");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedReference, setSelectedReference] = useState<any>(null);
@@ -234,6 +236,9 @@ export function CrazyJamStudio({
               <SlidersHorizontal className="h-3.5 w-3.5 inline mr-1.5" /> Mixer
             </button>
           )}
+          <button onClick={() => setActiveWorkspaceTab("comping")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "comping" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
+            <Wand2 className="h-3.5 w-3.5 inline mr-1.5" /> Comping
+          </button>
           <button onClick={() => setActiveWorkspaceTab("search")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "search" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
             <Compass className="h-3.5 w-3.5 inline mr-1.5" /> Reference sync
           </button>
@@ -368,6 +373,14 @@ export function CrazyJamStudio({
         {/* MIXER - real per-track gain/pan nodes + live AnalyserNode-driven VU meters */}
         {activeWorkspaceTab === "mixer" && tracks && onTracksUpdate && (
           <MixerPanel tracks={tracks} onTracksUpdate={onTracksUpdate} />
+        )}
+
+        {/* COMPING - real multi-take recording + sample-accurate segment splicing */}
+        {activeWorkspaceTab === "comping" && (
+          <CompingPanel
+            audioCtx={audioCtx}
+            onSendToSampler={(name, size, buffer) => setUploadedSample({ name, size, buffer })}
+          />
         )}
 
         {/* REFERENCE SYNC - genuinely functional: sets real tempo/scale/prompt */}

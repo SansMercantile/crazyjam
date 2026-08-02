@@ -603,7 +603,8 @@ export class AudioEngine {
     return this.audioBufferToWavBlob(rendered);
   }
 
-  private audioBufferToWavBlob(buffer: AudioBuffer): Blob {
+  /** Public so other features (e.g. take comping) can encode an AudioBuffer they've built to a real WAV Blob. */
+  public audioBufferToWavBlob(buffer: AudioBuffer): Blob {
     const numChannels = buffer.numberOfChannels;
     const sampleRate = buffer.sampleRate;
     const bitDepth = 16;
