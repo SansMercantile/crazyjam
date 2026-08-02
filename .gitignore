@@ -1,11 +1,26 @@
 node_modules/
 build/
 dist/
+release/
 coverage/
 .DS_Store
 *.log
 .env*
 !.env.example
+
+# Electron build artifacts - never belong in git (100MB+ binaries)
+*.exe
+*.dll
+*.dmg
+*.AppImage
+*.asar
+*.pak
+*.dat
+*.bin
+electron_build_log.txt
+electron_install_log.txt
+electron_rebuild_log.txt
+
 _deprecated_moved_to_backend/
 _restart_frontend.ps1
 _theme_migrate.ps1
