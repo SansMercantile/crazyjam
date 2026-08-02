@@ -15,6 +15,7 @@ import {
   Music,
   Compass,
   Disc,
+  Disc3,
   RefreshCw,
   FileAudio,
   AlertCircle,
@@ -23,6 +24,7 @@ import {
 import { TrackState } from "../types";
 import { MixerPanel } from "./MixerPanel";
 import { CompingPanel } from "./CompingPanel";
+import { DjModePanel } from "./DjModePanel";
 import { audioEngine } from "../utils/audioEngine";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -63,7 +65,7 @@ export function CrazyJamStudio({
   tracks,
   onTracksUpdate
 }: CrazyJamStudioProps) {
-  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<"recorder" | "sampler" | "mixer" | "comping" | "search">("search");
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<"recorder" | "sampler" | "mixer" | "comping" | "dj" | "search">("search");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedReference, setSelectedReference] = useState<any>(null);
@@ -239,6 +241,9 @@ export function CrazyJamStudio({
           <button onClick={() => setActiveWorkspaceTab("comping")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "comping" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
             <Wand2 className="h-3.5 w-3.5 inline mr-1.5" /> Comping
           </button>
+          <button onClick={() => setActiveWorkspaceTab("dj")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "dj" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
+            <Disc3 className="h-3.5 w-3.5 inline mr-1.5" /> DJ Mode
+          </button>
           <button onClick={() => setActiveWorkspaceTab("search")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "search" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
             <Compass className="h-3.5 w-3.5 inline mr-1.5" /> Reference sync
           </button>
@@ -382,6 +387,9 @@ export function CrazyJamStudio({
             onSendToSampler={(name, size, buffer) => setUploadedSample({ name, size, buffer })}
           />
         )}
+
+        {/* DJ MODE - two independent decks, real equal-power crossfader, real onset-based BPM sync */}
+        {activeWorkspaceTab === "dj" && <DjModePanel audioCtx={audioCtx} />}
 
         {/* REFERENCE SYNC - genuinely functional: sets real tempo/scale/prompt */}
         {activeWorkspaceTab === "search" && (
