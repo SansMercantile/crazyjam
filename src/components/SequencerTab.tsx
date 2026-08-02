@@ -310,6 +310,8 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
           onScaleChange={onScaleChange}
           onPromptChange={onPromptChange}
           audioCtx={audioCtx}
+          tracks={tracks}
+          onTracksUpdate={onTracksUpdate}
         />
       </div>
 

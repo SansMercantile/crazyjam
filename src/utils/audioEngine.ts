@@ -90,6 +90,58 @@ export class AudioEngine {
     return firstNode as unknown as AudioNode;
   }
 
+  // --- Real per-track mixer chain: gain (fader) -> pan -> analyser (VU) -> master.
+  // Created lazily per track ID and kept alive for the life of the AudioContext, so
+  // fader/pan moves affect currently-sounding audio in real time and the analyser
+  // reflects actual signal, not a simulated value. ---
+  private trackNodes: Record<string, { gain: GainNode; panner: StereoPannerNode; analyser: AnalyserNode }> = {};
+
+  private getOrCreateTrackNodes(trackId: string, ctx: AudioContext) {
+    let nodes = this.trackNodes[trackId];
+    if (nodes) return nodes;
+    const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner();
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.35;
+    gain.gain.value = 0.8;
+    gain.connect(panner);
+    panner.connect(analyser);
+    if (this.masterGain) analyser.connect(this.masterGain);
+    nodes = { gain, panner, analyser };
+    this.trackNodes[trackId] = nodes;
+    return nodes;
+  }
+
+  /** Live AnalyserNode for a track's post-fader signal, for real VU metering. Null until the context exists. */
+  public getTrackAnalyser(trackId: string): AnalyserNode | null {
+    this.init();
+    if (!this.ctx) return null;
+    return this.getOrCreateTrackNodes(trackId, this.ctx).analyser;
+  }
+
+  /** Effective 0..1 gain for a track given mute + the whole-session solo state. */
+  private computeEffectiveGain(track: TrackState, allTracks: TrackState[]): number {
+    if (track.muted) return 0;
+    const anySoloed = allTracks.some((t) => t.soloed);
+    if (anySoloed && !track.soloed) return 0;
+    return Math.max(0, Math.min(1, track.volume));
+  }
+
+  /** Routes a track's synthesis output through its persistent mixer chain (live playback),
+   * or a one-off pan node (offline stem/mix render, where persistent nodes don't apply since
+   * each render uses its own throwaway OfflineAudioContext). Returns the node to treat as
+   * "destination" for that track's EQ chain / synthesis nodes. */
+  private routeThroughTrackMixer(track: TrackState, ctx: BaseAudioContext, destination: AudioNode): AudioNode {
+    if (this.ctx && ctx === (this.ctx as unknown as BaseAudioContext)) {
+      return this.getOrCreateTrackNodes(track.id, this.ctx).gain;
+    }
+    const panner = (ctx as OfflineAudioContext).createStereoPanner();
+    panner.pan.value = Math.max(-1, Math.min(1, track.pan ?? 0));
+    panner.connect(destination);
+    return panner;
+  }
+
   constructor() {
     // Lazy initialized on first user interaction
   }
@@ -193,6 +245,17 @@ export class AudioEngine {
 
   public updateTracks(newTracks: TrackState[]) {
     this.tracks = newTracks;
+    // Sync the live per-track mixer chain immediately, so moving a fader/pan/mute/solo
+    // control in the UI affects currently-sounding audio right away rather than waiting
+    // for the next scheduled note.
+    if (this.ctx) {
+      for (const track of newTracks) {
+        const nodes = this.getOrCreateTrackNodes(track.id, this.ctx);
+        const eff = this.computeEffectiveGain(track, newTracks);
+        nodes.gain.gain.setTargetAtTime(eff, this.ctx.currentTime, 0.015);
+        nodes.panner.pan.setValueAtTime(Math.max(-1, Math.min(1, track.pan ?? 0)), this.ctx.currentTime);
+      }
+    }
   }
 
   /** Legacy single-listener API (kept for backward compatibility - overwrites any listeners set this way) */
@@ -260,13 +323,20 @@ export class AudioEngine {
    * can drive either live playback or an OfflineAudioContext render. */
   private triggerStepInto(tracks: TrackState[], step: number, ctx: BaseAudioContext, destination: AudioNode, timeOverride?: number) {
     const now = timeOverride ?? (ctx as AudioContext).currentTime;
+    const isLive = !!this.ctx && ctx === (this.ctx as unknown as BaseAudioContext);
 
     for (const track of tracks) {
-      if (track.muted) continue;
-      const trackDestination = this.routeThroughTrackEQ(track.id, ctx, destination);
+      const eff = this.computeEffectiveGain(track, tracks);
+      if (eff <= 0) continue; // muted, or another track is soloed, or fader at zero
+
+      const mixerInput = this.routeThroughTrackMixer(track, ctx, destination);
+      const trackDestination = this.routeThroughTrackEQ(track.id, ctx, mixerInput);
+      // Live: the persistent per-track gain node already applies the fader/mute/solo in
+      // real time, so notes are scheduled at unity. Offline (stem/mix export): there's no
+      // persistent node, so bake the effective volume into the note envelope directly.
+      const volumeFactor = isLive ? 1.0 : eff;
 
       if (track.type === "drums" && track.drumLanes) {
-        const volumeFactor = track.volume;
         for (const lane of track.drumLanes) {
           if (lane.pattern[step]) {
             this.playDrum(lane.id as any, now, volumeFactor, ctx, trackDestination);
@@ -277,7 +347,7 @@ export class AudioEngine {
       if (track.type === "synth" && track.melodyNotes) {
         const matchedNote = track.melodyNotes.find((n) => n.step === step);
         if (matchedNote) {
-          this.playSynthNote(track.id, matchedNote.note, now, track.volume, track.instrumentType || "saw", ctx, trackDestination);
+          this.playSynthNote(track.id, matchedNote.note, now, volumeFactor, track.instrumentType || "saw", ctx, trackDestination);
         }
       }
     }

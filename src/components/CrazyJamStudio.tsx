@@ -19,6 +19,8 @@ import {
   FileAudio,
   AlertCircle,
 } from "lucide-react";
+import { TrackState } from "../types";
+import { MixerPanel } from "./MixerPanel";
 
 interface CrazyJamStudioProps {
   tempo: number;
@@ -27,6 +29,8 @@ interface CrazyJamStudioProps {
   onScaleChange: (val: string) => void;
   onPromptChange: (val: string) => void;
   audioCtx: AudioContext | null;
+  tracks?: TrackState[];
+  onTracksUpdate?: (newTracks: TrackState[]) => void;
 }
 
 export function CrazyJamStudio({
@@ -35,7 +39,9 @@ export function CrazyJamStudio({
   onTempoChange,
   onScaleChange,
   onPromptChange,
-  audioCtx
+  audioCtx,
+  tracks,
+  onTracksUpdate
 }: CrazyJamStudioProps) {
   const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<"recorder" | "sampler" | "mixer" | "search">("search");
 
@@ -163,6 +169,11 @@ export function CrazyJamStudio({
           <button onClick={() => setActiveWorkspaceTab("sampler")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "sampler" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
             <Scissors className="h-3.5 w-3.5 inline mr-1.5" /> Sampler
           </button>
+          {tracks && onTracksUpdate && (
+            <button onClick={() => setActiveWorkspaceTab("mixer")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "mixer" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
+              <SlidersHorizontal className="h-3.5 w-3.5 inline mr-1.5" /> Mixer
+            </button>
+          )}
           <button onClick={() => setActiveWorkspaceTab("search")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "search" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
             <Compass className="h-3.5 w-3.5 inline mr-1.5" /> Reference sync
           </button>
@@ -252,6 +263,11 @@ export function CrazyJamStudio({
               )}
             </div>
           </div>
+        )}
+
+        {/* MIXER - real per-track gain/pan nodes + live AnalyserNode-driven VU meters */}
+        {activeWorkspaceTab === "mixer" && tracks && onTracksUpdate && (
+          <MixerPanel tracks={tracks} onTracksUpdate={onTracksUpdate} />
         )}
 
         {/* REFERENCE SYNC - genuinely functional: sets real tempo/scale/prompt */}
