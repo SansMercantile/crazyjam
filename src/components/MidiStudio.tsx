@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { 
   Cpu, 
   Settings, 
@@ -17,6 +17,7 @@ import {
   Plug,
   ListRestart
 } from "lucide-react";
+import { audioEngine } from "../utils/audioEngine";
 
 interface MidiStudioProps {
   tempo: number;
@@ -66,14 +67,67 @@ export function MidiStudio({
   const [usbConnected, setUsbConnected] = useState<boolean>(false);
   const [virtualInputDevice, setVirtualInputDevice] = useState<string>("Keyboard controller");
 
-  // Master Sound Engineer states
+  // Master Sound Engineer state - all values below are computed from a real
+  // AnalyserNode reading the actual master bus output (audioEngine.analyser),
+  // not hardcoded. See measureMix() for the analysis itself.
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [optimizationScore, setOptimizationScore] = useState(74);
-  const [diagnosticsList, setDiagnosticsList] = useState<any[]>([
-    { id: "warn-1", type: "warning", message: "Mid frequency clutter detected on Insert 2 (Lead synth layer).", fix: "Attenuate mid frequency by 2.2dB." },
-    { id: "warn-2", type: "warning", message: "Sub-bass headroom is insufficient. Soft limiter is near active clipping.", fix: "Lower synth bass fader or engage Master Limiter threshold." },
-    { id: "info-1", type: "optimal", message: "Pitch scale key is aligned to sequencer modal grid.", fix: "No adjustments needed." }
+  const [metrics, setMetrics] = useState<{ bassPct: number; midPct: number; highPct: number; peakDb: number; rmsDb: number } | null>(null);
+  const [optimizationScore, setOptimizationScore] = useState<number | null>(null);
+  const [diagnosticsList, setDiagnosticsList] = useState<{ id: string; type: "warning" | "optimal"; message: string; fix: string }[]>([
+    { id: "init", type: "optimal", message: "No analysis yet - play something and run an analysis to see real measurements.", fix: "N/A" },
   ]);
+
+  /** Reads the real master output via audioEngine.analyser and computes actual
+   * spectral band energy + level metrics. Returns null if audio hasn't started. */
+  const measureMix = useCallback((): { bassPct: number; midPct: number; highPct: number; peakDb: number; rmsDb: number } | null => {
+    const analyser = audioEngine.analyser;
+    if (!analyser) return null;
+
+    const freqData = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(freqData);
+    const timeData = new Uint8Array(analyser.fftSize);
+    analyser.getByteTimeDomainData(timeData);
+
+    const sampleRate = 44100; // AudioContext default; band edges are approximate either way
+    const binHz = sampleRate / analyser.fftSize;
+    const bassEndBin = Math.min(freqData.length - 1, Math.round(250 / binHz));
+    const highStartBin = Math.min(freqData.length - 1, Math.round(6000 / binHz));
+
+    let bassSum = 0, midSum = 0, highSum = 0, totalSum = 0;
+    for (let i = 0; i < freqData.length; i++) {
+      const v = freqData[i];
+      totalSum += v;
+      if (i <= bassEndBin) bassSum += v;
+      else if (i >= highStartBin) highSum += v;
+      else midSum += v;
+    }
+    const bassPct = totalSum > 0 ? (bassSum / totalSum) * 100 : 0;
+    const highPct = totalSum > 0 ? (highSum / totalSum) * 100 : 0;
+    const midPct = totalSum > 0 ? (midSum / totalSum) * 100 : 0;
+
+    let sumSquares = 0;
+    let peakDev = 0;
+    for (let i = 0; i < timeData.length; i++) {
+      const dev = (timeData[i] - 128) / 128; // -1..1
+      sumSquares += dev * dev;
+      peakDev = Math.max(peakDev, Math.abs(dev));
+    }
+    const rms = Math.sqrt(sumSquares / timeData.length);
+    const rmsDb = rms > 0 ? 20 * Math.log10(rms) : -60;
+    const peakDb = peakDev > 0 ? 20 * Math.log10(peakDev) : -60;
+
+    return { bassPct, midPct, highPct, peakDb, rmsDb };
+  }, []);
+
+  // Live-updating meters while the panel is open, so the bars reflect what's
+  // actually playing right now rather than a static snapshot.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const m = measureMix();
+      if (m) setMetrics(m);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [measureMix]);
 
   // Request Access to MIDI on start
   useEffect(() => {
@@ -190,31 +244,122 @@ export function MidiStudio({
     playMonoTone(noteToFrequency(midiVal));
   };
 
-  // Real-time Master engineer optimization handler
+  // Real-time Master engineer analysis: samples the actual master output a few
+  // times over ~600ms (to smooth out a single noisy instant), then derives
+  // diagnostics, a score, and auto-fix values entirely from those measurements.
+  // It only calls onAutoFix with parameters that genuinely correspond to a
+  // detected issue and that this panel actually controls (lowpass cutoff/Q and
+  // master volume) - it no longer touches delay params or claims LUFS/loudness-
+  // standard compliance it can't actually verify, and issues it can't fix from
+  // here (like bass buildup - there's no bass-cut control wired to onAutoFix)
+  // are reported as text suggestions pointing at the Mixer instead of faked.
   const handleEngineerOptimize = () => {
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      
-      // Perform acoustic recalculation
-      // Suggest automatic correct variables (e.g. adjust low cutoff, perfect tempo, release delay peaks)
-      onAutoFix({
-        tempo: Math.max(100, Math.min(125, tempo + 5)), // perfect pocket
-        cutoff: cutoff > 18000 ? 12000 : Math.max(800, cutoff - 150), // eliminate high-end harshness
-        q: 1.2, // set transparent resonance
-        delayTime: 0.33, // snap delay to 1/4 note grid
-        delayFeedback: 0.3, // eliminate loop congestion
-        volume: 0.8 // perfect loudness pocket
-      });
+    if (!audioEngine.analyser) {
+      setDiagnosticsList([{ id: "no-audio", type: "warning", message: "No audio is playing yet - start playback first so there's something to analyze.", fix: "N/A" }]);
+      return;
+    }
 
-      setOptimizationScore(98);
-      setDiagnosticsList([
-        { id: "success-1", type: "optimal", message: "Insert 2 (Lead synth) high frequencies smoothed via Dynamic EQ.", fix: "Optimized." },
-        { id: "success-2", type: "optimal", message: "Mid-bass headroom expanded. Limiter ceiling optimized to -0.3dBFS.", fix: "Optimized." },
-        { id: "info-1", type: "optimal", message: "Loudness target matched to Spotify Streaming standard (-14 LUFsi).", fix: "Optimized." }
-      ]);
-    }, 1800);
+    setIsAnalyzing(true);
+    const samples: ReturnType<typeof measureMix>[] = [];
+    let count = 0;
+    const sampleInterval = setInterval(() => {
+      const m = measureMix();
+      if (m) samples.push(m);
+      count++;
+      if (count >= 6) {
+        clearInterval(sampleInterval);
+        finishAnalysis(samples.filter((s): s is NonNullable<typeof s> => !!s));
+      }
+    }, 100);
   };
+
+  const finishAnalysis = (samples: { bassPct: number; midPct: number; highPct: number; peakDb: number; rmsDb: number }[]) => {
+    setIsAnalyzing(false);
+    if (samples.length === 0) {
+      setDiagnosticsList([{ id: "silent", type: "warning", message: "Master output is silent - nothing to analyze right now.", fix: "N/A" }]);
+      return;
+    }
+
+    const avg = {
+      bassPct: samples.reduce((s, x) => s + x.bassPct, 0) / samples.length,
+      highPct: samples.reduce((s, x) => s + x.highPct, 0) / samples.length,
+      peakDb: Math.max(...samples.map((x) => x.peakDb)),
+      rmsDb: samples.reduce((s, x) => s + x.rmsDb, 0) / samples.length,
+    };
+    setMetrics({ ...avg, midPct: 100 - avg.bassPct - avg.highPct });
+
+    const diagnostics: typeof diagnosticsList = [];
+    const fixes: Parameters<typeof onAutoFix>[0] = {};
+
+    if (avg.bassPct > 40) {
+      diagnostics.push({
+        id: "bass",
+        type: "warning",
+        message: `Low end is heavy - bass is ${avg.bassPct.toFixed(0)}% of spectral energy.`,
+        fix: "This panel can't cut bass directly - lower the bass track's fader in the Mixer tab.",
+      });
+    }
+
+    if (avg.highPct < 6) {
+      diagnostics.push({
+        id: "dull",
+        type: "warning",
+        message: `Mix sounds dull - only ${avg.highPct.toFixed(0)}% of energy is in the high end.`,
+        fix: cutoff < 15000 ? "Opening the lowpass cutoff to let more highs through." : "Cutoff is already wide open; the dullness is likely in the source sounds.",
+      });
+      if (cutoff < 15000) fixes.cutoff = Math.min(20000, cutoff + 3000);
+    } else if (avg.highPct > 22) {
+      diagnostics.push({
+        id: "harsh",
+        type: "warning",
+        message: `High end is harsh - ${avg.highPct.toFixed(0)}% of energy is above 6kHz.`,
+        fix: "Lowering the lowpass cutoff to tame harshness.",
+      });
+      fixes.cutoff = Math.max(2000, cutoff - 2500);
+      fixes.q = 1.0;
+    }
+
+    if (avg.peakDb > -0.5) {
+      diagnostics.push({
+        id: "clip",
+        type: "warning",
+        message: `Peaks are close to clipping (${avg.peakDb.toFixed(1)} dBFS).`,
+        fix: "Lowering master volume to add headroom.",
+      });
+      fixes.volume = Math.max(0.1, volume - 0.15);
+    } else if (avg.rmsDb < -28) {
+      diagnostics.push({
+        id: "quiet",
+        type: "warning",
+        message: `Mix is quiet overall (${avg.rmsDb.toFixed(1)} dBFS RMS average).`,
+        fix: "Raising master volume.",
+      });
+      fixes.volume = Math.min(1, volume + 0.15);
+    }
+
+    if (diagnostics.length === 0) {
+      diagnostics.push({
+        id: "healthy",
+        type: "optimal",
+        message: `Mix looks healthy: bass ${avg.bassPct.toFixed(0)}%, highs ${avg.highPct.toFixed(0)}%, peak ${avg.peakDb.toFixed(1)} dBFS, RMS ${avg.rmsDb.toFixed(1)} dBFS.`,
+        fix: "No changes needed.",
+      });
+    }
+
+    // Score: start at 100, subtract real penalties for each measured deviation
+    // from a healthy range - not a hardcoded jump to a fixed number.
+    let score = 100;
+    score -= Math.max(0, avg.bassPct - 40) * 1.2;
+    score -= Math.max(0, 6 - avg.highPct) * 2;
+    score -= Math.max(0, avg.highPct - 22) * 1.5;
+    score -= Math.max(0, avg.peakDb + 0.5) * 20;
+    score -= Math.max(0, -28 - avg.rmsDb) * 0.8;
+    setOptimizationScore(Math.round(Math.max(0, Math.min(100, score))));
+
+    setDiagnosticsList(diagnostics);
+    if (Object.keys(fixes).length > 0) onAutoFix(fixes);
+  };
+
 
   return (
     <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 mt-6 animate-fadeIn" id="midi-usb-hub">
@@ -368,35 +513,39 @@ export function MidiStudio({
               <h3 className="text-xs font-medium text-brand-ink">Neural Analytical Health Score</h3>
             </div>
 
-            <div className="h-12 w-12 rounded-full border border-brand-border flex flex-col justify-center items-center backdrop-blur-md relative" style={{ boxShadow: optimizationScore > 90 ? "0 0 15px rgba(16,185,129,0.25)" : "0 0 15px rgba(239,68,68,0.15)" }}>
-              <span className={`text-base font-semibold font-mono leading-none ${optimizationScore > 90 ? "text-emerald-400" : "text-[var(--gold)]"}`}>
-                {optimizationScore}%
+            <div className="h-12 w-12 rounded-full border border-brand-border flex flex-col justify-center items-center backdrop-blur-md relative" style={{ boxShadow: optimizationScore !== null && optimizationScore > 90 ? "0 0 15px rgba(16,185,129,0.25)" : "0 0 15px rgba(239,68,68,0.15)" }}>
+              <span className={`text-base font-semibold font-mono leading-none ${optimizationScore !== null && optimizationScore > 90 ? "text-emerald-400" : "text-[var(--gold)]"}`}>
+                {optimizationScore !== null ? `${optimizationScore}%` : "—"}
               </span>
               <span className="text-[7px] font-mono text-brand-ink-muted mt-0.5 font-medium">Acoustic</span>
             </div>
           </div>
 
-          {/* Progress analyzer levels bar */}
+          {/* Real spectral band levels, read live from the master AnalyserNode */}
           <div className="grid grid-cols-3 gap-3 border-t border-b border-brand-border py-3 font-mono text-[9px] font-medium text-brand-ink-muted">
             <div>
-              <span className="block text-brand-ink-muted mb-0.5">Bass Clutter</span>
+              <span className="block text-brand-ink-muted mb-0.5">Bass (&lt;250Hz)</span>
               <div className="w-full bg-brand-surface-2 h-1.5 rounded overflow-hidden">
-                <div className={`h-full ${optimizationScore > 90 ? "bg-emerald-500 w-[15%]" : "bg-brand-gold w-[68%]"}`} />
+                <div className={`h-full transition-all ${metrics && metrics.bassPct > 40 ? "bg-amber-500" : "bg-brand-gold"}`} style={{ width: `${metrics ? Math.min(100, metrics.bassPct) : 0}%` }} />
               </div>
+              <span className="block mt-0.5">{metrics ? `${metrics.bassPct.toFixed(0)}%` : "—"}</span>
             </div>
             <div>
-              <span className="block text-brand-ink-muted mb-0.5">High Crispness</span>
+              <span className="block text-brand-ink-muted mb-0.5">Highs (&gt;6kHz)</span>
               <div className="w-full bg-brand-surface-2 h-1.5 rounded overflow-hidden">
-                <div className="h-full bg-brand-gold w-[82%]" />
+                <div className={`h-full transition-all ${metrics && (metrics.highPct < 6 || metrics.highPct > 22) ? "bg-amber-500" : "bg-brand-gold"}`} style={{ width: `${metrics ? Math.min(100, metrics.highPct) : 0}%` }} />
               </div>
+              <span className="block mt-0.5">{metrics ? `${metrics.highPct.toFixed(0)}%` : "—"}</span>
             </div>
             <div>
-              <span className="block text-brand-ink-muted mb-0.5">Loudness Target</span>
+              <span className="block text-brand-ink-muted mb-0.5">RMS level</span>
               <div className="w-full bg-brand-surface-2 h-1.5 rounded overflow-hidden">
-                <div className={`h-full ${optimizationScore > 90 ? "bg-emerald-500 w-[94%]" : "bg-[var(--gold)] w-[45%]"}`} />
+                <div className={`h-full transition-all ${metrics && metrics.rmsDb < -28 ? "bg-amber-500" : "bg-brand-gold"}`} style={{ width: `${metrics ? Math.max(0, Math.min(100, (metrics.rmsDb + 60) / 60 * 100)) : 0}%` }} />
               </div>
+              <span className="block mt-0.5">{metrics ? `${metrics.rmsDb.toFixed(1)}dB` : "—"}</span>
             </div>
           </div>
+
 
           {/* Specific warnings */}
           <div className="flex flex-col gap-2.5 max-h-[170px] overflow-y-auto pr-1">
@@ -444,7 +593,9 @@ export function MidiStudio({
         </button>
 
         <p className="text-[9px] text-brand-ink-muted font-mono text-center leading-normal">
-          The sound engineer operates by optimizing real-time modular synthesis gain coefficients to Spotify/Club alignment. Click engage to auto-set effects mix and levels instantly.
+          Reads the real master output (spectral bands + peak/RMS) and only adjusts the lowpass cutoff/Q and
+          master volume when a measurement actually calls for it. It can't fix bass buildup or panning from
+          here - those get a text pointer to the Mixer tab instead of a fake fix.
         </p>
       </div>
     </div>

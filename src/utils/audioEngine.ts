@@ -183,7 +183,10 @@ export class AudioEngine {
     this.masterGain.gain.value = this.pendingVolume;
 
     this.analyser = this.ctx.createAnalyser();
-    this.analyser.fftSize = 256;
+    // 2048 gives ~21.5Hz-wide bins at 44.1kHz - fine enough to actually separate a
+    // 20-250Hz bass band from mids/highs. (Was 256, ~172Hz bins - too coarse for
+    // the real spectral analysis the Master Engineer panel now does.)
+    this.analyser.fftSize = 2048;
 
     this.delayNode = this.ctx.createDelay(1.0);
     this.delayNode.delayTime.value = this.delayTimeValue;
