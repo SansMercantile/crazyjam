@@ -515,6 +515,14 @@ export function SequencerGrid({
                     ))}
                   </div>
                 </div>
+
+                <div className="bg-brand-surface-2 border border-brand-border rounded-xl p-3">
+                  <AutomationLane
+                    values={getAutomation(track)}
+                    onChange={(values) => handleAutomationChange(track.id, values)}
+                    currentStep={currentStep}
+                  />
+                </div>
               </div>
             );
           }
