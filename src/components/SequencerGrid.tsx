@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { TrackState, DrumLane, NoteEvent } from "../types";
 import { VolumeX, Volume2, Bolt, Trash2, RefreshCw, Sparkles, Sliders, RotateCcw, Plus, X } from "lucide-react";
 import { audioEngine, AudioEngine } from "../utils/audioEngine";
+import { AutomationLane } from "./AutomationLane";
 
 interface SequencerGridProps {
   tracks: TrackState[];
@@ -97,6 +98,61 @@ export function SequencerGrid({
   const isSynthNoteActive = (track: TrackState, note: string, step: number): boolean => {
     if (!track.melodyNotes) return false;
     return track.melodyNotes.some((item) => item.step === step && item.note === note);
+  };
+
+  const getAutomation = (track: TrackState): number[] =>
+    track.volumeAutomation && track.volumeAutomation.length === 16 ? track.volumeAutomation : Array(16).fill(1);
+
+  const handleAutomationChange = (trackId: string, values: number[]) => {
+    if (!onTracksUpdate) return;
+    onTracksUpdate(tracks.map((t) => (t.id === trackId ? { ...t, volumeAutomation: values } : t)));
+  };
+
+  // Real duration-drag: mousedown on a note's start cell begins a drag; dragging
+  // right across subsequent cells (same pitch row) sets the note's real sustain
+  // length, which audioEngine.playSynthNote now actually honors.
+  const dragRef = useRef<{ trackId: string; note: string; startStep: number } | null>(null);
+
+  const beginNoteDrag = (trackId: string, note: string, startStep: number) => {
+    dragRef.current = { trackId, note, startStep };
+  };
+
+  const extendNoteDrag = useCallback(
+    (overStep: number) => {
+      const drag = dragRef.current;
+      if (!drag || !onTracksUpdate) return;
+      const newDuration = Math.max(1, overStep - drag.startStep + 1);
+      onTracksUpdate(
+        tracks.map((t) => {
+          if (t.id !== drag.trackId || !t.melodyNotes) return t;
+          return {
+            ...t,
+            melodyNotes: t.melodyNotes.map((n) =>
+              n.step === drag.startStep && n.note === drag.note ? { ...n, duration: newDuration } : n
+            ),
+          };
+        })
+      );
+    },
+    [tracks, onTracksUpdate]
+  );
+
+  useEffect(() => {
+    const handleUp = () => {
+      dragRef.current = null;
+    };
+    window.addEventListener("mouseup", handleUp);
+    return () => window.removeEventListener("mouseup", handleUp);
+  }, []);
+
+  const setNoteVelocity = (trackId: string, note: string, step: number, velocity: number) => {
+    if (!onTracksUpdate) return;
+    onTracksUpdate(
+      tracks.map((t) => {
+        if (t.id !== trackId || !t.melodyNotes) return t;
+        return { ...t, melodyNotes: t.melodyNotes.map((n) => (n.step === step && n.note === note ? { ...n, velocity } : n)) };
+      })
+    );
   };
 
   const handleAddTrack = () => {
@@ -549,21 +605,44 @@ export function SequencerGrid({
                         {Array.from({ length: 16 }).map((_, stepIdx) => {
                           const isCurrent = currentStep === stepIdx;
                           const isFour = stepIdx % 4 === 0;
-                          const pinActive = isSynthNoteActive(track, note, stepIdx);
+                          // Find any note on this pitch row whose span (step..step+duration-1) covers this cell.
+                          const coveringNote = track.melodyNotes?.find(
+                            (n) => n.note === note && stepIdx >= n.step && stepIdx < n.step + Math.max(1, n.duration || 1)
+                          );
+                          const isStart = coveringNote?.step === stepIdx;
+                          const pinActive = !!coveringNote;
+
                           return (
                             <button
                               key={stepIdx}
                               onClick={() => onStepToggle(track.id, note, stepIdx)}
-                              className={`aspect-square sm:h-9 hover:brightness-110 active:scale-95 transition-all rounded-md border outline-none ${
+                              onMouseDown={(e) => {
+                                if (isStart) {
+                                  e.preventDefault();
+                                  beginNoteDrag(track.id, note, stepIdx);
+                                }
+                              }}
+                              onMouseEnter={() => {
+                                if (dragRef.current && dragRef.current.trackId === track.id && dragRef.current.note === note) {
+                                  extendNoteDrag(stepIdx);
+                                }
+                              }}
+                              className={`relative aspect-square sm:h-9 hover:brightness-110 active:scale-95 transition-all border outline-none ${
                                 pinActive
-                                  ? "bg-brand-gold border-brand-gold/60"
+                                  ? `bg-brand-gold border-brand-gold/60 ${isStart ? "rounded-l-md" : ""} ${
+                                      stepIdx === (coveringNote!.step + Math.max(1, coveringNote!.duration || 1) - 1) ? "rounded-r-md" : ""
+                                    }`
                                   : isCurrent
-                                  ? "bg-brand-surface-2 border-brand-gold"
+                                  ? "bg-brand-surface-2 border-brand-gold rounded-md"
                                   : isFour
-                                  ? "bg-brand-surface border-brand-border"
-                                  : "bg-brand-surface/60 border-brand-border"
+                                  ? "bg-brand-surface border-brand-border rounded-md"
+                                  : "bg-brand-surface/60 border-brand-border rounded-md"
                               }`}
-                              title={`${track.name} ${note} step ${stepIdx + 1}`}
+                              title={
+                                isStart
+                                  ? `${track.name} ${note} step ${stepIdx + 1} - drag right to change length`
+                                  : `${track.name} ${note} step ${stepIdx + 1}`
+                              }
                             />
                           );
                         })}
@@ -572,6 +651,90 @@ export function SequencerGrid({
                   ))}
                 </div>
               </div>
+
+              <div className="bg-brand-surface-2 border border-brand-border rounded-xl p-3 flex flex-col gap-3">
+                <VelocityLane track={track} currentStep={currentStep} onSetVelocity={setNoteVelocity} />
+                <AutomationLane
+                  values={getAutomation(track)}
+                  onChange={(values) => handleAutomationChange(track.id, values)}
+                  currentStep={currentStep}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** Per-step velocity lane: drag vertically over a step that has a note to set that
+ * note's velocity. Steps with no note are dimmed and inert. */
+function VelocityLane({
+  track,
+  currentStep,
+  onSetVelocity,
+}: {
+  track: TrackState;
+  currentStep: number;
+  onSetVelocity: (trackId: string, note: string, step: number, velocity: number) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const draggingStepRef = useRef<number | null>(null);
+
+  const stepNote = (step: number) => track.melodyNotes?.find((n) => n.step === step);
+
+  const setFromEvent = useCallback(
+    (step: number, clientY: number) => {
+      const n = stepNote(step);
+      if (!n) return;
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const relY = clientY - rect.top;
+      const val = Math.max(0, Math.min(1, 1 - relY / rect.height));
+      onSetVelocity(track.id, n.note, step, Math.round(val * 100) / 100);
+    },
+    [track, onSetVelocity]
+  );
+
+  useEffect(() => {
+    const handleMove = (e: MouseEvent) => {
+      if (draggingStepRef.current === null) return;
+      setFromEvent(draggingStepRef.current, e.clientY);
+    };
+    const handleUp = () => {
+      draggingStepRef.current = null;
+    };
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+  }, [setFromEvent]);
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[10px] text-brand-ink-muted">Velocity - drag a note's bar up/down</span>
+      <div ref={containerRef} className="relative grid grid-cols-16 gap-1.5" style={{ height: 28 }}>
+        {Array.from({ length: 16 }).map((_, stepIdx) => {
+          const n = stepNote(stepIdx);
+          const vel = n?.velocity ?? 1;
+          const isCurrent = currentStep === stepIdx;
+          return (
+            <div
+              key={stepIdx}
+              onMouseDown={(e) => {
+                if (!n) return;
+                draggingStepRef.current = stepIdx;
+                setFromEvent(stepIdx, e.clientY);
+              }}
+              className={`relative rounded-sm border ${n ? "border-brand-border cursor-ns-resize" : "border-brand-border/40 opacity-30"} ${
+                isCurrent ? "bg-brand-surface-2" : "bg-brand-bg"
+              }`}
+            >
+              {n && <div className="absolute bottom-0 left-0 w-full bg-brand-gold/70 rounded-sm" style={{ height: `${vel * 100}%` }} />}
             </div>
           );
         })}
