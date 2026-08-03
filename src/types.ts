@@ -6,7 +6,8 @@
 export interface NoteEvent {
   step: number; // 0 to 15
   note: string; // e.g., "A3", "C4", "E4"
-  duration: number; // steps
+  duration: number; // steps - actually sustains the note for this many steps
+  velocity?: number; // 0.0 to 1.0, defaults to 1 when unset
 }
 
 export interface DrumLane {
@@ -29,6 +30,7 @@ export interface TrackState {
   drumLanes?: DrumLane[];
   melodyNotes?: NoteEvent[]; // synth tracks
   instrumentType?: "saw" | "square" | "sine" | "triangle" | "pluck";
+  volumeAutomation?: number[]; // 16 values, 0.0-1.0 per-step gain multiplier applied on top of `volume`
 }
 
 export interface AgentLog {

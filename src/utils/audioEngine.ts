@@ -120,12 +120,30 @@ export class AudioEngine {
     return this.getOrCreateTrackNodes(trackId, this.ctx).analyser;
   }
 
-  /** Effective 0..1 gain for a track given mute + the whole-session solo state. */
-  private computeEffectiveGain(track: TrackState, allTracks: TrackState[]): number {
+  /** Effective 0..1 gain for a track given mute + the whole-session solo state, optionally
+   * scaled by that track's step-indexed volume automation lane (FL Studio-style automation). */
+  private computeEffectiveGain(track: TrackState, allTracks: TrackState[], step?: number): number {
     if (track.muted) return 0;
     const anySoloed = allTracks.some((t) => t.soloed);
     if (anySoloed && !track.soloed) return 0;
-    return Math.max(0, Math.min(1, track.volume));
+    let gain = Math.max(0, Math.min(1, track.volume));
+    if (step !== undefined && track.volumeAutomation && track.volumeAutomation[step] !== undefined) {
+      gain *= Math.max(0, Math.min(1, track.volumeAutomation[step]));
+    }
+    return gain;
+  }
+
+  /** Ramps each track's real, persistent mixer gain node toward its automated value for this
+   * step - this is what makes automation actually audible on sustained/live playback, not just
+   * on notes triggered at that exact step. */
+  private applyStepAutomation(step: number) {
+    if (!this.ctx) return;
+    for (const track of this.tracks) {
+      if (!track.volumeAutomation) continue;
+      const nodes = this.getOrCreateTrackNodes(track.id, this.ctx);
+      const eff = this.computeEffectiveGain(track, this.tracks, step);
+      nodes.gain.gain.setTargetAtTime(eff, this.ctx.currentTime, 0.02);
+    }
   }
 
   /** Routes a track's synthesis output through its persistent mixer chain (live playback),
@@ -316,24 +334,29 @@ export class AudioEngine {
 
   private triggerStep(step: number) {
     if (!this.ctx || !this.masterGain) return;
+    this.applyStepAutomation(step);
     this.triggerStepInto(this.tracks, step, this.ctx, this.masterGain);
   }
 
   /** Core step-trigger logic, parameterized over context/destination so it
    * can drive either live playback or an OfflineAudioContext render. */
-  private triggerStepInto(tracks: TrackState[], step: number, ctx: BaseAudioContext, destination: AudioNode, timeOverride?: number) {
+  private triggerStepInto(
+    tracks: TrackState[], step: number, ctx: BaseAudioContext, destination: AudioNode,
+    timeOverride?: number, stepDurationOverride?: number
+  ) {
     const now = timeOverride ?? (ctx as AudioContext).currentTime;
     const isLive = !!this.ctx && ctx === (this.ctx as unknown as BaseAudioContext);
+    const stepSeconds = stepDurationOverride ?? (60 / this.tempo / 4);
 
     for (const track of tracks) {
-      const eff = this.computeEffectiveGain(track, tracks);
-      if (eff <= 0) continue; // muted, or another track is soloed, or fader at zero
+      const eff = this.computeEffectiveGain(track, tracks, step);
+      if (eff <= 0) continue; // muted, another track is soloed, fader at zero, or automation zeroed this step
 
       const mixerInput = this.routeThroughTrackMixer(track, ctx, destination);
       const trackDestination = this.routeThroughTrackEQ(track.id, ctx, mixerInput);
-      // Live: the persistent per-track gain node already applies the fader/mute/solo in
-      // real time, so notes are scheduled at unity. Offline (stem/mix export): there's no
-      // persistent node, so bake the effective volume into the note envelope directly.
+      // Live: the persistent per-track gain node already applies the fader/mute/solo/automation in
+      // real time (see applyStepAutomation), so notes are scheduled at unity. Offline (stem/mix
+      // export): there's no persistent node, so bake the effective volume into the note envelope directly.
       const volumeFactor = isLive ? 1.0 : eff;
 
       if (track.type === "drums" && track.drumLanes) {
@@ -347,7 +370,10 @@ export class AudioEngine {
       if (track.type === "synth" && track.melodyNotes) {
         const matchedNote = track.melodyNotes.find((n) => n.step === step);
         if (matchedNote) {
-          this.playSynthNote(track.id, matchedNote.note, now, volumeFactor, track.instrumentType || "saw", ctx, trackDestination);
+          this.playSynthNote(
+            track.id, matchedNote.note, now, volumeFactor, track.instrumentType || "saw", ctx, trackDestination,
+            Math.max(1, matchedNote.duration || 1), matchedNote.velocity ?? 1, stepSeconds
+          );
         }
       }
     }
@@ -468,10 +494,17 @@ export class AudioEngine {
   private playSynthNote(
     trackId: string, noteName: string, time: number, volume: number,
     type: "saw" | "square" | "sine" | "triangle" | "pluck",
-    ctx: BaseAudioContext, destination: AudioNode
+    ctx: BaseAudioContext, destination: AudioNode,
+    durationSteps: number = 1, velocity: number = 1, stepSeconds: number = 0.125
   ) {
     const frequency = this.noteNameToFrequency(noteName);
     if (!frequency) return;
+    // Real duration/velocity support: previously `duration` on a NoteEvent was
+    // stored but never used, and every note played a fixed-length envelope
+    // regardless of how long it was drawn in the piano roll. `holdExtra` now
+    // actually sustains the note for its drawn length before releasing.
+    const v = volume * Math.max(0, Math.min(1, velocity));
+    const holdExtra = Math.max(0, (Math.max(1, durationSteps) - 1) * stepSeconds);
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -488,35 +521,39 @@ export class AudioEngine {
       filter.type = "lowpass";
       filter.frequency.setValueAtTime(150, time);
       filter.frequency.exponentialRampToValueAtTime(80, time + 0.25);
-      gain.gain.setValueAtTime(volume * 1.3, time);
-      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+      gain.gain.setValueAtTime(v * 1.3, time);
+      gain.gain.setValueAtTime(v * 1.3, time + 0.05 + holdExtra);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3 + holdExtra);
       osc.start(time);
-      osc.stop(time + 0.32);
+      osc.stop(time + 0.32 + holdExtra);
     } else if (trackId === "lead") {
       filter.type = "lowpass";
       filter.frequency.setValueAtTime(1800, time);
       filter.Q.value = 3;
       if (type === "pluck") {
         filter.frequency.exponentialRampToValueAtTime(300, time + 0.15);
-        gain.gain.setValueAtTime(volume * 0.9, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + this.synthReleaseTime * 0.7);
+        gain.gain.setValueAtTime(v * 0.9, time);
+        gain.gain.setValueAtTime(v * 0.9, time + Math.max(0.02, this.synthReleaseTime * 0.2) + holdExtra);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + this.synthReleaseTime * 0.7 + holdExtra);
         osc.start(time);
-        osc.stop(time + this.synthReleaseTime * 0.7 + 0.02);
+        osc.stop(time + this.synthReleaseTime * 0.7 + holdExtra + 0.02);
       } else {
         gain.gain.setValueAtTime(0.001, time);
-        gain.gain.linearRampToValueAtTime(volume * 0.6, time + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + this.synthReleaseTime);
+        gain.gain.linearRampToValueAtTime(v * 0.6, time + 0.02);
+        gain.gain.setValueAtTime(v * 0.6, time + 0.02 + holdExtra);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + this.synthReleaseTime + holdExtra);
         osc.start(time);
-        osc.stop(time + this.synthReleaseTime + 0.02);
+        osc.stop(time + this.synthReleaseTime + holdExtra + 0.02);
       }
     } else {
       filter.type = "lowpass";
       filter.frequency.setValueAtTime(1000, time);
       gain.gain.setValueAtTime(0.001, time);
-      gain.gain.linearRampToValueAtTime(volume * 0.5, time + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.45);
+      gain.gain.linearRampToValueAtTime(v * 0.5, time + 0.08);
+      gain.gain.setValueAtTime(v * 0.5, time + 0.08 + holdExtra);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.45 + holdExtra);
       osc.start(time);
-      osc.stop(time + 0.5);
+      osc.stop(time + 0.5 + holdExtra);
     }
   }
 
@@ -561,7 +598,7 @@ export class AudioEngine {
     for (let i = 0; i < totalSteps; i++) {
       const step = i % 16;
       const time = i * stepDuration;
-      this.triggerStepInto([track], step, offlineCtx, destination, time);
+      this.triggerStepInto([track], step, offlineCtx, destination, time, stepDuration);
     }
 
     const rendered = await offlineCtx.startRendering();
@@ -596,7 +633,7 @@ export class AudioEngine {
     for (let i = 0; i < totalSteps; i++) {
       const step = i % 16;
       const time = i * stepDuration;
-      this.triggerStepInto(tracks, step, offlineCtx, destination, time);
+      this.triggerStepInto(tracks, step, offlineCtx, destination, time, stepDuration);
     }
 
     const rendered = await offlineCtx.startRendering();
