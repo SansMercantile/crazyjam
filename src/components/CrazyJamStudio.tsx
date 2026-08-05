@@ -25,6 +25,7 @@ import { TrackState } from "../types";
 import { MixerPanel } from "./MixerPanel";
 import { CompingPanel } from "./CompingPanel";
 import { DjModePanel } from "./DjModePanel";
+import { RegionEditor } from "./RegionEditor";
 import { audioEngine } from "../utils/audioEngine";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -372,6 +373,17 @@ export function CrazyJamStudio({
                 </>
               )}
             </div>
+
+            {uploadedSample?.buffer && (
+              <div className="bg-brand-surface-2 rounded-xl p-4 border border-brand-border">
+                <RegionEditor
+                  buffer={uploadedSample.buffer}
+                  fileName={uploadedSample.name}
+                  audioCtx={audioCtx}
+                  onReplaceSample={(buffer) => setUploadedSample((prev) => (prev ? { ...prev, buffer } : prev))}
+                />
+              </div>
+            )}
           </div>
         )}
 
