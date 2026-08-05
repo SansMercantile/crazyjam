@@ -31,6 +31,7 @@ export interface TrackState {
   melodyNotes?: NoteEvent[]; // synth tracks
   instrumentType?: "saw" | "square" | "sine" | "triangle" | "pluck";
   volumeAutomation?: number[]; // 16 values, 0.0-1.0 per-step gain multiplier applied on top of `volume`
+  panAutomation?: number[]; // 16 values, -1.0 (left) to 1.0 (right) per-step pan, overrides `pan` when set
 }
 
 export interface AgentLog {

@@ -103,9 +103,17 @@ export function SequencerGrid({
   const getAutomation = (track: TrackState): number[] =>
     track.volumeAutomation && track.volumeAutomation.length === 16 ? track.volumeAutomation : Array(16).fill(1);
 
+  const getPanAutomation = (track: TrackState): number[] =>
+    track.panAutomation && track.panAutomation.length === 16 ? track.panAutomation : Array(16).fill(track.pan ?? 0);
+
   const handleAutomationChange = (trackId: string, values: number[]) => {
     if (!onTracksUpdate) return;
     onTracksUpdate(tracks.map((t) => (t.id === trackId ? { ...t, volumeAutomation: values } : t)));
+  };
+
+  const handlePanAutomationChange = (trackId: string, values: number[]) => {
+    if (!onTracksUpdate) return;
+    onTracksUpdate(tracks.map((t) => (t.id === trackId ? { ...t, panAutomation: values } : t)));
   };
 
   // Real duration-drag: mousedown on a note's start cell begins a drag; dragging
@@ -516,11 +524,18 @@ export function SequencerGrid({
                   </div>
                 </div>
 
-                <div className="bg-brand-surface-2 border border-brand-border rounded-xl p-3">
+                <div className="bg-brand-surface-2 border border-brand-border rounded-xl p-3 flex flex-col gap-3">
                   <AutomationLane
                     values={getAutomation(track)}
                     onChange={(values) => handleAutomationChange(track.id, values)}
                     currentStep={currentStep}
+                  />
+                  <AutomationLane
+                    values={getPanAutomation(track)}
+                    onChange={(values) => handlePanAutomationChange(track.id, values)}
+                    currentStep={currentStep}
+                    label="Pan automation"
+                    bipolar
                   />
                 </div>
               </div>
@@ -666,6 +681,13 @@ export function SequencerGrid({
                   values={getAutomation(track)}
                   onChange={(values) => handleAutomationChange(track.id, values)}
                   currentStep={currentStep}
+                />
+                <AutomationLane
+                  values={getPanAutomation(track)}
+                  onChange={(values) => handlePanAutomationChange(track.id, values)}
+                  currentStep={currentStep}
+                  label="Pan automation"
+                  bipolar
                 />
               </div>
             </div>

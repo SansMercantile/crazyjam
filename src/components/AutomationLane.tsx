@@ -14,17 +14,22 @@ const STEP_COUNT = 16;
 const HEIGHT = 40;
 
 interface AutomationLaneProps {
-  values: number[]; // length 16, 0..1
+  values: number[]; // length 16
   onChange: (values: number[]) => void;
   currentStep: number;
   label?: string;
+  bipolar?: boolean; // true = range is -1..1 (e.g. pan), centered; false = 0..1 (e.g. volume)
+  resetValue?: number;
 }
 
-export function AutomationLane({ values, onChange, currentStep, label = "Volume automation" }: AutomationLaneProps) {
+export function AutomationLane({ values, onChange, currentStep, label = "Volume automation", bipolar = false, resetValue }: AutomationLaneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
   const valuesRef = useRef(values);
   valuesRef.current = values;
+  const min = bipolar ? -1 : 0;
+  const max = 1;
+  const flat = resetValue ?? (bipolar ? 0 : 1);
 
   const setFromEvent = useCallback(
     (clientX: number, clientY: number) => {
@@ -36,13 +41,13 @@ export function AutomationLane({ values, onChange, currentStep, label = "Volume 
       const stepWidth = rect.width / STEP_COUNT;
       let stepIdx = Math.floor(relX / stepWidth);
       stepIdx = Math.max(0, Math.min(STEP_COUNT - 1, stepIdx));
-      let val = 1 - relY / rect.height;
-      val = Math.max(0, Math.min(1, val));
+      let val = max - (relY / rect.height) * (max - min);
+      val = Math.max(min, Math.min(max, val));
       const next = [...valuesRef.current];
       next[stepIdx] = Math.round(val * 100) / 100;
       onChange(next);
     },
-    [onChange]
+    [onChange, min, max]
   );
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -66,7 +71,8 @@ export function AutomationLane({ values, onChange, currentStep, label = "Volume 
     };
   }, [setFromEvent]);
 
-  const handleReset = () => onChange(Array(STEP_COUNT).fill(1));
+  const handleReset = () => onChange(Array(STEP_COUNT).fill(flat));
+
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -83,11 +89,23 @@ export function AutomationLane({ values, onChange, currentStep, label = "Volume 
         style={{ height: HEIGHT }}
       >
         <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${STEP_COUNT}, 1fr)` }}>
-          {values.map((v, i) => (
-            <div key={i} className={`relative border-r border-brand-border/40 ${i === currentStep ? "bg-brand-gold/10" : ""}`}>
-              <div className="absolute bottom-0 left-0 w-full bg-brand-gold/70" style={{ height: `${v * 100}%` }} />
-            </div>
-          ))}
+          {values.map((v, i) => {
+            const pct = ((v - min) / (max - min)) * 100;
+            const centerPct = ((flat - min) / (max - min)) * 100;
+            const barTop = Math.min(pct, centerPct);
+            const barHeight = Math.abs(pct - centerPct);
+            return (
+              <div key={i} className={`relative border-r border-brand-border/40 ${i === currentStep ? "bg-brand-gold/10" : ""}`}>
+                {bipolar && (
+                  <div className="absolute left-0 w-full border-t border-brand-border/60" style={{ bottom: `${centerPct}%` }} />
+                )}
+                <div
+                  className="absolute left-0 w-full bg-brand-gold/70"
+                  style={{ bottom: `${100 - barTop - barHeight}%`, height: `${barHeight}%` }}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

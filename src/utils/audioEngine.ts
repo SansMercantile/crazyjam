@@ -139,10 +139,16 @@ export class AudioEngine {
   private applyStepAutomation(step: number) {
     if (!this.ctx) return;
     for (const track of this.tracks) {
-      if (!track.volumeAutomation) continue;
+      if (!track.volumeAutomation && !track.panAutomation) continue;
       const nodes = this.getOrCreateTrackNodes(track.id, this.ctx);
-      const eff = this.computeEffectiveGain(track, this.tracks, step);
-      nodes.gain.gain.setTargetAtTime(eff, this.ctx.currentTime, 0.02);
+      if (track.volumeAutomation) {
+        const eff = this.computeEffectiveGain(track, this.tracks, step);
+        nodes.gain.gain.setTargetAtTime(eff, this.ctx.currentTime, 0.02);
+      }
+      if (track.panAutomation && track.panAutomation[step] !== undefined) {
+        const pan = Math.max(-1, Math.min(1, track.panAutomation[step]));
+        nodes.panner.pan.setTargetAtTime(pan, this.ctx.currentTime, 0.02);
+      }
     }
   }
 
@@ -150,12 +156,13 @@ export class AudioEngine {
    * or a one-off pan node (offline stem/mix render, where persistent nodes don't apply since
    * each render uses its own throwaway OfflineAudioContext). Returns the node to treat as
    * "destination" for that track's EQ chain / synthesis nodes. */
-  private routeThroughTrackMixer(track: TrackState, ctx: BaseAudioContext, destination: AudioNode): AudioNode {
+  private routeThroughTrackMixer(track: TrackState, ctx: BaseAudioContext, destination: AudioNode, step?: number): AudioNode {
     if (this.ctx && ctx === (this.ctx as unknown as BaseAudioContext)) {
       return this.getOrCreateTrackNodes(track.id, this.ctx).gain;
     }
     const panner = (ctx as OfflineAudioContext).createStereoPanner();
-    panner.pan.value = Math.max(-1, Math.min(1, track.pan ?? 0));
+    const automatedPan = step !== undefined ? track.panAutomation?.[step] : undefined;
+    panner.pan.value = Math.max(-1, Math.min(1, automatedPan ?? track.pan ?? 0));
     panner.connect(destination);
     return panner;
   }
@@ -355,7 +362,7 @@ export class AudioEngine {
       const eff = this.computeEffectiveGain(track, tracks, step);
       if (eff <= 0) continue; // muted, another track is soloed, fader at zero, or automation zeroed this step
 
-      const mixerInput = this.routeThroughTrackMixer(track, ctx, destination);
+      const mixerInput = this.routeThroughTrackMixer(track, ctx, destination, step);
       const trackDestination = this.routeThroughTrackEQ(track.id, ctx, mixerInput);
       // Live: the persistent per-track gain node already applies the fader/mute/solo/automation in
       // real time (see applyStepAutomation), so notes are scheduled at unity. Offline (stem/mix
