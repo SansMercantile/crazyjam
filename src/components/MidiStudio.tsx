@@ -366,7 +366,7 @@ export function MidiStudio({
   return (
     <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 mt-6 animate-fadeIn" id="midi-usb-hub">
       {/* LEFT SECTION: MIDI & USB CONNECTIVES */}
-      <div className="xl:col-span-6 flex flex-col gap-4">
+      <div className={isPro ? "xl:col-span-6 flex flex-col gap-4" : "xl:col-span-12 flex flex-col gap-4"}>
         <div className="flex items-center justify-between border-b border-brand-border pb-3">
           <div className="flex items-center gap-2 text-brand-gold">
             <Plug className="h-4.5 w-4.5" />
@@ -494,6 +494,7 @@ export function MidiStudio({
       </div>
 
       {/* RIGHT SECTION: CRAZYJAM AI MASTER SOUND ENGINEER */}
+      {isPro && (
       <div className="xl:col-span-6 flex flex-col gap-4 border-t xl:border-t-0 xl:border-l border-brand-border pt-4 xl:pt-0 xl:pl-6">
         <div className="flex items-center justify-between border-b border-brand-border pb-3">
           <div className="flex items-center gap-2 text-brand-gold">
@@ -600,6 +601,7 @@ export function MidiStudio({
           here - those get a text pointer to the Mixer tab instead of a fake fix.
         </p>
       </div>
+      )}
     </div>
   );
 }
