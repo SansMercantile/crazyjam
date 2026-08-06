@@ -8,6 +8,7 @@ import { TrackState, DrumLane, NoteEvent } from "../types";
 import { VolumeX, Volume2, Bolt, Trash2, RefreshCw, Sparkles, Sliders, RotateCcw, Plus, X } from "lucide-react";
 import { audioEngine, AudioEngine } from "../utils/audioEngine";
 import { AutomationLane } from "./AutomationLane";
+import { useTier } from "../context/TierContext";
 
 interface SequencerGridProps {
   tracks: TrackState[];
@@ -89,6 +90,7 @@ export function SequencerGrid({
   scaleKey,
   onTracksUpdate,
 }: SequencerGridProps) {
+  const { isPro } = useTier();
   const [activeTab, setActiveTab] = useState<string>("drums");
   const [showEQFor, setShowEQFor] = useState<string | null>(null);
   const [showAddTrack, setShowAddTrack] = useState(false);
@@ -440,6 +442,7 @@ export function SequencerGrid({
                   </div>
 
                   <div className="flex items-center gap-4 flex-wrap">
+                    {isPro && (
                     <button
                       onClick={() => setShowEQFor(showEQFor === track.id ? null : track.id)}
                       className={`p-2 rounded-lg border transition-colors flex items-center gap-1.5 ${
@@ -448,6 +451,7 @@ export function SequencerGrid({
                     >
                       <Sliders className="h-4 w-4" /> <span className="text-[11px]">EQ</span>
                     </button>
+                    )}
                     <button
                       onClick={() => onTrackMuteToggle(track.id)}
                       className={`p-2 rounded-lg border transition-colors ${
@@ -524,6 +528,7 @@ export function SequencerGrid({
                   </div>
                 </div>
 
+                {isPro && (
                 <div className="bg-brand-surface-2 border border-brand-border rounded-xl p-3 flex flex-col gap-3">
                   <AutomationLane
                     values={getAutomation(track)}
@@ -538,6 +543,7 @@ export function SequencerGrid({
                     bipolar
                   />
                 </div>
+                )}
               </div>
             );
           }
@@ -569,6 +575,7 @@ export function SequencerGrid({
                   </div>
 
                   <div className="flex items-center gap-4">
+                    {isPro && (
                     <button
                       onClick={() => setShowEQFor(showEQFor === track.id ? null : track.id)}
                       className={`p-2 rounded-lg border transition-colors flex items-center gap-1.5 ${
@@ -577,6 +584,7 @@ export function SequencerGrid({
                     >
                       <Sliders className="h-4 w-4" /> <span className="text-[11px]">EQ</span>
                     </button>
+                    )}
                     <button
                       onClick={() => onTrackMuteToggle(track.id)}
                       className={`p-2 rounded-lg border transition-colors ${
@@ -675,6 +683,7 @@ export function SequencerGrid({
                 </div>
               </div>
 
+              {isPro && (
               <div className="bg-brand-surface-2 border border-brand-border rounded-xl p-3 flex flex-col gap-3">
                 <VelocityLane track={track} currentStep={currentStep} onSetVelocity={setNoteVelocity} />
                 <AutomationLane
@@ -690,6 +699,7 @@ export function SequencerGrid({
                   bipolar
                 />
               </div>
+              )}
             </div>
           );
         })}

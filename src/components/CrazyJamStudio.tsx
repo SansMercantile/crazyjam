@@ -27,6 +27,7 @@ import { CompingPanel } from "./CompingPanel";
 import { DjModePanel } from "./DjModePanel";
 import { RegionEditor } from "./RegionEditor";
 import { audioEngine } from "../utils/audioEngine";
+import { useTier } from "../context/TierContext";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const MODE_INTERVALS: Record<string, number[]> = {
@@ -67,6 +68,7 @@ export function CrazyJamStudio({
   onTracksUpdate
 }: CrazyJamStudioProps) {
   const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<"recorder" | "sampler" | "mixer" | "comping" | "dj" | "search">("search");
+  const { isPro } = useTier();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedReference, setSelectedReference] = useState<any>(null);
@@ -214,6 +216,12 @@ export function CrazyJamStudio({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!isPro && (activeWorkspaceTab === "mixer" || activeWorkspaceTab === "comping" || activeWorkspaceTab === "dj")) {
+      setActiveWorkspaceTab("recorder");
+    }
+  }, [isPro, activeWorkspaceTab]);
+
   return (
     <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col gap-5 mt-6" id="crazyjam-studio-rack">
       <div className="flex flex-wrap items-center justify-between border-b border-brand-border pb-3">
@@ -234,17 +242,21 @@ export function CrazyJamStudio({
           <button onClick={() => setActiveWorkspaceTab("sampler")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "sampler" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
             <Scissors className="h-3.5 w-3.5 inline mr-1.5" /> Sampler
           </button>
-          {tracks && onTracksUpdate && (
+          {isPro && tracks && onTracksUpdate && (
             <button onClick={() => setActiveWorkspaceTab("mixer")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "mixer" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
               <SlidersHorizontal className="h-3.5 w-3.5 inline mr-1.5" /> Mixer
             </button>
           )}
-          <button onClick={() => setActiveWorkspaceTab("comping")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "comping" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
-            <Wand2 className="h-3.5 w-3.5 inline mr-1.5" /> Comping
-          </button>
-          <button onClick={() => setActiveWorkspaceTab("dj")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "dj" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
-            <Disc3 className="h-3.5 w-3.5 inline mr-1.5" /> DJ Mode
-          </button>
+          {isPro && (
+            <button onClick={() => setActiveWorkspaceTab("comping")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "comping" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
+              <Wand2 className="h-3.5 w-3.5 inline mr-1.5" /> Comping
+            </button>
+          )}
+          {isPro && (
+            <button onClick={() => setActiveWorkspaceTab("dj")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "dj" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
+              <Disc3 className="h-3.5 w-3.5 inline mr-1.5" /> DJ Mode
+            </button>
+          )}
           <button onClick={() => setActiveWorkspaceTab("search")} className={`px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all ${activeWorkspaceTab === "search" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}>
             <Compass className="h-3.5 w-3.5 inline mr-1.5" /> Reference sync
           </button>
@@ -278,6 +290,7 @@ export function CrazyJamStudio({
                 <audio src={recordedAudioUrl} controls className="w-full h-8" />
               </div>
             )}
+            {isPro && (
             <div className="w-full bg-brand-surface-2 border border-brand-border rounded-xl p-3.5 text-left">
               <div className="flex items-center justify-between">
                 <h5 className="text-[12px] text-brand-ink flex items-center gap-1.5">
@@ -325,6 +338,7 @@ export function CrazyJamStudio({
                 </p>
               </div>
             </div>
+            )}
           </div>
         )}
 
@@ -380,6 +394,7 @@ export function CrazyJamStudio({
                   buffer={uploadedSample.buffer}
                   fileName={uploadedSample.name}
                   audioCtx={audioCtx}
+                  simple={!isPro}
                   onReplaceSample={(buffer) => setUploadedSample((prev) => (prev ? { ...prev, buffer } : prev))}
                 />
               </div>
@@ -388,12 +403,12 @@ export function CrazyJamStudio({
         )}
 
         {/* MIXER - real per-track gain/pan nodes + live AnalyserNode-driven VU meters */}
-        {activeWorkspaceTab === "mixer" && tracks && onTracksUpdate && (
+        {isPro && activeWorkspaceTab === "mixer" && tracks && onTracksUpdate && (
           <MixerPanel tracks={tracks} onTracksUpdate={onTracksUpdate} />
         )}
 
         {/* COMPING - real multi-take recording + sample-accurate segment splicing */}
-        {activeWorkspaceTab === "comping" && (
+        {isPro && activeWorkspaceTab === "comping" && (
           <CompingPanel
             audioCtx={audioCtx}
             onSendToSampler={(name, size, buffer) => setUploadedSample({ name, size, buffer })}
@@ -401,7 +416,7 @@ export function CrazyJamStudio({
         )}
 
         {/* DJ MODE - two independent decks, real equal-power crossfader, real onset-based BPM sync */}
-        {activeWorkspaceTab === "dj" && <DjModePanel audioCtx={audioCtx} />}
+        {isPro && activeWorkspaceTab === "dj" && <DjModePanel audioCtx={audioCtx} />}
 
         {/* REFERENCE SYNC - genuinely functional: sets real tempo/scale/prompt */}
         {activeWorkspaceTab === "search" && (

@@ -18,11 +18,12 @@ interface RegionEditorProps {
   fileName: string;
   audioCtx: AudioContext | null;
   onReplaceSample?: (buffer: AudioBuffer) => void;
+  simple?: boolean; // when true, hides fade/gain controls for a beginner-friendly trim-only view
 }
 
 const WAVEFORM_HEIGHT = 90;
 
-export function RegionEditor({ buffer, fileName, audioCtx, onReplaceSample }: RegionEditorProps) {
+export function RegionEditor({ buffer, fileName, audioCtx, onReplaceSample, simple = false }: RegionEditorProps) {
   const [trimStart, setTrimStart] = useState(0); // 0..1 fraction of buffer duration
   const [trimEnd, setTrimEnd] = useState(1);
   const [fadeInMs, setFadeInMs] = useState(0);
@@ -212,6 +213,7 @@ export function RegionEditor({ buffer, fileName, audioCtx, onReplaceSample }: Re
         />
       </div>
 
+      {!simple && (
       <div className="grid grid-cols-3 gap-3">
         <div className="flex flex-col gap-1.5">
           <span className="text-[10px] text-brand-ink-muted">Fade in: {fadeInMs}ms</span>
@@ -226,6 +228,7 @@ export function RegionEditor({ buffer, fileName, audioCtx, onReplaceSample }: Re
           <input type="range" min={-24} max={12} step={0.5} value={gainDb} onChange={(e) => setGainDb(parseFloat(e.target.value))} className="w-full accent-brand-gold cursor-pointer" />
         </div>
       </div>
+      )}
 
       <div className="flex gap-2">
         <button

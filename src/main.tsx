@@ -5,6 +5,7 @@ import {Analytics} from '@vercel/analytics/react';
 import App from './App.tsx';
 import {PublicArtistPage} from './components/PublicArtistPage.tsx';
 import {PlaybackProvider} from './context/PlaybackContext.tsx';
+import {TierProvider} from './context/TierContext.tsx';
 import './index.css';
 
 const AUTH0_DOMAIN = "dev-b78ozdt6veybztac.us.auth0.com";
@@ -47,7 +48,9 @@ createRoot(document.getElementById('root')!).render(
         cacheLocation="localstorage"
       >
         <PlaybackProvider>
-          <App />
+          <TierProvider>
+            <App />
+          </TierProvider>
         </PlaybackProvider>
         <Analytics />
       </Auth0Provider>

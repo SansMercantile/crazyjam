@@ -18,6 +18,7 @@ import {
   ListRestart
 } from "lucide-react";
 import { audioEngine } from "../utils/audioEngine";
+import { useTier } from "../context/TierContext";
 
 interface MidiStudioProps {
   tempo: number;

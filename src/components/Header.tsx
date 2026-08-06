@@ -4,7 +4,8 @@
  */
 
 import React from "react";
-import { Play, Square, Sparkles, Volume2, Loader2 } from "lucide-react";
+import { Play, Square, Sparkles, Volume2, Loader2, Wrench } from "lucide-react";
+import { useTier } from "../context/TierContext";
 
 interface HeaderProps {
   title: string;
@@ -45,6 +46,7 @@ export function Header({
   onVolumeChange,
   volume,
 }: HeaderProps) {
+  const { tier, setTier } = useTier();
   return (
     <header className="border-b border-brand-border bg-brand-surface/95 backdrop-blur-md px-6 py-4 sticky top-0 z-40">
       <div className="max-w-[1600px] mx-auto flex flex-col gap-4">
@@ -59,6 +61,23 @@ export function Header({
               AI-Native Music Composition Suite
             </p>
           </div>
+
+          <div className="flex items-center gap-3">
+            {/* Simple/Pro tier toggle - hides/reveals professional-grade tools app-wide */}
+            <div className="flex items-center bg-brand-surface-2 border border-brand-border rounded-full p-0.5">
+              <button
+                onClick={() => setTier("simple")}
+                className={`px-3 py-1 rounded-full text-[10px] font-medium transition-all ${tier === "simple" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}
+              >
+                Simple
+              </button>
+              <button
+                onClick={() => setTier("pro")}
+                className={`px-3 py-1 rounded-full text-[10px] font-medium transition-all flex items-center gap-1 ${tier === "pro" ? "bg-brand-gold text-brand-bg" : "text-brand-ink-muted hover:text-brand-ink"}`}
+              >
+                <Wrench className="h-2.5 w-2.5" /> Pro Tools
+              </button>
+            </div>
 
           {/* Active Track Metadata */}
           <div className="flex items-center gap-5 bg-brand-surface-2 border border-brand-border px-4 py-2 rounded-xl">
@@ -76,6 +95,7 @@ export function Header({
               <span className="text-[9px] text-brand-ink-muted block mb-0.5">Style</span>
               <span className="text-xs text-brand-gold font-medium block">{genre || "Modular Ambient"}</span>
             </div>
+          </div>
           </div>
         </div>
 
