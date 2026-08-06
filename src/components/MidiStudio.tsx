@@ -57,6 +57,7 @@ export function MidiStudio({
   onAutoFix,
   audioCtx
 }: MidiStudioProps) {
+  const { isPro } = useTier();
   // MIDI States
   const [midiSupported, setMidiSupported] = useState(false);
   const [midiDevices, setMidiDevices] = useState<MidiDevice[]>([]);
