@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Visualizer } from "./Visualizer";
 import { EffectsRack } from "./EffectsRack";
 import { MidiStudio } from "./MidiStudio";
 import { Download, Radio, Compass, Loader2, FileMusic } from "lucide-react";
@@ -108,11 +107,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
   return (
     <div className="space-y-5 animate-fadeIn text-left">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <div className="lg:col-span-8">
-          <Visualizer analyser={analyser} isPlaying={isPlaying} scaleKey={scaleKey} />
-        </div>
-
-        <div className="lg:col-span-4 bg-brand-surface border border-brand-border rounded-2xl p-5 flex flex-col justify-between">
+        <div className="lg:col-span-12 bg-brand-surface border border-brand-border rounded-2xl p-5 flex flex-col justify-between">
           <div className="space-y-4">
             <div className="flex items-center gap-2.5 border-b border-brand-border pb-3 text-brand-gold">
               <Compass className="h-4.5 w-4.5" />
@@ -128,7 +123,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
 
             <div className="space-y-2">
               <label className="text-[11px] text-brand-ink-muted block">Space presets</label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {SPACE_PRESETS.map((p) => (
                   <button
                     key={p.id}
