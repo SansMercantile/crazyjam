@@ -159,6 +159,62 @@ export async function humToBeat(audioBase64: string, mimeType: string) {
   return res.json();
 }
 
+// --- Real generative audio (MusicGen, running on the GPU box) ---
+// Genuinely different from generateBlueprint above: that drives the
+// client-side synth sequencer, this returns real generated audio bytes
+// from an actual model. Instrumental only - no vocals. Generation takes
+// ~20s+ so this uses a longer timeout than the default fetch.
+export interface GenerateMusicResult {
+  success: boolean;
+  audioBase64?: string;
+  mimeType?: string;
+  generationSeconds?: number;
+  errorMessage?: string;
+}
+
+export async function generateRealAudio(prompt: string, durationSeconds: number = 8): Promise<GenerateMusicResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 150000); // 150s - generation + GPU cold spots
+  try {
+    const res = await apiFetch("/api/music-generation/generate", {
+      method: "POST",
+      body: JSON.stringify({ prompt, durationSeconds }),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Generation request failed");
+    }
+    return res.json();
+  } catch (e: any) {
+    if (e.name === "AbortError") throw new Error("Generation timed out - the GPU may be busy, try again shortly.");
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+export async function checkMusicGenAvailable(): Promise<boolean> {
+  try {
+    const res = await apiFetch("/api/music-generation/status");
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data.available;
+  } catch {
+    return false;
+  }
+}
+
+/** Converts a base64 string (no data: prefix) into a playable object URL. */
+export function base64ToAudioUrl(base64: string, mimeType: string = "audio/wav"): string {
+  const byteChars = atob(base64);
+  const byteNumbers = new Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], { type: mimeType });
+  return URL.createObjectURL(blob);
+}
+
 // --- Tracks ---
 export interface SaveTrackOptions {
   renderedAudioBase64?: string;

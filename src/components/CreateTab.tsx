@@ -10,7 +10,7 @@
  * instrumentation, not performed. That's stated plainly in the UI so it
  * doesn't read as broken when no singing plays back.
  */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Wand2,
   SlidersHorizontal,
@@ -21,8 +21,12 @@ import {
   Music2,
   Mic2,
   Type,
+  Radio,
+  Download,
+  AlertCircle,
 } from "lucide-react";
 import { MusicBlueprint } from "../types";
+import { generateRealAudio, checkMusicGenAvailable, base64ToAudioUrl } from "../utils/api";
 
 const STYLE_TAG_CHIPS = [
   "Indie Rock", "Amapiano", "Lofi Hip-Hop", "Synthwave", "Afrobeats",
@@ -56,6 +60,37 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
   const [saveTitleInput, setSaveTitleInput] = useState("");
+
+  // Real generative audio (MusicGen) - separate from the sequencer blueprint above.
+  const [isMusicGenAvailable, setIsMusicGenAvailable] = useState<boolean | null>(null);
+  const [isRenderingAudio, setIsRenderingAudio] = useState(false);
+  const [audioResult, setAudioResult] = useState<{ url: string; seconds?: number } | null>(null);
+  const [audioError, setAudioError] = useState("");
+  const [audioDuration, setAudioDuration] = useState(8);
+
+  useEffect(() => {
+    checkMusicGenAvailable().then(setIsMusicGenAvailable);
+  }, []);
+
+  const effectivePrompt = mode === "simple" ? simplePrompt : (customStyle || customTitle || "a new track");
+
+  const handleRenderRealAudio = async () => {
+    setIsRenderingAudio(true);
+    setAudioError("");
+    setAudioResult(null);
+    try {
+      const result = await generateRealAudio(effectivePrompt, audioDuration);
+      if (result.success && result.audioBase64) {
+        setAudioResult({ url: base64ToAudioUrl(result.audioBase64, result.mimeType), seconds: result.generationSeconds });
+      } else {
+        setAudioError(result.errorMessage || "Generation failed.");
+      }
+    } catch (e: any) {
+      setAudioError(e.message || "Generation failed.");
+    } finally {
+      setIsRenderingAudio(false);
+    }
+  };
 
   const insertMetaTag = (tag: string) => {
     setCustomLyrics((prev) => (prev ? `${prev}\n${tag}\n` : `${tag}\n`));
