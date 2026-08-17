@@ -284,10 +284,79 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
         <div className="bg-brand-surface-2 border border-brand-border rounded-xl p-4 flex gap-2.5 items-start">
           <Info className="h-3.5 w-3.5 text-brand-gold shrink-0 mt-0.5" />
           <p className="text-[11px] text-brand-ink-muted leading-relaxed">
-            CrazyJam composes real instrumentation you can hear immediately in the sequencer. Lyrics are
+            "Generate Track" composes real instrumentation in the sequencer, instantly. Lyrics are
             generated/attached as reference text alongside it - sung vocal audio synthesis isn't part of this
-            release yet, so the words won't be performed out loud.
+            release yet, so the words won't be performed out loud. For real generated audio instead of the
+            sequencer, use "Render Real Audio" below.
           </p>
+        </div>
+
+        {/* Real generative audio - MusicGen running on dedicated GPU compute, not a mock */}
+        <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col gap-4">
+          <div className="flex items-center gap-2.5 text-brand-gold">
+            <Radio className="h-5 w-5" />
+            <div>
+              <h3 className="font-display text-base text-brand-ink">Render Real Audio</h3>
+              <p className="text-[11px] text-brand-ink-muted">Real generated audio, not the sequencer synth. Instrumental only.</p>
+            </div>
+          </div>
+
+          {isMusicGenAvailable === false && (
+            <div className="flex gap-2 items-start bg-brand-surface-2 border border-brand-border rounded-lg p-3">
+              <AlertCircle className="h-3.5 w-3.5 text-brand-ink-muted shrink-0 mt-0.5" />
+              <p className="text-[11px] text-brand-ink-muted">Generation engine is offline right now - try again shortly.</p>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            <label className="text-[11px] text-brand-ink-muted whitespace-nowrap">Length</label>
+            <input
+              type="range"
+              min={4}
+              max={20}
+              step={1}
+              value={audioDuration}
+              onChange={(e) => setAudioDuration(parseInt(e.target.value))}
+              className="flex-1 accent-brand-gold"
+            />
+            <span className="text-[11px] text-brand-ink-muted font-mono w-10 text-right">{audioDuration}s</span>
+          </div>
+
+          <button
+            onClick={handleRenderRealAudio}
+            disabled={isRenderingAudio || isMusicGenAvailable === false || !effectivePrompt.trim()}
+            className="w-full h-11 flex items-center justify-center gap-2 bg-brand-surface-2 border border-brand-gold/40 hover:border-brand-gold rounded-xl font-medium text-sm text-brand-gold transition-all disabled:opacity-40"
+          >
+            {isRenderingAudio ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Generating real audio (~20-40s)...
+              </>
+            ) : (
+              <>
+                <Radio className="h-4 w-4" /> Render Real Audio
+              </>
+            )}
+          </button>
+
+          {audioError && <p className="text-[11px] text-red-400">{audioError}</p>}
+
+          {audioResult && (
+            <div className="flex flex-col gap-2 pt-2 border-t border-brand-border">
+              <audio src={audioResult.url} controls className="w-full h-9" />
+              <div className="flex items-center justify-between">
+                {audioResult.seconds && (
+                  <span className="text-[10px] text-brand-ink-muted">Generated in {audioResult.seconds.toFixed(1)}s</span>
+                )}
+                <a
+                  href={audioResult.url}
+                  download="crazyjam-render.wav"
+                  className="flex items-center gap-1.5 text-[11px] text-brand-gold hover:underline"
+                >
+                  <Download className="h-3 w-3" /> Download WAV
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
