@@ -27,6 +27,7 @@ import {
 import { TrackState } from "../types";
 import { audioEngine } from "../utils/audioEngine";
 import { saveVideo, generateLipSyncVideo, checkLipSyncAvailable } from "../utils/api";
+import { TrackPreviewPlayer } from "./TrackPreviewPlayer";
 
 interface Clip {
   id: string;
@@ -349,6 +350,8 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
           <p className="text-[11px] text-brand-ink-muted">Composite your images/clips with the real track audio into a downloadable video.</p>
         </div>
       </div>
+
+      <TrackPreviewPlayer tracks={tracks} tempo={tempo} label="Track preview - listen while you edit" />
 
       <div className="flex flex-wrap gap-2">
         <button

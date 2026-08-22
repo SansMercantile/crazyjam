@@ -4,21 +4,17 @@
  */
 
 import React from "react";
-import { Play, Square, Sparkles, Volume2, Loader2, Wrench } from "lucide-react";
+import { Sparkles, Volume2, Loader2, Wrench } from "lucide-react";
 import { useTier } from "../context/TierContext";
 
 interface HeaderProps {
   title: string;
   scale: string;
   genre: string;
-  tempo: number;
-  isPlaying: boolean;
   isGenerating: boolean;
   prompt: string;
   onPromptChange: (val: string) => void;
   onGenerate: () => void;
-  onPlayToggle: () => void;
-  onTempoChange: (val: number) => void;
   onVolumeChange: (val: number) => void;
   volume: number;
 }
@@ -35,14 +31,10 @@ export function Header({
   title,
   scale,
   genre,
-  tempo,
-  isPlaying,
   isGenerating,
   prompt,
   onPromptChange,
   onGenerate,
-  onPlayToggle,
-  onTempoChange,
   onVolumeChange,
   volume,
 }: HeaderProps) {
@@ -146,59 +138,24 @@ export function Header({
           ))}
         </div>
 
-        {/* Transport */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-brand-surface-2 border border-brand-border px-5 py-3 rounded-xl">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onPlayToggle}
-              className={`h-11 w-11 rounded-full flex items-center justify-center transition-all ${
-                isPlaying
-                  ? "bg-brand-gold"
-                  : "bg-brand-surface border border-brand-gold/40 text-brand-gold hover:bg-brand-gold/10"
-              }`}
-            >
-              {isPlaying ? <Square className="h-4.5 w-4.5 fill-current" /> : <Play className="h-4.5 w-4.5 fill-current ml-0.5" />}
-            </button>
+        {/* Master volume - tempo & metronome now live in Studio mode, where users
+            actually build patterns; this bar no longer drives a live preview. */}
+        <div className="flex flex-wrap items-center justify-end gap-4 bg-brand-surface-2 border border-brand-border px-5 py-3 rounded-xl">
+          <div className="flex items-center gap-3 min-w-[170px]">
+            <Volume2 className="h-4 w-4 text-brand-ink-muted" />
             <div>
-              <span className="text-[9px] text-brand-ink-muted block leading-tight">Transport</span>
-              <span className="text-xs font-medium text-brand-ink">
-                {isPlaying ? "Playing" : "Idle"}
-              </span>
+              <span className="text-[9px] text-brand-ink-muted block leading-tight">Master Gain</span>
+              <span className="text-xs font-medium text-brand-ink">{Math.round(volume * 100)}%</span>
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-8">
-            <div className="flex items-center gap-3 min-w-[190px]">
-              <div>
-                <span className="text-[9px] text-brand-ink-muted block leading-tight">Tempo</span>
-                <span className="text-xs font-medium text-brand-ink">{tempo} <span className="text-[9px] text-brand-ink-muted">BPM</span></span>
-              </div>
-              <input
-                type="range"
-                min="75"
-                max="145"
-                value={tempo}
-                onChange={(e) => onTempoChange(Number(e.target.value))}
-                className="flex-1 h-1.5 bg-brand-border rounded-lg appearance-none cursor-pointer accent-brand-gold"
-              />
-            </div>
-
-            <div className="flex items-center gap-3 min-w-[170px]">
-              <Volume2 className="h-4 w-4 text-brand-ink-muted" />
-              <div>
-                <span className="text-[9px] text-brand-ink-muted block leading-tight">Gain</span>
-                <span className="text-xs font-medium text-brand-ink">{Math.round(volume * 100)}%</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={volume}
-                onChange={(e) => onVolumeChange(Number(e.target.value))}
-                className="flex-1 h-1.5 bg-brand-border rounded-lg appearance-none cursor-pointer accent-brand-gold"
-              />
-            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={volume}
+              onChange={(e) => onVolumeChange(Number(e.target.value))}
+              className="flex-1 h-1.5 bg-brand-border rounded-lg appearance-none cursor-pointer accent-brand-gold"
+            />
           </div>
         </div>
       </div>

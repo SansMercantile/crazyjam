@@ -11,7 +11,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  Sliders
+  Sliders,
+  Play,
+  Square,
 } from "lucide-react";
 import { TrackState, NoteEvent } from "../types";
 
@@ -19,6 +21,7 @@ interface SequencerTabProps {
   tracks: TrackState[];
   currentStep: number;
   isPlaying: boolean;
+  onPlayToggle: () => void;
   onStepToggle: (trackId: string, laneId: string | null, stepIndex: number) => void;
   onTrackVolumeChange: (trackId: string, val: number) => void;
   onTrackMuteToggle: (trackId: string) => void;
@@ -37,6 +40,7 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
   tracks,
   currentStep,
   isPlaying,
+  onPlayToggle,
   onStepToggle,
   onTrackVolumeChange,
   onTrackMuteToggle,
@@ -205,10 +209,25 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
             </div>
           </div>
 
-          {/* Quick Helper Chip */}
-          <div className="flex items-center gap-2 bg-brand-surface-2 border border-brand-border px-3.5 py-1.5 rounded-xl text-[10px] font-mono text-brand-ink-muted">
-            <Info className="h-3.5 w-3.5 text-brand-gold" />
-            <span>Click any block below to hear instant notes & build drum loop.</span>
+          {/* Play/stop preview - live-highlights the grid below via currentStep */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onPlayToggle}
+              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                isPlaying
+                  ? "bg-brand-gold"
+                  : "bg-brand-surface border border-brand-gold/40 text-brand-gold hover:bg-brand-gold/10"
+              }`}
+              title={isPlaying ? "Stop pattern preview" : "Play pattern preview"}
+            >
+              {isPlaying ? <Square className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current ml-0.5" />}
+            </button>
+
+            {/* Quick Helper Chip */}
+            <div className="flex items-center gap-2 bg-brand-surface-2 border border-brand-border px-3.5 py-1.5 rounded-xl text-[10px] font-mono text-brand-ink-muted">
+              <Info className="h-3.5 w-3.5 text-brand-gold" />
+              <span>Click any block below to hear instant notes & build drum loop.</span>
+            </div>
           </div>
         </div>
 

@@ -21,6 +21,15 @@ export class AudioEngine {
   private lastStepTime: number = 0;
   private stepListeners: Array<(step: number) => void> = [];
 
+  // Metronome: independent of the step sequencer's start()/stop() above -
+  // a simple, real audible click scheduled against audioCtx.currentTime
+  // (not setTimeout drift) so it stays tight at any tempo.
+  private metronomeTimerId: any = null;
+  private metronomeNextClickTime: number = 0;
+  private metronomeBeat: number = 0;
+  private metronomeRunning: boolean = false;
+  private metronomeGainValue: number = 0.5;
+
   // Real-time custom FX parameters
   private masterFilterCutoff: number = 20000; // default wide open (Hz)
   private masterFilterQ: number = 1.0;
@@ -337,6 +346,70 @@ export class AudioEngine {
       this.timerId = null;
     }
   }
+
+  /** Plays one real click - a short high-passed noise burst pitched down on
+   * beat 1 vs beats 2-4, like a hardware metronome's accent tick. */
+  private playMetronomeClick(time: number, accent: boolean) {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = "square";
+    osc.frequency.value = accent ? 1500 : 1000;
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(this.metronomeGainValue, time + 0.002);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.045);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(time);
+    osc.stop(time + 0.05);
+  }
+
+  /** Starts an audible metronome at the given BPM. Independent of the step
+   * sequencer - just a click, scheduled with a short look-ahead window
+   * against audioCtx.currentTime so it doesn't drift like a plain
+   * setInterval would. */
+  public startMetronome(bpm: number) {
+    this.init();
+    if (this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+    if (this.metronomeRunning) this.stopMetronome();
+    if (!this.ctx) return;
+
+    this.metronomeRunning = true;
+    this.metronomeBeat = 0;
+    this.metronomeNextClickTime = this.ctx.currentTime + 0.05;
+
+    const lookaheadMs = 25;
+    const scheduleAheadSec = 0.1;
+
+    const scheduler = () => {
+      if (!this.metronomeRunning || !this.ctx) return;
+      const secondsPerBeat = 60 / bpm;
+      while (this.metronomeNextClickTime < this.ctx.currentTime + scheduleAheadSec) {
+        this.playMetronomeClick(this.metronomeNextClickTime, this.metronomeBeat % 4 === 0);
+        this.metronomeNextClickTime += secondsPerBeat;
+        this.metronomeBeat++;
+      }
+      this.metronomeTimerId = setTimeout(scheduler, lookaheadMs);
+    };
+    scheduler();
+  }
+
+  public stopMetronome() {
+    this.metronomeRunning = false;
+    if (this.metronomeTimerId) {
+      clearTimeout(this.metronomeTimerId);
+      this.metronomeTimerId = null;
+    }
+  }
+
+  public isMetronomeRunning(): boolean {
+    return this.metronomeRunning;
+  }
+
+  public setMetronomeVolume(v: number) {
+    this.metronomeGainValue = Math.max(0, Math.min(1, v));
+  }
+
 
   public isPlaying() {
     return this.isRunning;

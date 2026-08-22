@@ -28,6 +28,8 @@ import {
   X,
 } from "lucide-react";
 import { saveAlbumArt, updateAlbumArt, listAlbumArt, deleteAlbumArt } from "../utils/api";
+import { TrackState } from "../types";
+import { TrackPreviewPlayer } from "./TrackPreviewPlayer";
 
 export const CANVAS_SIZE = 1400;
 const EDITOR_SIZE = 520;
@@ -63,9 +65,11 @@ function newId() {
 
 interface AlbumArtStudioProps {
   addLog?: (log: any) => void;
+  tracks?: TrackState[];
+  tempo?: number;
 }
 
-export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
+export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog, tracks, tempo }) => {
   const [title, setTitle] = useState("Untitled Cover");
   const [background, setBackground] = useState("#14141d");
   const [layers, setLayers] = useState<ArtLayer[]>([]);
@@ -368,6 +372,10 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog }) => {
             <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">Cover Art Studio</h2>
           </div>
           <p className="text-[10px] font-mono text-brand-ink-muted">Exports fixed at 1400 × 1400px for every streaming platform.</p>
+
+          {tracks && tracks.length > 0 && (
+            <TrackPreviewPlayer tracks={tracks} tempo={tempo || 120} label="Listen while you design" />
+          )}
 
           <input
             type="text"

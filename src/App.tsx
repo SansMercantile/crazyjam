@@ -814,14 +814,10 @@ export default function App() {
           title={title}
           scale={scale}
           genre={genre}
-          tempo={tempo}
-          isPlaying={isPlaying}
           isGenerating={isGenerating}
           prompt={prompt}
           onPromptChange={setPrompt}
           onGenerate={handleGenerate}
-          onPlayToggle={handlePlayToggle}
-          onTempoChange={handleTempoChange}
           onVolumeChange={handleVolumeChange}
           volume={volume}
         />
@@ -889,6 +885,7 @@ export default function App() {
               tracks={tracks}
               currentStep={currentStep}
               isPlaying={isPlaying}
+              onPlayToggle={handlePlayToggle}
               onStepToggle={handleStepToggle}
               onTrackVolumeChange={handleTrackVolumeChange}
               onTrackMuteToggle={handleTrackMuteToggle}
@@ -905,7 +902,7 @@ export default function App() {
           )}
 
           {activeTab === "artwork" && (
-            <AlbumArtStudio addLog={addLog} />
+            <AlbumArtStudio addLog={addLog} tracks={tracks} tempo={tempo} />
           )}
 
           {activeTab === "music" && (

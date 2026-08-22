@@ -20,6 +20,7 @@ import {
   FileAudio,
   AlertCircle,
   Wand2,
+  Timer,
 } from "lucide-react";
 import { TrackState } from "../types";
 import { MixerPanel } from "./MixerPanel";
@@ -212,9 +213,38 @@ export function CrazyJamStudio({
   useEffect(() => {
     return () => {
       if (isPitchOn) audioEngine.stopPitchCorrection();
+      audioEngine.stopMetronome();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // --- Metronome: real audible click, independent of the (removed) live
+  // sequencer preview - just keeps time at the studio's tempo. ---
+  const [metronomeOn, setMetronomeOn] = useState(false);
+  const [metronomeVolume, setMetronomeVolumeState] = useState(0.5);
+
+  const toggleMetronome = () => {
+    if (metronomeOn) {
+      audioEngine.stopMetronome();
+      setMetronomeOn(false);
+    } else {
+      audioEngine.setMetronomeVolume(metronomeVolume);
+      audioEngine.startMetronome(tempo);
+      setMetronomeOn(true);
+    }
+  };
+
+  const handleMetronomeVolume = (v: number) => {
+    setMetronomeVolumeState(v);
+    audioEngine.setMetronomeVolume(v);
+  };
+
+  // Keep a running metronome locked to tempo changes made while it's on.
+  useEffect(() => {
+    if (metronomeOn) audioEngine.startMetronome(tempo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tempo]);
+
 
   useEffect(() => {
     if (!isPro && (activeWorkspaceTab === "mixer" || activeWorkspaceTab === "comping" || activeWorkspaceTab === "dj")) {
@@ -261,6 +291,52 @@ export function CrazyJamStudio({
             <Compass className="h-3.5 w-3.5 inline mr-1.5" /> Reference sync
           </button>
         </div>
+      </div>
+
+      {/* Tempo & Metronome - persistent across every workspace tab, real audible click */}
+      <div className="flex flex-wrap items-center gap-6 bg-brand-bg/50 border border-brand-border rounded-xl px-5 py-3.5">
+        <div className="flex items-center gap-3 min-w-[220px]">
+          <div>
+            <span className="text-[9px] text-brand-ink-muted block leading-tight">Tempo</span>
+            <span className="text-xs font-medium text-brand-ink">
+              {tempo} <span className="text-[9px] text-brand-ink-muted">BPM</span>
+            </span>
+          </div>
+          <input
+            type="range"
+            min="60"
+            max="200"
+            value={tempo}
+            onChange={(e) => onTempoChange(Number(e.target.value))}
+            className="flex-1 h-1.5 bg-brand-border rounded-lg appearance-none cursor-pointer accent-brand-gold"
+          />
+        </div>
+
+        <button
+          onClick={toggleMetronome}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
+            metronomeOn
+              ? "bg-brand-gold text-brand-bg"
+              : "bg-brand-surface-2 border border-brand-border text-brand-ink-muted hover:text-brand-ink"
+          }`}
+        >
+          <Timer className={`h-3.5 w-3.5 ${metronomeOn ? "animate-pulse" : ""}`} /> Metronome {metronomeOn ? "On" : "Off"}
+        </button>
+
+        {metronomeOn && (
+          <div className="flex items-center gap-2 min-w-[130px]">
+            <span className="text-[9px] text-brand-ink-muted">Click vol</span>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={metronomeVolume}
+              onChange={(e) => handleMetronomeVolume(Number(e.target.value))}
+              className="flex-1 h-1.5 bg-brand-border rounded-lg appearance-none cursor-pointer accent-brand-gold"
+            />
+          </div>
+        )}
       </div>
 
       <div className="bg-brand-bg/50 rounded-xl border border-brand-border p-5">
