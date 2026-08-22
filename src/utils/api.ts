@@ -205,6 +205,55 @@ export async function checkMusicGenAvailable(): Promise<boolean> {
   }
 }
 
+// --- Real lip-sync video (Polly TTS + self-hosted Wav2Lip, same GPU box
+// as MusicGen) --- Animates a reference face photo speaking/singing the
+// given text. Render is CPU-bound (the GPU's memory is committed to
+// MusicGen) so this can take longer than audio generation.
+export interface GenerateLipSyncResult {
+  success: boolean;
+  videoBase64?: string;
+  mimeType?: string;
+  generationSeconds?: number;
+  errorMessage?: string;
+}
+
+export async function generateLipSyncVideo(
+  text: string,
+  faceImageBase64: string,
+  faceImageContentType: string = "image/jpeg"
+): Promise<GenerateLipSyncResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 170000); // CPU render, can be slow
+  try {
+    const res = await apiFetch("/api/lip-sync/generate", {
+      method: "POST",
+      body: JSON.stringify({ text, faceImageBase64, faceImageContentType }),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Lip-sync generation request failed");
+    }
+    return res.json();
+  } catch (e: any) {
+    if (e.name === "AbortError") throw new Error("Render timed out - try a shorter line of text.");
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+export async function checkLipSyncAvailable(): Promise<boolean> {
+  try {
+    const res = await apiFetch("/api/lip-sync/status");
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data.available;
+  } catch {
+    return false;
+  }
+}
+
 /** Converts a base64 string (no data: prefix) into a playable object URL. */
 export function base64ToAudioUrl(base64: string, mimeType: string = "audio/wav"): string {
   const byteChars = atob(base64);

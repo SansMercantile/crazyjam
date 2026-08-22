@@ -9,7 +9,7 @@
  * engine. No server-side video generation model involved; this is genuine
  * compositing of what you provide, not text-to-video generation.
  */
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Film,
   ImagePlus,
@@ -22,10 +22,11 @@ import {
   Save,
   Type,
   Clock,
+  Mic,
 } from "lucide-react";
 import { TrackState } from "../types";
 import { audioEngine } from "../utils/audioEngine";
-import { saveVideo } from "../utils/api";
+import { saveVideo, generateLipSyncVideo, checkLipSyncAvailable } from "../utils/api";
 
 interface Clip {
   id: string;
@@ -61,7 +62,74 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const faceInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // --- Talking/singing photo (Polly TTS + self-hosted Wav2Lip on the GPU box) ---
+  const [lipSyncAvailable, setLipSyncAvailable] = useState<boolean | null>(null);
+  const [faceFile, setFaceFile] = useState<File | null>(null);
+  const [facePreview, setFacePreview] = useState<string | null>(null);
+  const [lipSyncText, setLipSyncText] = useState(
+    lyrics ? lyrics.split("\n").find((l) => l.trim() && !l.startsWith("[")) || "" : ""
+  );
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [lipSyncStatus, setLipSyncStatus] = useState("");
+
+  useEffect(() => {
+    checkLipSyncAvailable().then(setLipSyncAvailable);
+  }, []);
+
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string).split(",")[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleAnimateFace = async () => {
+    if (!faceFile || !lipSyncText.trim()) {
+      setLipSyncStatus("Add a reference photo and a line of text first.");
+      return;
+    }
+    setIsAnimating(true);
+    setLipSyncStatus("Synthesizing speech and rendering (this can take a minute on CPU)...");
+    try {
+      const faceBase64 = await fileToBase64(faceFile);
+      const result = await generateLipSyncVideo(lipSyncText.trim(), faceBase64, faceFile.type || "image/jpeg");
+      if (!result.success || !result.videoBase64) {
+        setLipSyncStatus(result.errorMessage || "Render failed.");
+        return;
+      }
+      const byteChars = atob(result.videoBase64);
+      const byteArray = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([byteArray], { type: result.mimeType || "video/mp4" });
+      const src = URL.createObjectURL(blob);
+      const videoFile = new File([blob], `talking-photo-${Date.now()}.mp4`, { type: blob.type });
+      const newClip: Clip = {
+        id: `clip-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        type: "video",
+        src,
+        file: videoFile,
+        durationSec: 6,
+      };
+      setClips((prev) => [...prev, newClip]);
+      setLipSyncStatus("Added to your timeline below.");
+      addLog?.({
+        agentName: "Video Director",
+        role: "Lip Sync",
+        avatar: "\ud83d\udde3\ufe0f",
+        message: `Animated a reference photo speaking "${lipSyncText.trim().slice(0, 60)}${lipSyncText.trim().length > 60 ? "..." : ""}".`,
+        phase: "System",
+        status: "completed",
+      });
+    } catch (e: any) {
+      setLipSyncStatus(e.message || "Render failed.");
+    } finally {
+      setIsAnimating(false);
+    }
+  };
 
   const addFiles = (files: FileList | null, type: "image" | "video") => {
     if (!files) return;
@@ -298,6 +366,57 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
         <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => addFiles(e.target.files, "image")} />
         <input ref={videoInputRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => addFiles(e.target.files, "video")} />
       </div>
+
+      {/* Talking/singing photo - real Polly TTS + self-hosted Wav2Lip render */}
+      {lipSyncAvailable !== false && (
+        <div className="flex flex-col gap-3 bg-brand-surface-2 border border-brand-border rounded-xl p-4">
+          <div className="flex items-center gap-1.5 text-[12px] font-medium text-brand-ink">
+            <Mic className="h-3.5 w-3.5 text-brand-gold" /> Animate a photo
+            <span className="text-[10px] text-brand-ink-muted font-normal ml-1">
+              (real lip-sync render, adds a clip to your timeline)
+            </span>
+          </div>
+          <div className="flex items-start gap-3">
+            <button
+              onClick={() => faceInputRef.current?.click()}
+              className="h-16 w-16 shrink-0 rounded-lg border border-dashed border-brand-border flex items-center justify-center overflow-hidden bg-brand-surface"
+            >
+              {facePreview ? <img src={facePreview} className="h-full w-full object-cover" /> : <ImagePlus className="h-4 w-4 text-brand-ink-muted" />}
+            </button>
+            <input
+              ref={faceInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setFaceFile(file);
+                setFacePreview(file ? URL.createObjectURL(file) : null);
+              }}
+            />
+            <div className="flex-1 flex flex-col gap-2">
+              <textarea
+                value={lipSyncText}
+                onChange={(e) => setLipSyncText(e.target.value)}
+                rows={2}
+                maxLength={1500}
+                placeholder="What should the photo say or sing?"
+                className="bg-brand-surface border border-brand-border focus:border-brand-gold/50 text-brand-ink px-3 py-2 text-sm rounded-lg outline-none resize-none"
+              />
+              <button
+                onClick={handleAnimateFace}
+                disabled={isAnimating || !faceFile || !lipSyncText.trim() || lipSyncAvailable === false}
+                className="self-start flex items-center gap-1.5 bg-brand-surface-2 hover:bg-brand-border/30 border border-brand-border rounded-lg px-3 py-1.5 text-[11px] font-medium text-brand-ink transition-all disabled:opacity-40"
+              >
+                {isAnimating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mic className="h-3.5 w-3.5" />}
+                {isAnimating ? "Rendering..." : "Animate"}
+              </button>
+            </div>
+          </div>
+          {lipSyncStatus && <p className="text-[11px] text-brand-ink-muted">{lipSyncStatus}</p>}
+          {lipSyncAvailable === null && <p className="text-[10px] text-brand-ink-muted">Checking render engine...</p>}
+        </div>
+      )}
 
       {/* Clip list / timeline */}
       {clips.length > 0 && (
