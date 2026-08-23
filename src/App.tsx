@@ -9,7 +9,6 @@ import { ServiceAgent, TrackState, AgentLog, MusicBlueprint, NoteEvent } from ".
 import { AudioEngine, audioEngine } from "./utils/audioEngine";
 import { generateBlueprint, logout as apiLogout } from "./utils/api";
 import { Header } from "./components/Header";
-import { Visualizer } from "./components/Visualizer";
 import { SequencerGrid } from "./components/SequencerGrid";
 import { AgentControl } from "./components/AgentControl";
 import { EffectsRack } from "./components/EffectsRack";
