@@ -339,6 +339,27 @@ export async function saveAlbumArt(title: string, layers: any[], backgroundColor
   return res.json();
 }
 
+// Real AI album art generation (Bedrock Stable Image Core). Returns a
+// single PNG the caller drops in as a normal, movable/editable image layer.
+export interface GenerateAlbumArtResult {
+  success: boolean;
+  imageBase64?: string;
+  mimeType?: string;
+  errorMessage?: string;
+}
+
+export async function generateAiAlbumArt(prompt: string): Promise<GenerateAlbumArtResult> {
+  const res = await apiFetch("/api/album-art/generate-ai", {
+    method: "POST",
+    body: JSON.stringify({ prompt }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "AI image generation request failed");
+  }
+  return res.json();
+}
+
 export async function updateAlbumArt(id: string, title: string, layers: any[], backgroundColor: string, renderedImage: string) {
   const res = await apiFetch(`/api/album-art/${id}`, {
     method: "PUT",

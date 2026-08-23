@@ -18,6 +18,8 @@ import {
   Layers as LayersIcon,
   ChevronUp,
   ChevronDown,
+  Wand2,
+  Loader2,
   Palette,
   FolderOpen,
   Plus,
@@ -27,7 +29,7 @@ import {
   AlignRight,
   X,
 } from "lucide-react";
-import { saveAlbumArt, updateAlbumArt, listAlbumArt, deleteAlbumArt } from "../utils/api";
+import { saveAlbumArt, updateAlbumArt, listAlbumArt, deleteAlbumArt, generateAiAlbumArt } from "../utils/api";
 import { TrackState } from "../types";
 import { TrackPreviewPlayer } from "./TrackPreviewPlayer";
 
@@ -127,6 +129,50 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog, tracks, 
     };
     setLayers((prev) => [...prev, layer]);
     setSelectedId(layer.id);
+  };
+
+  // --- AI-generated art (Bedrock Stable Image Core) - dropped in as a
+  // normal image layer, so it's movable/resizable/deletable like any
+  // uploaded photo, never a fixed background. ---
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+
+  const handleGenerateAiArt = async () => {
+    if (!aiPrompt.trim()) return;
+    setIsGeneratingAi(true);
+    setStatusMsg("");
+    try {
+      const result = await generateAiAlbumArt(aiPrompt.trim());
+      if (!result.success || !result.imageBase64) {
+        setStatusMsg(result.errorMessage || "AI generation failed.");
+        return;
+      }
+      const src = `data:${result.mimeType || "image/png"};base64,${result.imageBase64}`;
+      const layer: ArtLayer = {
+        id: newId(),
+        type: "image",
+        x: 200,
+        y: 200,
+        width: 1000,
+        height: 1000,
+        zIndex: layers.length,
+        src,
+      };
+      setLayers((prev) => [...prev, layer]);
+      setSelectedId(layer.id);
+      addLog?.({
+        agentName: "Art Director",
+        role: "AI Generation",
+        avatar: "\ud83c\udfa8",
+        message: `Generated cover art from: "${aiPrompt.trim().slice(0, 60)}${aiPrompt.trim().length > 60 ? "..." : ""}"`,
+        phase: "System",
+        status: "completed",
+      });
+    } catch (e: any) {
+      setStatusMsg(e.message || "AI generation failed.");
+    } finally {
+      setIsGeneratingAi(false);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -400,6 +446,29 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog, tracks, 
             </button>
           </div>
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+
+          {/* AI-generated art - real Bedrock text-to-image, dropped in as a movable layer */}
+          <div className="flex flex-col gap-2 bg-brand-surface-2 border border-brand-border rounded-xl p-3">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase text-brand-ink">
+              <Wand2 className="h-3.5 w-3.5 text-brand-pink" /> Generate with AI
+            </div>
+            <textarea
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              rows={2}
+              maxLength={1000}
+              placeholder="Describe the cover art you want..."
+              className="bg-brand-surface border border-brand-border focus:border-brand-pink/50 text-brand-ink px-2.5 py-2 text-xs rounded-lg outline-none resize-none"
+            />
+            <button
+              onClick={handleGenerateAiArt}
+              disabled={isGeneratingAi || !aiPrompt.trim()}
+              className="flex items-center justify-center gap-1.5 bg-brand-pink/20 hover:bg-brand-pink/30 border border-brand-pink/40 rounded-lg py-2 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all disabled:opacity-40"
+            >
+              {isGeneratingAi ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+              {isGeneratingAi ? "Generating..." : "Generate"}
+            </button>
+          </div>
 
           <div className="mt-1">
             <span className="text-[9px] font-mono text-brand-ink-muted uppercase tracking-wide font-bold block mb-1.5">Background</span>
