@@ -16,6 +16,7 @@
     "electron:build:linux": "vite build && electron-builder --linux"
   },
   "dependencies": {
+    "@datadog/browser-rum": "^6.0.0",
     "@auth0/auth0-react": "^2.22.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vercel/analytics": "^2.0.1",

@@ -7,6 +7,9 @@ import {PublicArtistPage} from './components/PublicArtistPage.tsx';
 import {PlaybackProvider} from './context/PlaybackContext.tsx';
 import {TierProvider} from './context/TierContext.tsx';
 import './index.css';
+import { initDatadog } from './lib/datadog';
+
+initDatadog();
 
 const AUTH0_DOMAIN = "dev-b78ozdt6veybztac.us.auth0.com";
 // Dedicated CrazyJam SPA app (Single Page Application type - required for
