@@ -23,12 +23,14 @@ import {
   Type,
   Clock,
   Mic,
+  Layers,
 } from "lucide-react";
 import { TrackState } from "../types";
 import { audioEngine } from "../utils/audioEngine";
 import { saveVideo, generateLipSyncVideo, checkLipSyncAvailable } from "../utils/api";
 import { TrackPreviewPlayer } from "./TrackPreviewPlayer";
 import { VideoDirectorPanel } from "./VideoDirectorPanel";
+import { compositeOverlayVideo } from "../utils/videoCompositor";
 
 interface Clip {
   id: string;
@@ -145,6 +147,48 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
       durationSec: 6,
     };
     setClips((prev) => [...prev, newClip]);
+  };
+
+  // Combine any two video clips into one picture-in-picture composite -
+  // built for pairing an AI Video Director atmosphere clip with a Wav2Lip
+  // performer clip, but works generically on any two video clips.
+  const [pipBackgroundId, setPipBackgroundId] = useState("");
+  const [pipOverlayId, setPipOverlayId] = useState("");
+  const [isCompositing, setIsCompositing] = useState(false);
+  const [compositeStatus, setCompositeStatus] = useState("");
+
+  const handleComposite = async () => {
+    const bg = clips.find((c) => c.id === pipBackgroundId);
+    const ov = clips.find((c) => c.id === pipOverlayId);
+    if (!bg || !ov || bg.id === ov.id) {
+      setCompositeStatus("Pick two different video clips first.");
+      return;
+    }
+    setIsCompositing(true);
+    setCompositeStatus("Compositing (this renders in real time, ~duration of the clip)...");
+    try {
+      const combinedFile = await compositeOverlayVideo(bg.file, ov.file, { corner: "bottom-right" });
+      const src = URL.createObjectURL(combinedFile);
+      const newClip: Clip = {
+        id: `clip-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        type: "video",
+        src,
+        file: combinedFile,
+        durationSec: 6,
+      };
+      setClips((prev) => [...prev.filter((c) => c.id !== bg.id && c.id !== ov.id), newClip]);
+      setPipBackgroundId(""); setPipOverlayId("");
+      setCompositeStatus("Combined clip added to your timeline.");
+      addLog?.({
+        agentName: "Video Director", role: "Compositing", avatar: "\ud83c\udfa5",
+        message: "Combined the atmosphere and performer clips into one picture-in-picture shot.",
+        phase: "System", status: "completed",
+      });
+    } catch (e: any) {
+      setCompositeStatus(e.message || "Compositing failed.");
+    } finally {
+      setIsCompositing(false);
+    }
   };
 
   const addFiles = (files: FileList | null, type: "image" | "video") => {
@@ -443,6 +487,44 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
         addLog={addLog}
         onVideoReady={handleDirectorVideoReady}
       />
+
+      {clips.filter((c) => c.type === "video").length >= 2 && (
+        <div className="flex flex-col gap-2 bg-brand-surface-2 border border-brand-border rounded-xl p-4">
+          <div className="flex items-center gap-1.5 text-[12px] font-medium text-brand-ink">
+            <Layers className="h-4 w-4 text-brand-pink" /> Combine two clips (picture-in-picture)
+          </div>
+          <p className="text-[10px] text-brand-ink-muted">Pair an atmosphere clip with a performer clip - the overlay appears as a corner box on top of the background.</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={pipBackgroundId} onChange={(e) => setPipBackgroundId(e.target.value)}
+              className="bg-brand-surface border border-brand-border text-brand-ink text-xs rounded-lg px-2 py-1.5 outline-none"
+            >
+              <option value="">Background clip...</option>
+              {clips.filter((c) => c.type === "video").map((c, i) => (
+                <option key={c.id} value={c.id}>Clip {i + 1}</option>
+              ))}
+            </select>
+            <span className="text-brand-ink-muted text-xs">+</span>
+            <select
+              value={pipOverlayId} onChange={(e) => setPipOverlayId(e.target.value)}
+              className="bg-brand-surface border border-brand-border text-brand-ink text-xs rounded-lg px-2 py-1.5 outline-none"
+            >
+              <option value="">Overlay (performer) clip...</option>
+              {clips.filter((c) => c.type === "video").map((c, i) => (
+                <option key={c.id} value={c.id}>Clip {i + 1}</option>
+              ))}
+            </select>
+            <button
+              onClick={handleComposite} disabled={isCompositing || !pipBackgroundId || !pipOverlayId}
+              className="flex items-center gap-1.5 bg-brand-pink/20 hover:bg-brand-pink/30 border border-brand-pink/40 rounded-lg px-3 py-1.5 text-[11px] font-medium text-brand-ink transition-all disabled:opacity-40"
+            >
+              {isCompositing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Layers className="h-3.5 w-3.5" />}
+              {isCompositing ? "Compositing..." : "Combine"}
+            </button>
+          </div>
+          {compositeStatus && <p className="text-[10px] text-brand-ink-muted">{compositeStatus}</p>}
+        </div>
+      )}
 
       {/* Clip list / timeline */}
       {clips.length > 0 && (
