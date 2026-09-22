@@ -28,6 +28,7 @@ import { TrackState } from "../types";
 import { audioEngine } from "../utils/audioEngine";
 import { saveVideo, generateLipSyncVideo, checkLipSyncAvailable } from "../utils/api";
 import { TrackPreviewPlayer } from "./TrackPreviewPlayer";
+import { VideoDirectorPanel } from "./VideoDirectorPanel";
 
 interface Clip {
   id: string;
@@ -130,6 +131,20 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
     } finally {
       setIsAnimating(false);
     }
+  };
+
+  // AI Video Director produced a real atmosphere/b-roll clip - drop it into
+  // the timeline exactly like any other video clip.
+  const handleDirectorVideoReady = (file: File) => {
+    const src = URL.createObjectURL(file);
+    const newClip: Clip = {
+      id: `clip-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      type: "video",
+      src,
+      file,
+      durationSec: 6,
+    };
+    setClips((prev) => [...prev, newClip]);
   };
 
   const addFiles = (files: FileList | null, type: "image" | "video") => {
@@ -420,6 +435,14 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
           {lipSyncAvailable === null && <p className="text-[10px] text-brand-ink-muted">Checking render engine...</p>}
         </div>
       )}
+
+      <VideoDirectorPanel
+        trackTitle={trackTitle}
+        bpm={tempo}
+        lyrics={lyrics}
+        addLog={addLog}
+        onVideoReady={handleDirectorVideoReady}
+      />
 
       {/* Clip list / timeline */}
       {clips.length > 0 && (

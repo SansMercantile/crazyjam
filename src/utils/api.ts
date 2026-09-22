@@ -492,3 +492,142 @@ export function publicReleaseVideoUrl(id: string): string {
 export function publicReleaseAudioUrl(id: string): string {
   return `${API_BASE_URL}/api/releases/public/${id}/audio`;
 }
+
+// --- AI Music Video Director (AWS-native: Claude for writing/analysis,
+// Stability for stills, Luma Ray 2 for atmosphere/b-roll video). The
+// performer's own singing shot is NOT generated here - see generateLipSyncVideo
+// above; the frontend composites both into the timeline separately. ---
+export interface VideoDirectorConcept {
+  id: string;
+  title: string;
+  awardCategory: string;
+  storylineSynopsis: string;
+  narrativeTone: string;
+  characterRole: string;
+  logline: string;
+  visualStyle: string;
+  directorVision: string;
+  recommendedArtistStyle: string;
+  colorPalette: string[];
+}
+
+export interface VideoDirectorScene {
+  id: string;
+  name: string;
+  timestamp: string;
+  storyBeat: string;
+  narrativeAction: string;
+  description: string;
+  cameraMove: string;
+  lighting: string;
+  imagePrompt: string;
+}
+
+export interface AnalyzeConceptsResult {
+  success: boolean;
+  audioAnalysis?: string;
+  concepts?: VideoDirectorConcept[];
+  errorMessage?: string;
+}
+
+export async function analyzeVideoConcepts(params: {
+  trackTitle: string; genre?: string; bpm?: number; mood?: string; description?: string;
+  lyricsConcept?: string; storyline?: string; characterRole?: string; narrativeTone?: string; customNotes?: string;
+}): Promise<AnalyzeConceptsResult> {
+  const res = await apiFetch("/api/video-director/analyze-concepts", { method: "POST", body: JSON.stringify(params) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Concept analysis failed");
+  return res.json();
+}
+
+export interface GenerateScenesResult {
+  success: boolean;
+  scenes?: VideoDirectorScene[];
+  errorMessage?: string;
+}
+
+export async function generateConceptScenes(params: {
+  conceptTitle: string; storylineSynopsis?: string; directorVision?: string; visualStyle?: string;
+  narrativeTone?: string; characterRole?: string; trackTitle?: string; genre?: string; bpm?: number; mood?: string;
+}): Promise<GenerateScenesResult> {
+  const res = await apiFetch("/api/video-director/generate-scenes", { method: "POST", body: JSON.stringify(params) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Scene generation failed");
+  return res.json();
+}
+
+export interface EnhanceSceneResult {
+  success: boolean;
+  enhancedDescription?: string;
+  cameraMove?: string;
+  lighting?: string;
+  narrativeAction?: string;
+  cinematicHighlights?: string[];
+  directorNote?: string;
+  errorMessage?: string;
+}
+
+export async function enhanceVideoScene(params: {
+  sceneDescription?: string; narrativeAction?: string; storyBeat?: string; cameraMove?: string; lighting?: string;
+  songTitle?: string; songGenre?: string; songMood?: string; bpm?: number; storyline?: string;
+  conceptTitle?: string; characterRole?: string; visualStyle?: string;
+}): Promise<EnhanceSceneResult> {
+  const res = await apiFetch("/api/video-director/enhance-scene", { method: "POST", body: JSON.stringify(params) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Scene enhancement failed");
+  return res.json();
+}
+
+export interface GenerateStillResult {
+  success: boolean;
+  imageBase64?: string;
+  mimeType?: string;
+  errorMessage?: string;
+}
+
+export async function generateSceneStill(prompt: string, aspectRatio: string = "16:9"): Promise<GenerateStillResult> {
+  const res = await apiFetch("/api/video-director/generate-still", { method: "POST", body: JSON.stringify({ prompt, aspectRatio }) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Still generation failed");
+  return res.json();
+}
+
+export interface GenerateVideoPromptResult {
+  success: boolean;
+  prompt?: string;
+  errorMessage?: string;
+}
+
+export async function generateVideoDirectorPrompt(params: {
+  artistDesc?: string; conceptTitle?: string; directorVision?: string; visualStyle?: string;
+  scenes: VideoDirectorScene[]; genre?: string; bpm?: number; mood?: string;
+  storylineSynopsis?: string; characterRole?: string;
+}): Promise<GenerateVideoPromptResult> {
+  const res = await apiFetch("/api/video-director/generate-video-prompt", { method: "POST", body: JSON.stringify(params) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Video prompt generation failed");
+  return res.json();
+}
+
+export interface StartVideoGenerationResult {
+  success: boolean;
+  jobId?: string;
+  errorMessage?: string;
+}
+
+export async function startVideoDirectorRender(
+  prompt: string, durationSeconds: number = 5, aspectRatio: string = "16:9", loop: boolean = false
+): Promise<StartVideoGenerationResult> {
+  const res = await apiFetch("/api/video-director/generate-video", {
+    method: "POST", body: JSON.stringify({ prompt, durationSeconds, aspectRatio, loop }),
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Video render request failed");
+  return res.json();
+}
+
+export interface VideoGenerationStatusResult {
+  status: string;
+  videoUrl?: string;
+  errorMessage?: string;
+}
+
+export async function getVideoDirectorStatus(jobId: string): Promise<VideoGenerationStatusResult> {
+  const res = await apiFetch(`/api/video-director/video-status?jobId=${encodeURIComponent(jobId)}`);
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Could not check render status");
+  return res.json();
+}
