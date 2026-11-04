@@ -15,6 +15,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { customerSupport, humToBeat } from "../utils/api";
+import { LiveAgentPanel } from "./LiveAgentPanel";
 
 interface SpeechBubble {
   id: string;
@@ -44,7 +45,7 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
   noiseGateEnabled = true,
   reverbWet = 40,
 }) => {
-  const [activeTab, setActiveTab] = useState<"support" | "voice">("support");
+  const [activeTab, setActiveTab] = useState<"support" | "voice" | "agent">("support");
 
   const [messages, setMessages] = useState<SpeechBubble[]>([
     {
@@ -294,6 +295,14 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
         >
           <Mic className="h-4 w-4" /> Hum-to-beat
         </button>
+        <button
+          onClick={() => setActiveTab("agent")}
+          className={`flex-1 py-4 text-[12px] font-medium flex items-center justify-center gap-2 transition-all ${
+            activeTab === "agent" ? "text-brand-gold border-b-2 border-brand-gold" : "text-brand-ink-muted hover:text-brand-ink"
+          }`}
+        >
+          <User className="h-4 w-4" /> Live agent
+        </button>
       </div>
 
       <div className="flex-1 p-5 overflow-y-auto max-h-[340px] flex flex-col justify-between">
@@ -337,6 +346,10 @@ export const StudioSupportHub: React.FC<StudioSupportHubProps> = ({
                 </button>
               </div>
             )}
+          </div>
+        ) : activeTab === "agent" ? (
+          <div className="overflow-y-auto max-h-[300px]">
+            <LiveAgentPanel kind="avatar" audioCtx={audioCtx} />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-4 text-center h-full gap-3">

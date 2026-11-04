@@ -159,6 +159,25 @@ export async function humToBeat(audioBase64: string, mimeType: string) {
   return res.json();
 }
 
+// --- Live agent (Pipecat voice + avatar over WebSocket) ---
+// Vercel's edge rewrites /api/* as plain HTTP and does NOT upgrade WebSocket
+// connections, so the live-agent socket goes straight to the ALB hostname
+// (which we've verified upgrades + serves the agent routes). Override with
+// VITE_AGENT_WS_URL for local dev (e.g. ws://localhost:8000/api/agent).
+const AGENT_WS_BASE =
+  (import.meta as any).env?.VITE_AGENT_WS_URL ||
+  "ws://crazyjam-alb-919447685.us-east-1.elb.amazonaws.com/api/agent";
+
+export type AgentKind = "support" | "avatar";
+
+/** Opens an authenticated live-agent WebSocket. Returns the socket, or throws. */
+export function openAgentSocket(kind: AgentKind): WebSocket {
+  const token = getToken();
+  if (!token) throw new Error("Not logged in");
+  const url = `${AGENT_WS_BASE}/${kind}?token=${encodeURIComponent(token)}`;
+  return new WebSocket(url);
+}
+
 // --- Real generative audio (MusicGen, running on the GPU box) ---
 // Genuinely different from generateBlueprint above: that drives the
 // client-side synth sequencer, this returns real generated audio bytes
