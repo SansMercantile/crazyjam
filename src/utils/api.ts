@@ -224,6 +224,59 @@ export async function checkMusicGenAvailable(): Promise<boolean> {
   }
 }
 
+// --- Full-song generation with VOCALS (ACE-Step 1.5 on the A10G GPU box) ---
+// The vocal counterpart to generateRealAudio (instrumental-only). Suno's core:
+// lyrics + style -> a sung song. Returns the first take + optional variants
+// (Suno's two-version pattern). MIT-licensed model.
+export interface GenerateSongResult {
+  success: boolean;
+  audioBase64?: string;
+  audioBase64Variants?: string[];
+  mimeType?: string;
+  hasVocals?: boolean;
+  generationSeconds?: number;
+  errorMessage?: string;
+}
+
+export async function generateSong(
+  prompt: string,
+  lyrics: string,
+  durationSeconds: number = 30,
+  instrumental: boolean = false,
+  variants: number = 2
+): Promise<GenerateSongResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 320000); // vocal gen is slow
+  try {
+    const res = await apiFetch("/api/song-generation/generate", {
+      method: "POST",
+      body: JSON.stringify({ prompt, lyrics, durationSeconds, instrumental, variants }),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Song generation request failed");
+    }
+    return res.json();
+  } catch (e: any) {
+    if (e.name === "AbortError") throw new Error("Song generation timed out - the GPU may be busy, try again shortly.");
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+export async function checkSongGenAvailable(): Promise<boolean> {
+  try {
+    const res = await apiFetch("/api/song-generation/status");
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data.available;
+  } catch {
+    return false;
+  }
+}
+
 // --- Real lip-sync video (Polly TTS + self-hosted Wav2Lip, same GPU box
 // as MusicGen) --- Animates a reference face photo speaking/singing the
 // given text. Render is CPU-bound (the GPU's memory is committed to
@@ -510,6 +563,121 @@ export function publicReleaseVideoUrl(id: string): string {
 
 export function publicReleaseAudioUrl(id: string): string {
   return `${API_BASE_URL}/api/releases/public/${id}/audio`;
+}
+
+// --- Promotion Hub (playlist campaigns, charts registration, Beatport label) ---
+export interface PromoRelease {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  primaryGenre: string;
+  subGenres: string[];
+  dittoLink?: string;
+  upc?: string;
+  catalogNumber?: string;
+  spotifyAlbumId?: string;
+  tracks: { n: number; title: string; isrc?: string }[];
+}
+
+export interface ChartBody {
+  id: string; name: string; territory: string; requires: string[];
+}
+
+export async function getPromoCatalog(): Promise<PromoRelease[]> {
+  const res = await apiFetch("/api/promotion/catalog");
+  if (!res.ok) throw new Error("Could not load promotion catalog");
+  return res.json();
+}
+
+export async function listChartBodies(): Promise<ChartBody[]> {
+  const res = await apiFetch("/api/promotion/chart-bodies");
+  if (!res.ok) throw new Error("Could not load chart bodies");
+  return res.json();
+}
+
+export async function createPlaylistCampaign(payload: { releaseId: string; tier: string; trackTitle?: string; notes?: string }) {
+  const res = await apiFetch("/api/promotion/campaigns", { method: "POST", body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Could not create campaign");
+  return res.json();
+}
+
+export async function listPlaylistCampaigns() {
+  const res = await apiFetch("/api/promotion/campaigns");
+  if (!res.ok) throw new Error("Could not load campaigns");
+  return res.json();
+}
+
+export async function launchPlaylistCampaign(campaignId: string) {
+  const res = await apiFetch(`/api/promotion/campaigns/${campaignId}/launch`, { method: "POST" });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Could not launch campaign");
+  return res.json();
+}
+
+export async function updateCampaignCurator(campaignId: string, payload: { curatorName: string; status: string; playlistUrl?: string }) {
+  const res = await apiFetch(`/api/promotion/campaigns/${campaignId}/curator`, { method: "POST", body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Could not update curator");
+  return res.json();
+}
+
+export async function updateCampaignStats(campaignId: string, stats: { streams?: number; saves?: number; playlistAdds?: number }) {
+  const res = await apiFetch(`/api/promotion/campaigns/${campaignId}/stats`, { method: "POST", body: JSON.stringify(stats) });
+  if (!res.ok) throw new Error("Could not update stats");
+  return res.json();
+}
+
+export async function registerForCharts(payload: { releaseId: string; chartBodyIds: string[]; upc?: string; catalogNumber?: string; isrcs?: string[]; notes?: string }) {
+  const res = await apiFetch("/api/promotion/charts/register", { method: "POST", body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Could not register for charts");
+  return res.json();
+}
+
+export async function listChartRegistrations() {
+  const res = await apiFetch("/api/promotion/charts/registrations");
+  if (!res.ok) throw new Error("Could not load chart registrations");
+  return res.json();
+}
+
+export async function confirmChartRegistration(regId: string) {
+  const res = await apiFetch(`/api/promotion/charts/registrations/${regId}/confirm`, { method: "POST" });
+  if (!res.ok) throw new Error("Could not confirm registration");
+  return res.json();
+}
+
+export async function getBeatportLabel() {
+  const res = await apiFetch("/api/promotion/beatport/label");
+  if (!res.ok) throw new Error("Could not load Beatport label");
+  return res.json();
+}
+
+export async function saveBeatportLabel(payload: { labelName: string; greenroomUrl?: string; contactEmail?: string; bio?: string; logoUrl?: string; status?: string }) {
+  const res = await apiFetch("/api/promotion/beatport/label", { method: "PUT", body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error("Could not save Beatport label");
+  return res.json();
+}
+
+export async function setupBeatportRelease(payload: { releaseId: string; beatportGenre?: string; beatportSubGenres?: string[]; exclusiveWindow?: boolean; preOrderDate?: string; releaseDate?: string; notes?: string }) {
+  const res = await apiFetch("/api/promotion/beatport/releases", { method: "POST", body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Could not set up Beatport release");
+  return res.json();
+}
+
+export async function listBeatportReleases() {
+  const res = await apiFetch("/api/promotion/beatport/releases");
+  if (!res.ok) throw new Error("Could not load Beatport releases");
+  return res.json();
+}
+
+export async function submitBeatportDjChart(payload: { title: string; description?: string; trackUrls: string[]; genre?: string }) {
+  const res = await apiFetch("/api/promotion/beatport/dj-charts", { method: "POST", body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Could not submit DJ chart");
+  return res.json();
+}
+
+export async function listBeatportDjCharts() {
+  const res = await apiFetch("/api/promotion/beatport/dj-charts");
+  if (!res.ok) throw new Error("Could not load DJ charts");
+  return res.json();
 }
 
 // --- AI Music Video Director (AWS-native: Claude for writing/analysis,

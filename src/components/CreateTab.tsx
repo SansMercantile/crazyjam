@@ -26,7 +26,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { MusicBlueprint } from "../types";
-import { generateRealAudio, checkMusicGenAvailable, base64ToAudioUrl } from "../utils/api";
+import { generateRealAudio, checkMusicGenAvailable, generateSong, checkSongGenAvailable, base64ToAudioUrl } from "../utils/api";
 
 const STYLE_TAG_CHIPS = [
   "Indie Rock", "Amapiano", "Lofi Hip-Hop", "Synthwave", "Afrobeats",
@@ -68,8 +68,18 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
   const [audioError, setAudioError] = useState("");
   const [audioDuration, setAudioDuration] = useState(8);
 
+  // Full-song generation WITH VOCALS (ACE-Step) - Suno's core. Uses the same
+  // prompt/style + lyrics as the form above, but sings them.
+  const [isSongAvailable, setIsSongAvailable] = useState<boolean | null>(null);
+  const [isSinging, setIsSinging] = useState(false);
+  const [songError, setSongError] = useState("");
+  const [songTakes, setSongTakes] = useState<Array<{ url: string; label: string }>>([]);
+  const [songSeconds, setSongSeconds] = useState<number | undefined>(undefined);
+  const [songDuration, setSongDuration] = useState(20);
+
   useEffect(() => {
     checkMusicGenAvailable().then(setIsMusicGenAvailable);
+    checkSongGenAvailable().then(setIsSongAvailable);
   }, []);
 
   const effectivePrompt = mode === "simple" ? simplePrompt : (customStyle || customTitle || "a new track");
@@ -94,6 +104,34 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
 
   const insertMetaTag = (tag: string) => {
     setCustomLyrics((prev) => (prev ? `${prev}\n${tag}\n` : `${tag}\n`));
+  };
+
+  // Suno-simple vocal generation: style (from the form) + lyrics -> sung song.
+  // Custom mode uses its own lyrics; Simple mode lets ACE-Step write them.
+  const handleSingIt = async () => {
+    setIsSinging(true);
+    setSongError("");
+    setSongTakes([]);
+    setSongSeconds(undefined);
+    try {
+      const styleText = mode === "custom" ? customStyle : simplePrompt;
+      const lyricsText = mode === "custom" ? customLyrics : "";
+      const result = await generateSong(styleText, lyricsText, songDuration, false, 2);
+      if (result.success && result.audioBase64) {
+        const takes = [{ url: base64ToAudioUrl(result.audioBase64, result.mimeType), label: "Take 1" }];
+        (result.audioBase64Variants || []).forEach((b64, i) => {
+          takes.push({ url: base64ToAudioUrl(b64, result.mimeType), label: `Take ${i + 2}` });
+        });
+        setSongTakes(takes);
+        setSongSeconds(result.generationSeconds);
+      } else {
+        setSongError(result.errorMessage || "Generation failed.");
+      }
+    } catch (e: any) {
+      setSongError(e.message || "Generation failed.");
+    } finally {
+      setIsSinging(false);
+    }
   };
 
   const toggleStyleChip = (chip: string) => {
@@ -355,6 +393,82 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
                   <Download className="h-3 w-3" /> Download WAV
                 </a>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Sing It - full song WITH VOCALS (ACE-Step, the Suno core) */}
+        <div className="bg-brand-surface border border-brand-gold/40 rounded-2xl p-6 flex flex-col gap-4">
+          <div className="flex items-center gap-2.5 text-brand-gold">
+            <Mic2 className="h-5 w-5" />
+            <div>
+              <h3 className="font-display text-base text-brand-ink">Sing It</h3>
+              <p className="text-[11px] text-brand-ink-muted">A full song with vocals, from your style + lyrics. The Suno core — no subscription, MIT-licensed model on our own GPU.</p>
+            </div>
+          </div>
+
+          {isSongAvailable === false && (
+            <div className="flex gap-2 items-start bg-brand-surface-2 border border-brand-border rounded-lg p-3">
+              <AlertCircle className="h-3.5 w-3.5 text-brand-ink-muted shrink-0 mt-0.5" />
+              <p className="text-[11px] text-brand-ink-muted">The vocal engine is offline right now — try again shortly.</p>
+            </div>
+          )}
+
+          <div className="bg-brand-surface-2 border border-brand-border rounded-lg p-3">
+            <p className="text-[11px] text-brand-ink-muted leading-relaxed">
+              Sings the <span className="text-brand-gold">Style</span> above {mode === "custom" ? <>with your <span className="text-brand-gold">Lyrics</span></> : <>— it writes the words from your description</>}.
+              Generates two takes so you can pick the better one.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <label className="text-[11px] text-brand-ink-muted whitespace-nowrap">Length</label>
+            <input
+              type="range"
+              min={10}
+              max={120}
+              step={5}
+              value={songDuration}
+              onChange={(e) => setSongDuration(parseInt(e.target.value))}
+              className="flex-1 accent-brand-gold"
+            />
+            <span className="text-[11px] text-brand-ink-muted font-mono w-12 text-right">{songDuration}s</span>
+          </div>
+
+          <button
+            onClick={handleSingIt}
+            disabled={isSinging || isSongAvailable === false || !(mode === "simple" ? simplePrompt.trim() : customStyle.trim())}
+            className="w-full h-11 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-40"
+          >
+            {isSinging ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Singing it (~60-90s)...
+              </>
+            ) : (
+              <>
+                <Mic2 className="h-4 w-4" /> Sing It
+              </>
+            )}
+          </button>
+
+          {songError && <p className="text-[11px] text-red-400">{songError}</p>}
+
+          {songTakes.length > 0 && (
+            <div className="flex flex-col gap-3 pt-2 border-t border-brand-border">
+              {songSeconds && (
+                <span className="text-[10px] text-brand-ink-muted">Generated in {songSeconds.toFixed(1)}s</span>
+              )}
+              {songTakes.map((take) => (
+                <div key={take.label} className="flex flex-col gap-1.5 bg-brand-surface-2 border border-brand-border rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium text-brand-gold">{take.label}</span>
+                    <a href={take.url} download={`crazyjam-${take.label.toLowerCase().replace(" ", "-")}.mp3`} className="flex items-center gap-1 text-[10px] text-brand-gold hover:underline">
+                      <Download className="h-3 w-3" /> MP3
+                    </a>
+                  </div>
+                  <audio src={take.url} controls className="w-full h-9" />
+                </div>
+              ))}
             </div>
           )}
         </div>
