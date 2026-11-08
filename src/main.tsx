@@ -4,6 +4,7 @@ import {Auth0Provider} from '@auth0/auth0-react';
 import {Analytics} from '@vercel/analytics/react';
 import App from './App.tsx';
 import {PublicArtistPage} from './components/PublicArtistPage.tsx';
+import {PublicReleasesPage} from './components/PublicReleasesPage.tsx';
 import {PlaybackProvider} from './context/PlaybackContext.tsx';
 import {TierProvider} from './context/TierContext.tsx';
 import './index.css';
@@ -30,15 +31,21 @@ const AUTH0_CLIENT_ID = "ZGrL6wQYYEPLH2c6C9254wRLQvWJUw6T";
   }
 })();
 
-// Lightweight path-based routing: /a/<slug> is a fully public page and
-// must never be gated behind login. Everything else renders the main app.
+// Lightweight path-based routing: /a/<slug> and /releases are fully public
+// pages and must never be gated behind login. Everything else renders the app.
 const pathMatch = window.location.pathname.match(/^\/a\/([a-z0-9-]+)\/?$/);
+const isReleases = /^\/releases\/?$/.test(window.location.pathname);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     {pathMatch ? (
       <>
         <PublicArtistPage slug={pathMatch[1]} />
+        <Analytics />
+      </>
+    ) : isReleases ? (
+      <>
+        <PublicReleasesPage />
         <Analytics />
       </>
     ) : (

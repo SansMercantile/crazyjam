@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Allow: /releases
+Allow: /a/
+
+Sitemap: https://crazyjam.sansmercantile.com/sitemap.xml
