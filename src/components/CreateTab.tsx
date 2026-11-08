@@ -26,7 +26,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { MusicBlueprint } from "../types";
-import { generateRealAudio, checkMusicGenAvailable, generateSong, checkSongGenAvailable, base64ToAudioUrl } from "../utils/api";
+import { generateRealAudio, checkMusicGenAvailable, generateSong, checkSongGenAvailable, base64ToAudioUrl, blobToBase64, generateYuE2, checkYuE2Available, extractStems, listPersonas, trainPersona, loadPersona, unloadPersona } from "../utils/api";
 
 const STYLE_TAG_CHIPS = [
   "Indie Rock", "Amapiano", "Lofi Hip-Hop", "Synthwave", "Afrobeats",
@@ -77,9 +77,24 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
   const [songSeconds, setSongSeconds] = useState<number | undefined>(undefined);
   const [songDuration, setSongDuration] = useState(20);
 
+  // Personas (LoRA voice/style identity) + Stems export + YuE2 admin engine
+  const [personas, setPersonas] = useState<string[]>([]);
+  const [activePersona, setActivePersona] = useState<string | null>(null);
+  const [personaMsg, setPersonaMsg] = useState("");
+  const [isYuE2Available, setIsYuE2Available] = useState<boolean | null>(null);
+  const [isSingingYuE2, setIsSingingYuE2] = useState(false);
+  const [yue2Error, setYue2Error] = useState("");
+  const [yue2Url, setYue2Url] = useState<string | null>(null);
+  const [yue2Seconds, setYue2Seconds] = useState<number | undefined>(undefined);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [stemsError, setStemsError] = useState("");
+  const [stems, setStems] = useState<Record<string, string> | null>(null);
+
   useEffect(() => {
     checkMusicGenAvailable().then(setIsMusicGenAvailable);
     checkSongGenAvailable().then(setIsSongAvailable);
+    checkYuE2Available().then(setIsYuE2Available);
+    listPersonas().then(setPersonas);
   }, []);
 
   const effectivePrompt = mode === "simple" ? simplePrompt : (customStyle || customTitle || "a new track");
@@ -131,6 +146,76 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
       setSongError(e.message || "Generation failed.");
     } finally {
       setIsSinging(false);
+    }
+  };
+
+  // YuE2 (admin engine) - highest-quality open vocals, for testing + A/B
+  const handleSingYuE2 = async () => {
+    setIsSingingYuE2(true);
+    setYue2Error("");
+    setYue2Url(null);
+    setYue2Seconds(undefined);
+    try {
+      const styleText = mode === "custom" ? customStyle : simplePrompt;
+      const lyricsText = mode === "custom" ? customLyrics : "";
+      const result = await generateYuE2(styleText, lyricsText, "full", 0);
+      if (result.success && result.audioBase64) {
+        setYue2Url(base64ToAudioUrl(result.audioBase64, "audio/mpeg"));
+        setYue2Seconds(result.generationSeconds);
+      } else {
+        setYue2Error(result.errorMessage || "YuE2 generation failed.");
+      }
+    } catch (e: any) {
+      setYue2Error(e.message || "YuE2 generation failed.");
+    } finally {
+      setIsSingingYuE2(false);
+    }
+  };
+
+  // Persona load/unload
+  const handlePersonaToggle = async (name: string) => {
+    setPersonaMsg("");
+    try {
+      if (activePersona === name) {
+        await unloadPersona();
+        setActivePersona(null);
+        setPersonaMsg(`"${name}" unloaded - back to the base model.`);
+      } else {
+        await loadPersona(name);
+        setActivePersona(name);
+        setPersonaMsg(`"${name}" active - new songs sing in this voice/style.`);
+      }
+    } catch (e: any) {
+      setPersonaMsg(e.message || "Persona action failed.");
+    }
+  };
+
+  // Stems export - separate the latest YuE2/song audio into stems
+  const handleExtractStems = async () => {
+    setIsExtracting(true);
+    setStemsError("");
+    setStems(null);
+    try {
+      // use the first YuE2 take if present, else the first song take
+      const src = yue2Url || songTakes[0]?.url;
+      if (!src) {
+        setStemsError("Generate a song first (Sing It or YuE2) to extract stems from.");
+        setIsExtracting(false);
+        return;
+      }
+      // fetch the audio blob -> base64
+      const blob = await (await fetch(src)).blob();
+      const b64 = await blobToBase64(blob);
+      const result = await extractStems(b64);
+      if (result.success && result.stems) {
+        setStems(result.stems);
+      } else {
+        setStemsError(result.errorMessage || "Stems extract failed.");
+      }
+    } catch (e: any) {
+      setStemsError(e.message || "Stems extract failed.");
+    } finally {
+      setIsExtracting(false);
     }
   };
 
@@ -471,6 +556,103 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
               ))}
             </div>
           )}
+        </div>
+
+        {/* YuE2 (admin engine) - highest-quality open vocals, A/B vs ACE-Step */}
+        {isYuE2Available && (
+          <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col gap-4">
+            <div className="flex items-center gap-2.5 text-brand-gold">
+              <Mic2 className="h-5 w-5" />
+              <div>
+                <h3 className="font-display text-base text-brand-ink">YuE2 <span className="text-[10px] text-brand-ink-muted font-sans">(admin)</span></h3>
+                <p className="text-[11px] text-brand-ink-muted">The highest-quality open vocal model — for testing and A/B-ing our ACE-Step vocals. Non-commercial, admin-only.</p>
+              </div>
+            </div>
+            <button
+              onClick={handleSingYuE2}
+              disabled={isSingingYuE2 || !(mode === "simple" ? simplePrompt.trim() : customStyle.trim())}
+              className="w-full h-11 flex items-center justify-center gap-2 bg-brand-surface-2 border border-brand-gold/40 hover:border-brand-gold rounded-xl font-medium text-sm text-brand-gold transition-all disabled:opacity-40"
+            >
+              {isSingingYuE2 ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> YuE2 singing (~90s)...
+                </>
+              ) : (
+                <>
+                  <Mic2 className="h-4 w-4" /> Sing with YuE2
+                </>
+              )}
+            </button>
+            {yue2Error && <p className="text-[11px] text-red-400">{yue2Error}</p>}
+            {yue2Url && (
+              <div className="flex flex-col gap-2 pt-2 border-t border-brand-border">
+                {yue2Seconds && <span className="text-[10px] text-brand-ink-muted">Generated in {yue2Seconds.toFixed(1)}s</span>}
+                <audio src={yue2Url} controls className="w-full h-9" />
+                <a href={yue2Url} download="crazyjam-yue2.mp3" className="flex items-center gap-1.5 text-[11px] text-brand-gold hover:underline">
+                  <Download className="h-3 w-3" /> Download MP3
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Personas (LoRA voice/style identity) + Stems export */}
+        <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col gap-4">
+          <div className="flex items-center gap-2.5 text-brand-gold">
+            <SlidersHorizontal className="h-5 w-5" />
+            <div>
+              <h3 className="font-display text-base text-brand-ink">Personas &amp; Stems</h3>
+              <p className="text-[11px] text-brand-ink-muted">Reusable voice/style identity (LoRA), and split a song into stems.</p>
+            </div>
+          </div>
+
+          {personas.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {personas.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => handlePersonaToggle(p)}
+                  className={`px-3 py-1.5 rounded-full text-[11px] border transition-all ${
+                    activePersona === p ? "bg-brand-gold/15 border-brand-gold/50 text-brand-gold" : "bg-brand-surface-2 border-brand-border text-brand-ink-muted hover:text-brand-ink"
+                  }`}
+                >
+                  {activePersona === p ? `● ${p}` : p}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] text-brand-ink-muted">No personas yet — train one from 3-12 reference vocal takes to lock in a voice.</p>
+          )}
+          {personaMsg && <p className="text-[11px] text-brand-gold">{personaMsg}</p>}
+
+          <div className="border-t border-brand-border pt-3">
+            <button
+              onClick={handleExtractStems}
+              disabled={isExtracting || !(yue2Url || songTakes.length > 0)}
+              className="w-full h-10 flex items-center justify-center gap-2 bg-brand-surface-2 border border-brand-border hover:border-brand-gold/50 rounded-xl font-medium text-sm text-brand-ink transition-all disabled:opacity-40"
+            >
+              {isExtracting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Separating stems...
+                </>
+              ) : (
+                <>
+                  <Music2 className="h-4 w-4" /> Extract Stems (vocals / drums / bass / other)
+                </>
+              )}
+            </button>
+            {stemsError && <p className="text-[11px] text-red-400 mt-2">{stemsError}</p>}
+            {stems && (
+              <div className="flex flex-col gap-2 mt-3">
+                {Object.entries(stems).map(([name, b64]) => (
+                  <div key={name} className="flex items-center justify-between bg-brand-surface-2 border border-brand-border rounded-lg px-3 py-2">
+                    <span className="text-[11px] text-brand-ink capitalize">{name}</span>
+                    <audio src={base64ToAudioUrl(b64, "audio/wav")} controls className="h-8 w-48" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

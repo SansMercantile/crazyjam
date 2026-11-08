@@ -224,6 +224,91 @@ export async function checkMusicGenAvailable(): Promise<boolean> {
   }
 }
 
+// --- YuE2 admin engine (CC BY-NC, admin-only vocal improvement) ---
+export interface YuE2Result {
+  success: boolean;
+  audioBase64?: string;
+  truncated?: boolean;
+  generationSeconds?: number;
+  errorMessage?: string;
+}
+
+export async function generateYuE2(style: string, lyrics: string, cot: string = "full", seed: number = 0): Promise<YuE2Result> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), 320000);
+  try {
+    const res = await apiFetch("/api/yue2/generate", {
+      method: "POST", body: JSON.stringify({ style, lyrics, cot, seed }), signal: controller.signal,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "YuE2 generation failed (admin-only engine)");
+    }
+    return res.json();
+  } catch (e: any) {
+    if (e.name === "AbortError") throw new Error("YuE2 generation timed out - the GPU may be busy.");
+    throw e;
+  } finally { clearTimeout(t); }
+}
+
+export async function checkYuE2Available(): Promise<boolean> {
+  try {
+    const res = await apiFetch("/api/yue2/status");
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data.available;
+  } catch { return false; }
+}
+
+// --- Personas (voice/style identity via LoRA fine-tune) ---
+export interface PersonaResult { success: boolean; name?: string; errorMessage?: string; }
+
+export async function trainPersona(name: string, audioBase64List: string[]): Promise<PersonaResult> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), 30 * 60 * 1000); // LoRA training is slow
+  try {
+    const res = await apiFetch("/api/personas/train", {
+      method: "POST", body: JSON.stringify({ name, audioBase64List }), signal: controller.signal,
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Persona training failed");
+    return res.json();
+  } finally { clearTimeout(t); }
+}
+
+export async function loadPersona(name: string, scale: number = 1.0): Promise<PersonaResult> {
+  const res = await apiFetch("/api/personas/load", { method: "POST", body: JSON.stringify({ name, scale }) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Persona load failed");
+  return res.json();
+}
+
+export async function unloadPersona(): Promise<PersonaResult> {
+  const res = await apiFetch("/api/personas/unload", { method: "POST", body: JSON.stringify({}) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Persona unload failed");
+  return res.json();
+}
+
+export async function listPersonas(): Promise<string[]> {
+  const res = await apiFetch("/api/personas");
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.personas || [];
+}
+
+// --- Stems export (track separation) ---
+export interface StemsResult { success: boolean; stems?: Record<string, string>; seconds?: number; errorMessage?: string; }
+
+export async function extractStems(audioBase64: string): Promise<StemsResult> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), 10 * 60 * 1000);
+  try {
+    const res = await apiFetch("/api/stems/extract", {
+      method: "POST", body: JSON.stringify({ audioBase64 }), signal: controller.signal,
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Stems extract failed");
+    return res.json();
+  } finally { clearTimeout(t); }
+}
+
 // --- Full-song generation with VOCALS (ACE-Step 1.5 on the A10G GPU box) ---
 // The vocal counterpart to generateRealAudio (instrumental-only). Suno's core:
 // lyrics + style -> a sung song. Returns the first take + optional variants
