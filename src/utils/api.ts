@@ -297,12 +297,12 @@ export async function listPersonas(): Promise<string[]> {
 // --- Stems export (track separation) ---
 export interface StemsResult { success: boolean; stems?: Record<string, string>; seconds?: number; errorMessage?: string; }
 
-export async function extractStems(audioBase64: string): Promise<StemsResult> {
+export async function extractStems(srcAudioPath: string): Promise<StemsResult> {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), 10 * 60 * 1000);
   try {
     const res = await apiFetch("/api/stems/extract", {
-      method: "POST", body: JSON.stringify({ audioBase64 }), signal: controller.signal,
+      method: "POST", body: JSON.stringify({ srcAudioPath }), signal: controller.signal,
     });
     if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Stems extract failed");
     return res.json();

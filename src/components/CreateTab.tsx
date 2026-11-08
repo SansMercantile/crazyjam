@@ -76,6 +76,7 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
   const [songTakes, setSongTakes] = useState<Array<{ url: string; label: string }>>([]);
   const [songSeconds, setSongSeconds] = useState<number | undefined>(undefined);
   const [songDuration, setSongDuration] = useState(20);
+  const [songBoxPaths, setSongBoxPaths] = useState<string[]>([]);
 
   // Personas (LoRA voice/style identity) + Stems export + YuE2 admin engine
   const [personas, setPersonas] = useState<string[]>([]);
@@ -139,6 +140,7 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
         });
         setSongTakes(takes);
         setSongSeconds(result.generationSeconds);
+        setSongBoxPaths(result.boxPaths || []);
       } else {
         setSongError(result.errorMessage || "Generation failed.");
       }
@@ -190,23 +192,21 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
     }
   };
 
-  // Stems export - separate the latest YuE2/song audio into stems
+  // Stems export - separate the latest generated song into stems.
+  // The extract task needs the take's path ON THE BOX (a generated song lives
+  // there), so we pass the first take's box path captured at generation time.
   const handleExtractStems = async () => {
     setIsExtracting(true);
     setStemsError("");
     setStems(null);
     try {
-      // use the first YuE2 take if present, else the first song take
-      const src = yue2Url || songTakes[0]?.url;
+      const src = songBoxPaths[0];
       if (!src) {
-        setStemsError("Generate a song first (Sing It or YuE2) to extract stems from.");
+        setStemsError("Sing a song first (Sing It) - stems split the take that's already on the GPU box.");
         setIsExtracting(false);
         return;
       }
-      // fetch the audio blob -> base64
-      const blob = await (await fetch(src)).blob();
-      const b64 = await blobToBase64(blob);
-      const result = await extractStems(b64);
+      const result = await extractStems(src);
       if (result.success && result.stems) {
         setStems(result.stems);
       } else {
@@ -628,7 +628,7 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
           <div className="border-t border-brand-border pt-3">
             <button
               onClick={handleExtractStems}
-              disabled={isExtracting || !(yue2Url || songTakes.length > 0)}
+              disabled={isExtracting || songBoxPaths.length === 0}
               className="w-full h-10 flex items-center justify-center gap-2 bg-brand-surface-2 border border-brand-border hover:border-brand-gold/50 rounded-xl font-medium text-sm text-brand-ink transition-all disabled:opacity-40"
             >
               {isExtracting ? (
