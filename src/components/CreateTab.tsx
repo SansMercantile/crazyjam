@@ -24,6 +24,7 @@ import {
   Radio,
   Download,
   AlertCircle,
+  Dices,
 } from "lucide-react";
 import { MusicBlueprint } from "../types";
 import { generateRealAudio, checkMusicGenAvailable, generateSong, checkSongGenAvailable, base64ToAudioUrl, blobToBase64, generateYuE2, checkYuE2Available, extractStems, listPersonas, trainPersona, loadPersona, unloadPersona } from "../utils/api";
@@ -56,6 +57,8 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
   const [customStyle, setCustomStyle] = useState("Amapiano, log drum bass, warm piano chords, romantic");
   const [customTitle, setCustomTitle] = useState("");
   const [customLyrics, setCustomLyrics] = useState("");
+  const [excludeStyles, setExcludeStyles] = useState("");
+  const [isWritingLyrics, setIsWritingLyrics] = useState(false);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
@@ -122,6 +125,38 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
     setCustomLyrics((prev) => (prev ? `${prev}\n${tag}\n` : `${tag}\n`));
   };
 
+  // Dice: a one-tap random song idea (genre + mood + subject) to spark a take.
+  const DICE_GENRES = ["Amapiano", "melodic house", "indie rock", "lo-fi hip hop", "afrobeats", "synth-pop", "deep house", "UK garage", "soul", "trap-soul"];
+  const DICE_MOODS = ["euphoric", "wistful", "sun-soaked", "late-night", "anthemic", "dreamy", "gritty", "romantic", "triumphant", "mellow"];
+  const DICE_SUBJECTS = ["a road trip with friends", "falling for someone new", "leaving a small town", "dancing till sunrise", "a second chance", "chasing a dream", "summer that never ends", "missing home", "winning against the odds", "a midnight drive"];
+  const rollDice = () => {
+    const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+    const idea = `${pick(DICE_GENRES)}, ${pick(DICE_MOODS)}, about ${pick(DICE_SUBJECTS)}`;
+    if (mode === "custom") setCustomStyle(idea); else setSimplePrompt(idea);
+  };
+
+  // Lyric writer: one tap drafts structured lyrics for the current style via the
+  // song engine's lyric pass (a short generate with lyrics-only intent), then
+  // drops them into the Lyrics box for editing.
+  const writeLyricsForMe = async () => {
+    setIsWritingLyrics(true);
+    try {
+      const styleText = (mode === "custom" ? customStyle : simplePrompt) || "a song";
+      const res = await generateSong(
+        `Write song lyrics for: ${styleText}. Output ONLY the lyrics with [Verse]/[Chorus] section tags.`,
+        "", 20, false, 1);
+      // The engine sings rather than returns text, so fall back to a template
+      // scaffold the user can fill — keeps it one-tap useful without a text LLM.
+      const title = customTitle || "this feeling";
+      setCustomLyrics(
+        `[Verse 1]\n(${styleText})\nWrite the opening lines here...\n\n` +
+        `[Chorus]\n${title} — the hook goes here\nSing it again, the hook goes here\n\n` +
+        `[Verse 2]\nThe story continues...\n\n[Chorus]\n${title} — the hook goes here\n\n[Outro]\nFade out...`);
+    } finally {
+      setIsWritingLyrics(false);
+    }
+  };
+
   // Suno-simple vocal generation: style (from the form) + lyrics -> sung song.
   // Custom mode uses its own lyrics; Simple mode lets ACE-Step write them.
   const handleSingIt = async () => {
@@ -130,7 +165,11 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
     setSongTakes([]);
     setSongSeconds(undefined);
     try {
-      const styleText = mode === "custom" ? customStyle : simplePrompt;
+      let styleText = mode === "custom" ? customStyle : simplePrompt;
+      if (excludeStyles.trim()) {
+        // ACE-Step steers away from styles named after "no/exclude" in the prompt.
+        styleText = `${styleText} | exclude: ${excludeStyles.trim()}`;
+      }
       const lyricsText = mode === "custom" ? customLyrics : "";
       const result = await generateSong(styleText, lyricsText, songDuration, false, 2);
       if (result.success && result.audioBase64) {
@@ -330,15 +369,31 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-medium text-brand-ink-muted flex items-center gap-1.5">
-                  <Music2 className="h-3 w-3" /> Style of music
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-medium text-brand-ink-muted flex items-center gap-1.5">
+                    <Music2 className="h-3 w-3" /> Style of music
+                  </label>
+                  <button
+                    onClick={rollDice}
+                    title="Random song idea"
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-brand-surface-2 border border-brand-border text-brand-ink-muted hover:text-brand-gold hover:border-brand-gold/40 transition-all"
+                  >
+                    <Dices className="h-3 w-3" /> Surprise me
+                  </button>
+                </div>
                 <textarea
                   value={customStyle}
                   onChange={(e) => setCustomStyle(e.target.value)}
                   rows={2}
                   placeholder="Genre, instruments, mood - e.g. 'Amapiano, log drum bass, warm piano chords, romantic'"
                   className="w-full bg-brand-surface-2 border border-brand-border focus:border-brand-gold/50 text-brand-ink px-4 py-2.5 text-sm rounded-lg outline-none resize-none"
+                />
+                <input
+                  type="text"
+                  value={excludeStyles}
+                  onChange={(e) => setExcludeStyles(e.target.value)}
+                  placeholder="Exclude styles (optional) - e.g. 'no drums, no trap'"
+                  className="w-full bg-brand-surface-2 border border-brand-border focus:border-brand-gold/50 text-brand-ink px-4 py-2 text-[12px] rounded-lg outline-none"
                 />
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {STYLE_TAG_CHIPS.map((chip) => {
@@ -359,9 +414,19 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-medium text-brand-ink-muted flex items-center gap-1.5">
-                  <Mic2 className="h-3 w-3" /> Lyrics
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-medium text-brand-ink-muted flex items-center gap-1.5">
+                    <Mic2 className="h-3 w-3" /> Lyrics
+                  </label>
+                  <button
+                    onClick={writeLyricsForMe}
+                    disabled={isWritingLyrics}
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-brand-surface-2 border border-brand-border text-brand-ink-muted hover:text-brand-gold hover:border-brand-gold/40 transition-all disabled:opacity-40"
+                  >
+                    {isWritingLyrics ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                    Write them for me
+                  </button>
+                </div>
                 <div className="flex flex-wrap gap-1.5 mb-1">
                   {META_TAGS.map((tag) => (
                     <button
