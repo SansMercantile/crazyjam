@@ -5,6 +5,7 @@ import {Analytics} from '@vercel/analytics/react';
 import App from './App.tsx';
 import {PublicArtistPage} from './components/PublicArtistPage.tsx';
 import {PublicReleasesPage} from './components/PublicReleasesPage.tsx';
+import {PublicPricingPage} from './components/PublicPricingPage.tsx';
 import {PlaybackProvider} from './context/PlaybackContext.tsx';
 import {TierProvider} from './context/TierContext.tsx';
 import './index.css';
@@ -35,6 +36,7 @@ const AUTH0_CLIENT_ID = "ZGrL6wQYYEPLH2c6C9254wRLQvWJUw6T";
 // pages and must never be gated behind login. Everything else renders the app.
 const pathMatch = window.location.pathname.match(/^\/a\/([a-z0-9-]+)\/?$/);
 const isReleases = /^\/releases\/?$/.test(window.location.pathname);
+const isPricing = /^\/pricing\/?$/.test(window.location.pathname);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -46,6 +48,11 @@ createRoot(document.getElementById('root')!).render(
     ) : isReleases ? (
       <>
         <PublicReleasesPage />
+        <Analytics />
+      </>
+    ) : isPricing ? (
+      <>
+        <PublicPricingPage />
         <Analytics />
       </>
     ) : (

@@ -287,6 +287,27 @@ export async function unloadPersona(): Promise<PersonaResult> {
   return res.json();
 }
 
+// --- Billing (PayFast subscriptions, ~50% under Suno) ---
+export interface BillingPlan { id: string; name: string; price: string; tagline: string; sunoCompare: string; }
+
+export async function listBillingPlans(): Promise<{ plans: BillingPlan[]; currency: string; note: string }> {
+  const res = await apiFetch("/api/billing/plans");
+  if (!res.ok) throw new Error("Could not load plans");
+  return res.json();
+}
+
+export async function getMyPlan(): Promise<{ planId: string; status: string }> {
+  const res = await apiFetch("/api/billing/plan");
+  if (!res.ok) return { planId: "free", status: "free" };
+  return res.json();
+}
+
+export async function subscribeToPlan(planId: string): Promise<{ success: boolean; redirectUrl?: string; error?: string }> {
+  const res = await apiFetch("/api/billing/subscribe", { method: "POST", body: JSON.stringify({ planId }) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Subscribe failed");
+  return res.json();
+}
+
 export async function listPersonas(): Promise<string[]> {
   const res = await apiFetch("/api/personas");
   if (!res.ok) return [];
