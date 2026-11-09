@@ -287,8 +287,8 @@ export async function unloadPersona(): Promise<PersonaResult> {
   return res.json();
 }
 
-// --- Billing (PayFast subscriptions, ~50% under Suno) ---
-export interface BillingPlan { id: string; name: string; price: string; tagline: string; sunoCompare: string; }
+// --- Billing (PayFast subscriptions) ---
+export interface BillingPlan { id: string; name: string; price: string; tagline: string; }
 
 export async function listBillingPlans(): Promise<{ plans: BillingPlan[]; currency: string; note: string }> {
   const res = await apiFetch("/api/billing/plans");
@@ -331,9 +331,9 @@ export async function extractStems(srcAudioPath: string): Promise<StemsResult> {
 }
 
 // --- Full-song generation with VOCALS (ACE-Step 1.5 on the A10G GPU box) ---
-// The vocal counterpart to generateRealAudio (instrumental-only). Suno's core:
+// The vocal counterpart to generateRealAudio (instrumental-only). The core:
 // lyrics + style -> a sung song. Returns the first take + optional variants
-// (Suno's two-version pattern). MIT-licensed model.
+// (a two-version pick-the-best pattern). MIT-licensed model.
 export interface GenerateSongResult {
   success: boolean;
   audioBase64?: string;

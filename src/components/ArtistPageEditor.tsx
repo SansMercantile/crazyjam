@@ -149,7 +149,7 @@ export const ArtistPageEditor: React.FC = () => {
             <input
               value={link.label}
               onChange={(e) => updateLink(idx, "label", e.target.value)}
-              placeholder="Label (Spotify, Instagram...)"
+              placeholder="Label or social link"
               className="w-40 bg-brand-surface-2 border border-brand-border text-brand-ink px-3 py-2 text-sm rounded-lg outline-none"
             />
             <input

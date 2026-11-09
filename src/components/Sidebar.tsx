@@ -14,7 +14,8 @@ import {
   Sun,
   Moon,
   Monitor,
-  Disc3
+  Disc3,
+  Rocket
 } from "lucide-react";
 import { AnimatedAvatar } from "./AnimatedAvatar";
 
@@ -53,6 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "launchpad", label: "Launchpad", icon: Grid },
     { id: "artwork", label: "Cover Art Studio", icon: Palette },
     { id: "music", label: "CrazyJam Music", icon: Disc3 },
+    { id: "promotion", label: "Promotion Hub", icon: Rocket },
     { id: "agents", label: "Neural Swarm", icon: Users },
     { id: "support", label: "Support", icon: MessageSquare },
     { id: "profile", label: "Creator Profile", icon: User },

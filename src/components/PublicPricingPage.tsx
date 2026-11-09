@@ -2,9 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Public /pricing page — CrazyJam plans at ~50% under Suno. SEO-crawlable,
- * no login required to view. The subscribe CTA sends signed-in users to the
- * PayFast hosted checkout; signed-out users get sent to sign in first.
+ * Public /pricing page — CrazyJam plans. SEO-crawlable, no login required to
+ * view. The subscribe CTA sends signed-in users to the PayFast hosted
+ * checkout; signed-out users get sent to sign in first.
  */
 import React, { useEffect, useState } from "react";
 import { Music2, Check, Loader2, Sparkles } from "lucide-react";
@@ -12,13 +12,13 @@ import { listBillingPlans, subscribeToPlan, isLoggedIn, BillingPlan } from "../u
 
 export const PublicPricingPage: React.FC = () => {
   const [plans, setPlans] = useState<BillingPlan[]>([]);
-  const [note, setNote] = useState("~50% less than Suno. Cancel anytime.");
+  const [note, setNote] = useState("Simple monthly pricing. Cancel anytime.");
   const [loading, setLoading] = useState(true);
   const [busyPlan, setBusyPlan] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    document.title = "CrazyJam Pricing | ~50% less than Suno — AI music studio";
+    document.title = "CrazyJam Pricing | AI music studio";
     listBillingPlans()
       .then((d) => { setPlans(d.plans); setNote(d.note); })
       .catch(() => setError("Could not load pricing right now."))
@@ -76,7 +76,7 @@ export const PublicPricingPage: React.FC = () => {
 
       <main className="max-w-5xl mx-auto px-6 py-12 flex flex-col gap-10">
         <div className="text-center flex flex-col gap-3">
-          <h2 className="text-3xl font-bold">The AI music studio, ~50% less than Suno</h2>
+          <h2 className="text-3xl font-bold">The AI music studio, priced to create</h2>
           <p className="text-white/60 text-sm max-w-xl mx-auto leading-relaxed">
             Full songs with vocals on our own GPU models — no subscription lock-in games,
             just a fair price. {note}
@@ -120,7 +120,7 @@ export const PublicPricingPage: React.FC = () => {
                 )}
                 <div>
                   <h3 className="text-xl font-bold">{p.name}</h3>
-                  <p className="text-[12px] text-white/50">{p.sunoCompare} — we're {p.price === "5.00" ? "half" : "half"} that</p>
+                  <p className="text-[12px] text-white/50">{p.tagline}</p>
                 </div>
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-bold">${p.price.split(".")[0]}</span>

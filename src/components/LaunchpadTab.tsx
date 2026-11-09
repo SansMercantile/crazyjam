@@ -139,8 +139,8 @@ export const LaunchpadTab: React.FC<LaunchpadTabProps> = ({ onApplyStyle, addLog
         <div>
           <p className="text-[12px] text-brand-ink">On the roadmap</p>
           <p className="text-[11px] text-brand-ink-muted mt-1 leading-relaxed">
-            Personalized style suggestions from your Spotify/YouTube listening history, and direct one-click
-            distribution to Spotify/Apple Music/DistroKid/LANDR etc. Both need real API partnerships we haven't
+            Personalized style suggestions from your listening history, and direct one-click
+            distribution to major streaming platforms. Both need real API partnerships we haven't
             set up yet, so they're not built - this isn't a "coming soon" placeholder dressed up as working,
             it's genuinely not here.
           </p>

@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Suno-style Create page: Simple Mode (one prompt -> full song) and Custom
+ * CrazyJam Create page: Simple Mode (one prompt -> full song) and Custom
  * Mode (separate Style / Lyrics / Title fields, with lyric meta-tag
  * insertion helpers). Generation produces an instrumental 16-step blueprint
  * plus full lyrics text - CrazyJam does not synthesize sung vocal audio,
@@ -71,7 +71,7 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
   const [audioError, setAudioError] = useState("");
   const [audioDuration, setAudioDuration] = useState(8);
 
-  // Full-song generation WITH VOCALS (ACE-Step) - Suno's core. Uses the same
+  // Full-song generation WITH VOCALS (ACE-Step) - the core. Uses the same
   // prompt/style + lyrics as the form above, but sings them.
   const [isSongAvailable, setIsSongAvailable] = useState<boolean | null>(null);
   const [isSinging, setIsSinging] = useState(false);
@@ -157,7 +157,7 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
     }
   };
 
-  // Suno-simple vocal generation: style (from the form) + lyrics -> sung song.
+  // Simple vocal generation: style (from the form) + lyrics -> sung song.
   // Custom mode uses its own lyrics; Simple mode lets ACE-Step write them.
   const handleSingIt = async () => {
     setIsSinging(true);
@@ -547,13 +547,13 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
           )}
         </div>
 
-        {/* Sing It - full song WITH VOCALS (ACE-Step, the Suno core) */}
+        {/* Sing It - full song WITH VOCALS (ACE-Step, the core engine) */}
         <div className="bg-brand-surface border border-brand-gold/40 rounded-2xl p-6 flex flex-col gap-4">
           <div className="flex items-center gap-2.5 text-brand-gold">
             <Mic2 className="h-5 w-5" />
             <div>
               <h3 className="font-display text-base text-brand-ink">Sing It</h3>
-              <p className="text-[11px] text-brand-ink-muted">A full song with vocals, from your style + lyrics. The Suno core — no subscription, MIT-licensed model on our own GPU.</p>
+              <p className="text-[11px] text-brand-ink-muted">A full song with vocals, from your style + lyrics. No subscription lock-in, MIT-licensed model on our own GPU.</p>
             </div>
           </div>
 

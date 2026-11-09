@@ -26,6 +26,7 @@ import { LaunchpadTab } from "./components/LaunchpadTab";
 import { AlbumArtStudio } from "./components/AlbumArtStudio";
 import { CreateTab } from "./components/CreateTab";
 import { CrazyJamMusicTab } from "./components/CrazyJamMusicTab";
+import { PromotionHub } from "./components/PromotionHub";
 import { PlayerBar } from "./components/PlayerBar";
 import { saveTrack, blobToBase64 } from "./utils/api";
 import { Sparkles, Library, AlertCircle, RefreshCw, Volume2, Moon, Sliders } from "lucide-react";
@@ -43,7 +44,7 @@ const INITIAL_AGENTS: ServiceAgent[] = [
     enabled: true,
     agencyLevel: 90,
     biasValue: 15,
-    specialty: "Billboard & Spotify Virality Forecast"
+    specialty: "Charts & Virality Forecast"
   },
   {
     id: "lofi-beat",
@@ -912,6 +913,10 @@ export default function App() {
               lyrics={lyrics}
               addLog={addLog}
             />
+          )}
+
+          {activeTab === "promotion" && (
+            <PromotionHub addLog={addLog} />
           )}
 
           {activeTab === "agents" && (
