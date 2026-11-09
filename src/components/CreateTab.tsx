@@ -81,7 +81,7 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
   const [songDuration, setSongDuration] = useState(20);
   const [songBoxPaths, setSongBoxPaths] = useState<string[]>([]);
 
-  // Personas (LoRA voice/style identity) + Stems export + YuE2 admin engine
+  // Personas (Dima voice/style identity) + Stems export + YuE2 admin engine
   const [personas, setPersonas] = useState<string[]>([]);
   const [activePersona, setActivePersona] = useState<string | null>(null);
   const [personaMsg, setPersonaMsg] = useState("");
@@ -661,13 +661,13 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
           </div>
         )}
 
-        {/* Personas (LoRA voice/style identity) + Stems export */}
+        {/* Personas (Dima voice/style identity) + Stems export */}
         <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col gap-4">
           <div className="flex items-center gap-2.5 text-brand-gold">
             <SlidersHorizontal className="h-5 w-5" />
             <div>
               <h3 className="font-display text-base text-brand-ink">Personas &amp; Stems</h3>
-              <p className="text-[11px] text-brand-ink-muted">Reusable voice/style identity (LoRA), and split a song into stems.</p>
+              <p className="text-[11px] text-brand-ink-muted">Reusable voice/style identity (Dima), and split a song into stems.</p>
             </div>
           </div>
 

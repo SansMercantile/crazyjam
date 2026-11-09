@@ -260,12 +260,12 @@ export async function checkYuE2Available(): Promise<boolean> {
   } catch { return false; }
 }
 
-// --- Personas (voice/style identity via LoRA fine-tune) ---
+// --- Personas (voice/style identity via Dima fine-tune) ---
 export interface PersonaResult { success: boolean; name?: string; errorMessage?: string; }
 
 export async function trainPersona(name: string, audioBase64List: string[]): Promise<PersonaResult> {
   const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), 30 * 60 * 1000); // LoRA training is slow
+  const t = setTimeout(() => controller.abort(), 30 * 60 * 1000); // Dima training is slow
   try {
     const res = await apiFetch("/api/personas/train", {
       method: "POST", body: JSON.stringify({ name, audioBase64List }), signal: controller.signal,
