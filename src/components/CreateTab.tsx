@@ -213,21 +213,21 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
     }
   };
 
-  // Persona load/unload
+  // Dima voice load/unload
   const handlePersonaToggle = async (name: string) => {
     setPersonaMsg("");
     try {
       if (activePersona === name) {
         await unloadPersona();
         setActivePersona(null);
-        setPersonaMsg(`"${name}" unloaded - back to the base model.`);
+        setPersonaMsg(`"${name}" unloaded - back to the default Dima voice.`);
       } else {
         await loadPersona(name);
         setActivePersona(name);
-        setPersonaMsg(`"${name}" active - new songs sing in this voice/style.`);
+        setPersonaMsg(`Dima voice "${name}" active - new songs sing in this voice & style.`);
       }
     } catch (e: any) {
-      setPersonaMsg(e.message || "Persona action failed.");
+      setPersonaMsg(e.message || "Dima voice action failed.");
     }
   };
 
@@ -661,32 +661,41 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
           </div>
         )}
 
-        {/* Personas (Dima voice/style identity) + Stems export */}
-        <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col gap-4">
+        {/* Dima voices (Personas) + Stems export */}
+        <div className="bg-brand-surface border border-brand-gold/40 rounded-2xl p-6 flex flex-col gap-4">
           <div className="flex items-center gap-2.5 text-brand-gold">
-            <SlidersHorizontal className="h-5 w-5" />
+            <Mic2 className="h-5 w-5" />
             <div>
-              <h3 className="font-display text-base text-brand-ink">Personas &amp; Stems</h3>
-              <p className="text-[11px] text-brand-ink-muted">Reusable voice/style identity (Dima), and split a song into stems.</p>
+              <h3 className="font-display text-base text-brand-ink">Dima voices</h3>
+              <p className="text-[11px] text-brand-ink-muted">Train a Dima voice once — every song then sings in that exact voice &amp; style. Plus split a song into stems.</p>
             </div>
           </div>
 
           {personas.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {personas.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePersonaToggle(p)}
-                  className={`px-3 py-1.5 rounded-full text-[11px] border transition-all ${
-                    activePersona === p ? "bg-brand-gold/15 border-brand-gold/50 text-brand-gold" : "bg-brand-surface-2 border-brand-border text-brand-ink-muted hover:text-brand-ink"
-                  }`}
-                >
-                  {activePersona === p ? `● ${p}` : p}
-                </button>
-              ))}
+            <div className="flex flex-col gap-2">
+              <p className="text-[11px] text-brand-ink-muted">Your Dima voices — tap one to make new songs sing in it:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {personas.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => handlePersonaToggle(p)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] border transition-all ${
+                      activePersona === p ? "bg-brand-gold/15 border-brand-gold/50 text-brand-gold" : "bg-brand-surface-2 border-brand-border text-brand-ink-muted hover:text-brand-ink"
+                    }`}
+                  >
+                    {activePersona === p ? `● ${p} (active)` : p}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
-            <p className="text-[11px] text-brand-ink-muted">No personas yet — train one from 3-12 reference vocal takes to lock in a voice.</p>
+            <div className="bg-brand-surface-2 border border-brand-border rounded-lg p-3">
+              <p className="text-[11px] text-brand-ink-muted leading-relaxed">
+                <span className="text-brand-gold font-medium">Create a Dima voice.</span> Train it from
+                3-12 reference vocal takes and it becomes a reusable voice/style identity — new songs
+                sing in that voice every time.
+              </p>
+            </div>
           )}
           {personaMsg && <p className="text-[11px] text-brand-gold">{personaMsg}</p>}
 
