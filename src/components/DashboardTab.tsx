@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { EffectsRack } from "./EffectsRack";
 import { MidiStudio } from "./MidiStudio";
-import { Download, Radio, Compass, Loader2, FileMusic } from "lucide-react";
+import { Download, Radio, Compass, Loader2, FileMusic, Sliders as SlidersIcon } from "lucide-react";
 import { audioEngine } from "../utils/audioEngine";
 import { exportLoopAsMidi } from "../utils/midiExport";
 
@@ -106,6 +106,35 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
 
   return (
     <div className="space-y-5 animate-fadeIn text-left">
+      {/* Control Room header strip */}
+      <div className="bg-brand-surface border border-brand-border rounded-2xl px-5 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-brand-gold/10 border border-brand-gold/30 flex items-center justify-center">
+            <SlidersIcon className="h-4.5 w-4.5 text-brand-gold" />
+          </div>
+          <div>
+            <h2 className="font-display text-base text-brand-ink leading-tight">Control Room</h2>
+            <p className="text-[10px] text-brand-ink-muted">Master spatializer, effects rack &amp; session export</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-5">
+          <div className="hidden sm:block text-right">
+            <span className="text-[10px] text-brand-ink-muted block">Key / Genre</span>
+            <span className="text-[12px] text-brand-ink">{scaleKey} · {genre}</span>
+          </div>
+          <div className="h-8 w-px bg-brand-border hidden sm:block" />
+          <div className="text-right">
+            <span className="text-[10px] text-brand-ink-muted block">Tempo</span>
+            <span className="text-[12px] text-brand-gold font-mono">{tempo} BPM</span>
+          </div>
+          <div className="h-8 w-px bg-brand-border hidden sm:block" />
+          <div className="flex items-center gap-1.5 text-[11px] text-brand-ink-muted">
+            <div className={`h-1.5 w-1.5 rounded-full ${isPlaying ? "bg-emerald-500 animate-pulse" : "bg-brand-ink-muted"}`} />
+            <span>{isPlaying ? "Playing" : "Ready"}</span>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <div className="lg:col-span-12 bg-brand-surface border border-brand-border rounded-2xl p-5 flex flex-col justify-between">
           <div className="space-y-4">
@@ -128,8 +157,8 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
                   <button
                     key={p.id}
                     onClick={() => handleSpacePresetChange(p.id)}
-                    className={`p-2.5 rounded-lg border text-left transition-all ${
-                      delayPreset === p.id ? "bg-brand-gold/10 border-brand-gold/40 text-brand-ink" : "bg-brand-surface-2 border-brand-border text-brand-ink-muted"
+                    className={`p-2.5 rounded-lg border text-left transition-all active:scale-[0.98] ${
+                      delayPreset === p.id ? "bg-brand-gold/10 border-brand-gold/40 text-brand-ink shadow-[0_2px_12px_rgba(169,134,63,0.15)]" : "bg-brand-surface-2 border-brand-border text-brand-ink-muted hover:text-brand-ink hover:border-brand-gold/30"
                     }`}
                   >
                     <span className="text-[12px] font-medium block">{p.label}</span>
