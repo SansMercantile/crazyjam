@@ -85,7 +85,7 @@ export const PublicPricingPage: React.FC = () => {
         <div className="max-w-5xl mx-auto px-6 py-14 text-center flex flex-col gap-4 relative">
           <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-[0.2em]">Pricing</span>
           <h2 className="text-4xl sm:text-5xl font-bold leading-tight">Priced to create</h2>
-          <p className="text-white/60 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+          <p className="text-white/75 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
             Full songs with vocals on our own GPU models — no subscription lock-in games,
             just a fair price. {note}
           </p>

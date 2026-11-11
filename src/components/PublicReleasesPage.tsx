@@ -146,7 +146,7 @@ const PublicReleasesPageInner: React.FC = () => {
           <h2 className="text-4xl sm:text-5xl font-bold leading-tight max-w-2xl">
             Released albums &amp; singles
           </h2>
-          <p className="text-white/60 text-sm sm:text-base max-w-2xl leading-relaxed">
+          <p className="text-white/75 text-sm sm:text-base max-w-2xl leading-relaxed">
             Every public release across the CrazyJam label family — CrazyJam Records, CrazyJam Music,
             CrazyJam Studios, and CrazyJam — playable right here in the browser. New releases appear
             the moment an artist publishes from the studio.
