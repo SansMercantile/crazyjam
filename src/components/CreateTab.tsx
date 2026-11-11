@@ -455,11 +455,12 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
           <button
             onClick={handleGenerateClick}
             disabled={!canGenerate || isGenerating}
-            className="w-full h-12 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-40"
+            className="w-full h-12 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-40 active:scale-[0.99]"
           >
             {isGenerating ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Composing...
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="animate-pulse">Composing your track…</span>
               </>
             ) : (
               <>
@@ -605,13 +606,18 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
 
           {songTakes.length > 0 && (
             <div className="flex flex-col gap-3 pt-2 border-t border-brand-border">
-              {songSeconds && (
-                <span className="text-[10px] text-brand-ink-muted">Generated in {songSeconds.toFixed(1)}s</span>
-              )}
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-medium text-brand-ink">{songTakes.length} takes — pick your favourite</span>
+                {songSeconds && (
+                  <span className="text-[10px] text-brand-ink-muted">Generated in {songSeconds.toFixed(1)}s</span>
+                )}
+              </div>
               {songTakes.map((take) => (
-                <div key={take.label} className="flex flex-col gap-1.5 bg-brand-surface-2 border border-brand-border rounded-lg p-3">
+                <div key={take.label} className="flex flex-col gap-1.5 bg-brand-surface-2 border border-brand-border rounded-lg p-3 transition-all hover:border-brand-gold/40 hover:shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-medium text-brand-gold">{take.label}</span>
+                    <span className="text-[11px] font-medium text-brand-gold flex items-center gap-1.5">
+                      <Music2 className="h-3 w-3" /> {take.label}
+                    </span>
                     <a href={take.url} download={`crazyjam-${take.label.toLowerCase().replace(" ", "-")}.mp3`} className="flex items-center gap-1 text-[10px] text-brand-gold hover:underline">
                       <Download className="h-3 w-3" /> MP3
                     </a>
@@ -739,8 +745,29 @@ export const CreateTab: React.FC<CreateTabProps> = ({ isGenerating, onGenerate, 
           </div>
 
           {!hasGeneratedSomething ? (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-[12px] text-brand-ink-muted text-center px-8">Generate a track to see its title, lyrics, and arrangement here</p>
+            <div className="flex-1 flex flex-col items-center justify-center gap-4 py-10">
+              <div className="h-14 w-14 rounded-2xl bg-brand-gold/10 border border-brand-gold/30 flex items-center justify-center">
+                <Sparkles className="h-6 w-6 text-brand-gold" />
+              </div>
+              <div className="text-center px-8 flex flex-col gap-1.5">
+                <p className="text-[13px] font-medium text-brand-ink">Your next track starts here</p>
+                <p className="text-[12px] text-brand-ink-muted leading-relaxed">
+                  Describe a song and hit <span className="text-brand-gold">Generate Track</span> for an instant
+                  arrangement, or <span className="text-brand-gold">Sing It</span> for a full song with vocals.
+                  The title, lyrics, and arrangement will appear in this panel.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-1.5 px-6">
+                {["melodic house, euphoric", "lo-fi, late-night study", "amapiano, romantic"].map((idea) => (
+                  <button
+                    key={idea}
+                    onClick={() => { setMode("simple"); setSimplePrompt(idea); }}
+                    className="px-2.5 py-1 rounded-full text-[10px] bg-brand-surface-2 border border-brand-border text-brand-ink-muted hover:text-brand-gold hover:border-brand-gold/40 transition-all"
+                  >
+                    {idea}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             <>
