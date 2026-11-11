@@ -182,11 +182,23 @@ export const LiveAgentPanel: React.FC<LiveAgentPanelProps> = ({ kind, audioCtx }
       </div>
 
       {kind === "avatar" && (
-        <div className="bg-black rounded-xl overflow-hidden border border-brand-border aspect-video flex items-center justify-center">
+        <div className="bg-black rounded-xl overflow-hidden border border-brand-border aspect-video flex items-center justify-center relative">
           {state === "live" ? (
             <canvas ref={canvasRef} className="w-full h-full object-cover" />
           ) : (
-            <span className="text-[11px] text-brand-ink-muted">Face stream appears here when live</span>
+            <div className="flex flex-col items-center gap-2 text-center px-6">
+              <div className={`h-12 w-12 rounded-full border flex items-center justify-center ${state === "connecting" ? "border-brand-gold/50 bg-brand-gold/10" : "border-brand-border bg-brand-surface-2"}`}>
+                {state === "connecting" ? <Loader2 className="h-5 w-5 animate-spin text-brand-gold" /> : <User className="h-5 w-5 text-brand-ink-muted" />}
+              </div>
+              <span className="text-[11px] text-brand-ink-muted">
+                {state === "connecting" ? "Warming up the face stream…" : "The artist's face appears here once you're live"}
+              </span>
+            </div>
+          )}
+          {state === "live" && (
+            <span className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/60 text-emerald-400 text-[9px] font-semibold uppercase tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
+            </span>
           )}
         </div>
       )}
