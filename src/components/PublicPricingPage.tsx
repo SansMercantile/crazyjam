@@ -112,11 +112,11 @@ export const PublicPricingPage: React.FC = () => {
             <div className="bg-white/5 border border-white/10 rounded-2xl p-7 flex flex-col gap-5 transition-all hover:border-white/20">
               <div>
                 <h3 className="text-xl font-bold">Free</h3>
-                <p className="text-[12px] text-white/50">Start making music right now</p>
+                <p className="text-[12px] text-white/60">Start making music right now</p>
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-5xl font-bold">$0</span>
-                <span className="text-white/50 text-sm">/mo</span>
+                <span className="text-white/60 text-sm">/mo</span>
               </div>
               <ul className="flex flex-col gap-2.5 flex-1">
                 {["Instrumental sequencer + blueprint", "Render Real Audio (MusicGen)", "CrazyJam Music publishing", "Community releases"].map((f) => (
@@ -141,11 +141,11 @@ export const PublicPricingPage: React.FC = () => {
                   )}
                   <div>
                     <h3 className="text-xl font-bold">{p.name}</h3>
-                    <p className="text-[12px] text-white/50">{p.tagline}</p>
+                    <p className="text-[12px] text-white/60">{p.tagline}</p>
                   </div>
                   <div className="flex items-baseline gap-1">
                     <span className="text-5xl font-bold">${p.price.split(".")[0]}</span>
-                    <span className="text-white/50 text-sm">/mo</span>
+                    <span className="text-white/60 text-sm">/mo</span>
                   </div>
                   <ul className="flex flex-col gap-2.5 flex-1">
                     {(FEATURES[p.id] || [p.tagline]).map((f) => (
@@ -171,7 +171,7 @@ export const PublicPricingPage: React.FC = () => {
         {error && <p className="text-center text-red-400 text-sm">{error}</p>}
 
         <div className="text-center flex flex-col gap-2">
-          <p className="text-white/40 text-[12px] max-w-md mx-auto leading-relaxed">
+          <p className="text-white/60 text-[12px] max-w-md mx-auto leading-relaxed">
             Secure checkout by PayFast — your card never touches our servers.
             Prices in USD, billed monthly, cancel anytime.
           </p>

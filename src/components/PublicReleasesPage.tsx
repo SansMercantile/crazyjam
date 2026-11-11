@@ -78,7 +78,7 @@ const ReleaseGrid: React.FC<{ releases: any[] }> = ({ releases }) => {
             </div>
             <div className="p-3">
               <h3 className="text-[13px] font-medium text-white truncate group-hover:text-amber-300 transition-colors">{r.title}</h3>
-              <p className="text-[11px] text-white/50 truncate">{r.artistName}</p>
+              <p className="text-[11px] text-white/60 truncate">{r.artistName}</p>
             </div>
           </div>
         );
@@ -129,7 +129,7 @@ const PublicReleasesPageInner: React.FC = () => {
             </div>
             <div>
               <h1 className="font-bold text-base leading-tight">CrazyJam Releases</h1>
-              <p className="text-[10px] text-white/50">CrazyJam Records · CrazyJam Music · CrazyJam Studios</p>
+              <p className="text-[10px] text-white/60">CrazyJam Records · CrazyJam Music · CrazyJam Studios</p>
             </div>
           </div>
           <a href="/" className="px-3.5 py-1.5 rounded-lg bg-amber-400 text-black text-[12px] font-semibold hover:bg-amber-300 transition-colors flex items-center gap-1.5">
@@ -169,7 +169,7 @@ const PublicReleasesPageInner: React.FC = () => {
             {releases.length === 0 && (
               <div className="text-center py-16 flex flex-col items-center gap-3">
                 <Disc3 className="h-10 w-10 text-white/20" />
-                <p className="text-white/40 text-sm max-w-sm">No public releases yet — the catalog fills as artists publish from CrazyJam Studios.</p>
+                <p className="text-white/60 text-sm max-w-sm">No public releases yet — the catalog fills as artists publish from CrazyJam Studios.</p>
               </div>
             )}
             {IMPRINTS.map((imp) => {
@@ -179,9 +179,9 @@ const PublicReleasesPageInner: React.FC = () => {
                   <div className="flex items-baseline justify-between border-b border-white/10 pb-3">
                     <div>
                       <h3 className="text-xl font-bold text-amber-400">{imp.name}</h3>
-                      <p className="text-[12px] text-white/50 mt-0.5">{imp.tagline}</p>
+                      <p className="text-[12px] text-white/60 mt-0.5">{imp.tagline}</p>
                     </div>
-                    <span className="text-[10px] text-white/30 uppercase tracking-wider">{releases.length} releases</span>
+                    <span className="text-[10px] text-white/60 uppercase tracking-wider">{releases.length} releases</span>
                   </div>
                   {list.length > 0 ? (
                     <ReleaseGrid releases={list} />
@@ -197,8 +197,8 @@ const PublicReleasesPageInner: React.FC = () => {
 
       <footer className="border-t border-white/10 px-6 py-8 max-w-6xl mx-auto w-full">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[11px] text-white/40">CrazyJam Records · CrazyJam Music · CrazyJam Studios · CrazyJam</p>
-          <p className="text-[11px] text-white/30">The AI-native music studio.</p>
+          <p className="text-[11px] text-white/60">CrazyJam Records · CrazyJam Music · CrazyJam Studios · CrazyJam</p>
+          <p className="text-[11px] text-white/60">The AI-native music studio.</p>
         </div>
       </footer>
     </div>
