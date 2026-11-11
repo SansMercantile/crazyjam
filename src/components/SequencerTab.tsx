@@ -145,7 +145,7 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
       agentName: "Groove Specialist",
       role: "Beats",
       avatar: "🎧",
-      message: `SHIFTED ARRANGEMENTS:\nShifted dynamic sequenser timings for Track ID: "${selectedTrackId}" to the ${direction}.`,
+      message: `SHIFTED ARRANGEMENTS:\nShifted dynamic Sequencer timings for Track ID: "${selectedTrackId}" to the ${direction}.`,
       phase: "Sequence",
       status: "completed"
     });
@@ -176,7 +176,7 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
       agentName: "Groove Specialist",
       role: "Beats",
       avatar: "🎧",
-      message: `CLEARED SEQUENSER BUFFER:\nWiped trigger values across Track ID "${selectedTrackId}" to prepare scratch musical structures.`,
+      message: `CLEARED Sequencer BUFFER:\nWiped trigger values across Track ID "${selectedTrackId}" to prepare scratch musical structures.`,
       phase: "Sequence",
       status: "completed"
     });
@@ -204,8 +204,8 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <span className="text-[9px] uppercase font-mono tracking-wide text-brand-gold font-medium">Sequenser Groove Controllers</span>
-              <h2 className="font-display font-semibold text-lg uppercase text-brand-ink leading-tight">Advanced Groove & Timing Console</h2>
+              <span className="text-[9px] uppercase font-mono tracking-wide text-brand-gold font-medium">Sequencer Groove Controllers</span>
+              <h2 className="font-display font-semibold text-lg uppercase text-brand-ink leading-tight">Groove &amp; Timing Console</h2>
             </div>
           </div>
 
@@ -241,10 +241,10 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
                 <button
                   key={t.id}
                   onClick={() => setSelectedTrackId(t.id)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] font-display font-semibold uppercase text-center transition cursor-pointer ${
+                  className={`flex-1 py-2 rounded-lg text-[10px] font-display font-semibold uppercase text-center transition cursor-pointer active:scale-[0.98] ${
                     selectedTrackId === t.id
                       ? "bg-brand-gold text-brand-ink shadow-md shadow-brand-gold/20"
-                      : "text-brand-ink-muted hover:text-brand-ink-muted hover:bg-brand-surface-2"
+                      : "text-brand-ink-muted hover:text-brand-ink hover:bg-brand-border/40"
                   }`}
                 >
                   {t.id}
@@ -260,7 +260,7 @@ export const SequencerTab: React.FC<SequencerTabProps> = ({
               <div className="flex gap-2">
                 <button
                   onClick={handleRandomizeTrack}
-                  className="flex-1 bg-brand-gold hover:bg-cyan-600 font-display font-semibold px-3 py-2.5 text-[10px] uppercase tracking-wide rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 bg-brand-gold hover:bg-brand-gold-soft font-display font-semibold px-3 py-2.5 text-[10px] uppercase tracking-wide rounded-xl transition flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98]"
                   title="Randomize selected track patterns"
                 >
                   <Dices className="h-4.5 w-4.5" />
