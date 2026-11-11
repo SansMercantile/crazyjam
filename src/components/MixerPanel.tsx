@@ -37,9 +37,15 @@ export function MixerPanel({ tracks, onTracksUpdate }: MixerPanelProps) {
 
   if (tracks.length === 0) {
     return (
-      <p className="text-[12px] text-brand-ink-muted text-center py-8">
-        No tracks yet - add tracks in the Sequencer to see them here.
-      </p>
+      <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+        <div className="h-12 w-12 rounded-xl bg-brand-gold/10 border border-brand-gold/30 flex items-center justify-center">
+          <Volume2 className="h-5 w-5 text-brand-gold" />
+        </div>
+        <div>
+          <p className="text-[12px] font-medium text-brand-ink">No tracks to mix yet</p>
+          <p className="text-[11px] text-brand-ink-muted mt-0.5">Add tracks in the Sequencer and they'll appear here as channel strips.</p>
+        </div>
+      </div>
     );
   }
 
@@ -120,7 +126,9 @@ function ChannelStrip({
   const meterColor = level > 0.85 ? "bg-red-500" : level > 0.65 ? "bg-yellow-400" : "bg-brand-gold";
 
   return (
-    <div className="flex flex-col items-center gap-2 bg-brand-surface-2 border border-brand-border rounded-xl p-3 w-[92px] shrink-0">
+    <div className={`flex flex-col items-center gap-2 bg-brand-surface-2 border rounded-xl p-3 w-[92px] shrink-0 transition-all duration-200 hover:border-brand-gold/40 hover:shadow-[0_4px_16px_rgba(0,0,0,0.25)] ${
+      track.muted ? "border-red-500/20 opacity-60" : track.soloed ? "border-brand-gold/50" : "border-brand-border"
+    }`}>
       <span className="text-[11px] text-brand-ink truncate w-full text-center" title={track.name}>
         {track.name}
       </span>

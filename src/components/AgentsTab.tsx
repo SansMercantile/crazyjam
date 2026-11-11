@@ -88,6 +88,23 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
 
   return (
     <div className="space-y-6 animate-fadeIn text-left">
+      {/* Neural Swarm header */}
+      <div className="bg-brand-surface border border-brand-border rounded-2xl px-5 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-brand-gold/10 border border-brand-gold/30 flex items-center justify-center">
+            <Users className="h-4.5 w-4.5 text-brand-gold" />
+          </div>
+          <div>
+            <h2 className="font-display text-base text-brand-ink leading-tight">Neural Swarm</h2>
+            <p className="text-[10px] text-brand-ink-muted">Autonomous production agents, tuned by autonomy &amp; bias</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 text-[11px] text-brand-ink-muted">
+          <span className={`h-1.5 w-1.5 rounded-full ${enabledAgents.length > 0 ? "bg-emerald-500" : "bg-brand-ink-muted"}`} />
+          <span>{enabledAgents.length} of {agents.length} active</span>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Real agent state - not fake telemetry */}
         <div className="lg:col-span-7 bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col justify-between">
@@ -102,10 +119,18 @@ export const AgentsTab: React.FC<AgentsTabProps> = ({
 
             <div className="space-y-2.5">
               {enabledAgents.length === 0 ? (
-                <p className="text-[12px] text-brand-ink-muted text-center py-6">No agents enabled - toggle some on below.</p>
+                <div className="flex flex-col items-center gap-3 py-8 text-center">
+                  <div className="h-11 w-11 rounded-xl bg-brand-gold/10 border border-brand-gold/30 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-brand-gold" />
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-medium text-brand-ink">No agents active</p>
+                    <p className="text-[11px] text-brand-ink-muted mt-0.5">Toggle some agents on below and they'll shape your next generation.</p>
+                  </div>
+                </div>
               ) : (
                 enabledAgents.map((ag) => (
-                  <div key={ag.id} className="flex justify-between items-center text-[12px] bg-brand-surface-2 border border-brand-border p-3 rounded-xl">
+                  <div key={ag.id} className="flex justify-between items-center text-[12px] bg-brand-surface-2 border border-brand-border p-3 rounded-xl transition-all hover:border-brand-gold/30">
                     <div className="flex items-center gap-2.5">
                       <span className="h-2 w-2 rounded-full bg-brand-gold" />
                       <span className="text-brand-ink">{ag.name}</span>
