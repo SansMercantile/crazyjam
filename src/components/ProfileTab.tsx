@@ -102,6 +102,23 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
 
   return (
     <div className="space-y-6 animate-fadeIn text-left">
+      {/* Profile header card */}
+      <div className="bg-brand-surface border border-brand-border rounded-2xl p-5 flex flex-wrap items-center gap-4">
+        <div className="relative shrink-0">
+          <AnimatedAvatar avatar={editAvatar} size="lg" className="border-2 border-brand-gold/50" />
+          <span className="absolute bottom-1 right-1 h-3 w-3 rounded-full bg-emerald-500 border-2 border-brand-surface" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-lg text-brand-ink leading-tight truncate">{editName || "Producer"}</h2>
+          <p className="text-[12px] text-brand-gold truncate">@{editHandle?.replace(/^@/, "") || "handle"}</p>
+          <p className="text-[11px] text-brand-ink-muted mt-0.5">{editStyle}</p>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30">
+          <Award className="h-3.5 w-3.5 text-brand-gold" />
+          <span className="text-[11px] font-medium text-brand-gold">{rank.label}</span>
+        </div>
+      </div>
+
       {onboardingFinished && (
         <div className="bg-brand-gold/10 border border-brand-gold/25 p-4 rounded-2xl flex flex-wrap justify-between items-center gap-4">
           <div>

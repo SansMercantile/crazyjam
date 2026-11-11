@@ -633,8 +633,13 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog, tracks, 
             );
           })}
           {layers.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center text-center px-8">
-              <p className="text-[10px] font-mono text-brand-ink-muted uppercase tracking-wide">Add text, images, or shapes from the left panel to start your cover</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8 gap-3">
+              <div className="h-12 w-12 rounded-xl bg-brand-pink/10 border border-brand-pink/30 flex items-center justify-center">
+                <Palette className="h-5 w-5 text-brand-pink" />
+              </div>
+              <p className="text-[10px] font-mono text-brand-ink-muted uppercase tracking-wide leading-relaxed">
+                Add text, images, or shapes from the left<br />to start your cover
+              </p>
             </div>
           )}
         </div>
@@ -670,16 +675,21 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog, tracks, 
 
       {/* Gallery modal */}
       {showGallery && (
-        <div className="fixed inset-0 bg-brand-surface-2 backdrop-blur-sm z-[100] flex items-center justify-center p-6" onClick={() => setShowGallery(false)}>
-          <div onClick={(e) => e.stopPropagation()} className="bg-brand-card border border-brand-border rounded-2xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-6 animate-fadeIn" onClick={() => setShowGallery(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-brand-card border border-brand-border rounded-2xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between border-b border-brand-border pb-3 mb-4">
               <h2 className="font-display font-semibold text-sm tracking-wide uppercase text-brand-ink">My Saved Covers</h2>
-              <button onClick={() => setShowGallery(false)}><X className="h-4 w-4 text-brand-ink-muted" /></button>
+              <button onClick={() => setShowGallery(false)} className="p-1.5 rounded-lg text-brand-ink-muted hover:text-brand-ink hover:bg-brand-surface-2 transition-all"><X className="h-4 w-4" /></button>
             </div>
             {loadingGallery ? (
-              <p className="text-center text-brand-ink-muted text-xs font-mono py-8">Loading...</p>
+              <div className="flex items-center justify-center gap-2 py-12 text-brand-ink-muted text-xs font-mono">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading covers…
+              </div>
             ) : gallery.length === 0 ? (
-              <p className="text-center text-brand-ink-muted text-xs font-mono py-8">No saved covers yet.</p>
+              <div className="flex flex-col items-center gap-3 py-12 text-center">
+                <Palette className="h-8 w-8 text-brand-ink-muted" />
+                <p className="text-brand-ink-muted text-xs font-mono">No saved covers yet — design one and hit Save.</p>
+              </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {gallery.map((item) => (
