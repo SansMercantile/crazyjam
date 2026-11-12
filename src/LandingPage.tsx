@@ -7,10 +7,11 @@ import {
 } from 'lucide-react';
 
 // Official CrazyJam Records releases (same as /releases) — real, released albums.
+// Artwork lives in /public/art (optimized 1000x1000 progressive JPEGs).
 const FEATURED_RELEASES = [
-  { title: 'Little Ben', kind: 'Album · 12 tracks', url: 'https://ditto.fm/little-ben' },
-  { title: 'Cradle of Jazz, Vol. 1', kind: 'Album', url: 'https://ditto.fm/cradle-of-jazz-vol-1' },
-  { title: 'Letters to Carli', kind: 'Album', url: 'https://ditto.fm/letter-s-to-carli' },
+  { title: 'Little Ben', kind: 'Album · 12 tracks', url: 'https://ditto.fm/little-ben', art: '/art/little-ben.jpg' },
+  { title: 'Cradle of Jazz, Vol. 1', kind: 'Album', url: 'https://ditto.fm/cradle-of-jazz-vol-1', art: '/art/cradle-of-jazz-vol-1.jpg' },
+  { title: 'Letters to Carli', kind: 'Album', url: 'https://ditto.fm/letter-s-to-carli', art: '/art/letters-to-carli.jpg' },
 ];
 
 // Real studio locations — Johannesburg (Records/Studios HQ), Cape Town (head
@@ -168,16 +169,25 @@ const LandingPage = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
             {FEATURED_RELEASES.map((r) => (
               <a key={r.title} href={r.url} target="_blank" rel="noopener noreferrer"
-                className="group bg-white/5 border border-amber-400/20 rounded-xl p-5 transition-all hover:border-amber-400/60 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(217,196,143,0.12)]">
-                <div className="flex items-start justify-between mb-3">
-                  <Disc3 className="h-9 w-9 text-amber-400/70 group-hover:rotate-90 transition-transform duration-500" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400 text-black">Official</span>
+                className="group bg-white/5 border border-amber-400/20 rounded-xl overflow-hidden transition-all hover:border-amber-400/60 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(217,196,143,0.12)]">
+                <div className="relative aspect-square bg-white/5 overflow-hidden">
+                  <img
+                    src={r.art}
+                    alt={`${r.title} album cover`}
+                    loading="lazy"
+                    width={1000}
+                    height={1000}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <span className="absolute top-2 left-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400 text-black">Official</span>
                 </div>
-                <h3 className="font-semibold text-white group-hover:text-amber-300 transition-colors">{r.title}</h3>
-                <p className="text-[12px] text-amber-400/80 mt-0.5">{r.kind}</p>
-                <span className="inline-flex items-center gap-1 mt-3 text-[12px] text-amber-400 group-hover:underline">
-                  Listen <ExternalLink className="h-3 w-3" />
-                </span>
+                <div className="p-5">
+                  <h3 className="font-semibold text-white group-hover:text-amber-300 transition-colors">{r.title}</h3>
+                  <p className="text-[12px] text-amber-400/80 mt-0.5">{r.kind}</p>
+                  <span className="inline-flex items-center gap-1 mt-3 text-[12px] text-amber-400 group-hover:underline">
+                    Listen <ExternalLink className="h-3 w-3" />
+                  </span>
+                </div>
               </a>
             ))}
           </div>

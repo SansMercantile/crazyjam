@@ -58,6 +58,7 @@ const FEATURED_RELEASES = [
     kind: "Album · 12 tracks",
     url: "https://ditto.fm/little-ben",
     blurb: "A 12-track journey from Cracked Phone to 3 Times.",
+    art: "/art/little-ben.jpg",
   },
   {
     id: "cradle-of-jazz-vol-1",
@@ -66,6 +67,7 @@ const FEATURED_RELEASES = [
     kind: "Album",
     url: "https://ditto.fm/cradle-of-jazz-vol-1",
     blurb: "The first volume in the Cradle of Jazz series.",
+    art: "/art/cradle-of-jazz-vol-1.jpg",
   },
   {
     id: "letter-s-to-carli",
@@ -74,6 +76,7 @@ const FEATURED_RELEASES = [
     kind: "Album",
     url: "https://ditto.fm/letter-s-to-carli",
     blurb: "An intimate, letter-by-letter release.",
+    art: "/art/letters-to-carli.jpg",
   },
 ];
 
@@ -87,8 +90,15 @@ const FeaturedCard: React.FC<{ release: typeof FEATURED_RELEASES[number]; idx: n
     className="group relative bg-white/5 border border-amber-400/20 rounded-xl overflow-hidden transition-all duration-200 hover:border-amber-400/60 hover:shadow-[0_12px_40px_rgba(217,196,143,0.15)] hover:-translate-y-1 animate-fadeIn"
     style={{ animationDelay: `${idx * 60}ms` }}
   >
-    <div className="relative aspect-square bg-gradient-to-br from-amber-400/15 via-white/5 to-transparent flex items-center justify-center">
-      <Disc3 className="h-16 w-16 text-amber-400/60 group-hover:text-amber-400 group-hover:rotate-90 transition-all duration-500" />
+    <div className="relative aspect-square bg-gradient-to-br from-amber-400/15 via-white/5 to-transparent overflow-hidden">
+      <img
+        src={release.art}
+        alt={`${release.title} album cover`}
+        loading="lazy"
+        width={1000}
+        height={1000}
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
       <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-amber-400 text-black text-[9px] font-bold uppercase tracking-wider">Official</span>
       <span className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/50 border border-white/20 flex items-center justify-center text-white/70 group-hover:bg-amber-400 group-hover:text-black group-hover:border-amber-400 transition-all">
         <ArrowUpRight className="h-3.5 w-3.5" />
