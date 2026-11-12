@@ -13,9 +13,8 @@ import { Play, Pause, Music2, Disc3, ExternalLink, ArrowUpRight } from "lucide-r
 import { discoverReleases } from "../utils/api";
 import { PlaybackProvider, usePlayback, releaseToPlaybackItem } from "../context/PlaybackContext";
 
-// Official CrazyJam Records releases, distributed via Ditto. These are real,
-// released albums — each links out to its Ditto smart-link, which fans open in
-// their preferred service (Spotify, YouTube, Apple, Deezer, Tidal, etc).
+// Official CrazyJam Records releases. These are real, released albums — each
+// links out so fans can open it in their preferred music service.
 const FEATURED_RELEASES = [
   {
     id: "little-ben",
@@ -43,7 +42,7 @@ const FEATURED_RELEASES = [
   },
 ];
 
-// Featured official-release card: links OUT to the Ditto smart-link (these
+// Featured official-release card: links OUT to where fans can listen (these
 // albums live on streaming services, not in the in-app player).
 const FeaturedCard: React.FC<{ release: typeof FEATURED_RELEASES[number]; idx: number }> = ({ release, idx }) => (
   <a
@@ -71,15 +70,18 @@ const FeaturedCard: React.FC<{ release: typeof FEATURED_RELEASES[number]; idx: n
   </a>
 );
 
-// The four label imprints. These names are the SEO targets — searches for
-// "CrazyJam Records", "CrazyJam Music", "CrazyJam Studios" and "CrazyJam"
-// should all surface this page. Each imprint groups its released albums.
-const IMPRINTS = [
+// The CrazyJam Artists roster — the names behind the label's released albums.
+const ARTISTS = ["mF", "Ben", "Jay5", "JinO", "Cherry Stone", "Children of the Forest"];
+
+// The label sections. These names are the SEO targets — searches for
+// "CrazyJam Artists", "CrazyJam Music", "CrazyJam Studios" and "CrazyJam"
+// should all surface this page.
+const SECTIONS = [
   {
-    id: "crazyjam-records",
-    name: "CrazyJam Records",
-    tagline: "The flagship label — original artist albums and singles.",
-    match: ["crazyjam records", "records"],
+    id: "crazyjam-artists",
+    name: "CrazyJam Artists",
+    tagline: "The roster — original artist albums and singles.",
+    match: ["crazyjam artists", "crazyjam records", "artists", "records"],
   },
   {
     id: "crazyjam-music",
@@ -96,8 +98,8 @@ const IMPRINTS = [
   {
     id: "crazyjam",
     name: "CrazyJam",
-    tagline: "The AI-native music studio — all releases across every imprint.",
-    match: ["crazyjam"],
+    tagline: "The AI-native music studio — every song our creators publish on the platform.",
+    match: [], // special: shows ALL published songs
   },
 ];
 
@@ -165,15 +167,15 @@ const PublicReleasesPageInner: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = "CrazyJam Releases | CrazyJam Records · CrazyJam Music · CrazyJam Studios";
+    document.title = "CrazyJam Releases | CrazyJam Artists · CrazyJam Music · CrazyJam Studios";
     discoverReleases().then(setReleases).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  // Group releases by imprint keyword match (artist name / genre / title).
-  const byImprint = (imp: typeof IMPRINTS[number]) =>
+  // Group releases by section keyword match (artist name / genre / title).
+  const bySection = (sec: typeof SECTIONS[number]) =>
     releases.filter((r) => {
       const hay = `${r.artistName || ""} ${r.genre || ""} ${r.title || ""}`.toLowerCase();
-      return imp.match.some((m) => hay.includes(m));
+      return sec.match.some((m) => hay.includes(m));
     });
 
   return (
@@ -210,9 +212,9 @@ const PublicReleasesPageInner: React.FC = () => {
             the moment an artist publishes from the studio.
           </p>
           <div className="flex flex-wrap gap-2 pt-2">
-            {IMPRINTS.map((imp) => (
-              <a key={imp.id} href={`#${imp.id}`} className="px-3 py-1.5 rounded-full border border-white/15 text-[11px] text-white/70 hover:border-amber-400/50 hover:text-amber-300 transition-colors">
-                {imp.name}
+            {SECTIONS.map((sec) => (
+              <a key={sec.id} href={`#${sec.id}`} className="px-3 py-1.5 rounded-full border border-white/15 text-[11px] text-white/70 hover:border-amber-400/50 hover:text-amber-300 transition-colors">
+                {sec.name}
               </a>
             ))}
           </div>
@@ -225,13 +227,39 @@ const PublicReleasesPageInner: React.FC = () => {
           <div className="flex items-baseline justify-between border-b border-amber-400/20 pb-3">
             <div>
               <h3 className="text-2xl font-bold text-amber-400">CrazyJam Records — Official Releases</h3>
-              <p className="text-[12px] text-white/60 mt-1">Our released albums, out now on every streaming service via Ditto.</p>
+              <p className="text-[12px] text-white/60 mt-1">Our released albums, out now on every major music service.</p>
             </div>
             <span className="text-[10px] text-white/60 uppercase tracking-wider">{FEATURED_RELEASES.length} albums</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURED_RELEASES.map((r, idx) => (
               <FeaturedCard key={r.id} release={r} idx={idx} />
+            ))}
+          </div>
+        </section>
+
+        {/* CrazyJam Artists roster */}
+        <section id="crazyjam-artists" className="flex flex-col gap-5 scroll-mt-20">
+          <div className="flex items-baseline justify-between border-b border-white/10 pb-3">
+            <div>
+              <h3 className="text-xl font-bold text-amber-400">CrazyJam Artists</h3>
+              <p className="text-[12px] text-white/60 mt-0.5">The roster — original artist albums and singles.</p>
+            </div>
+            <span className="text-[10px] text-white/60 uppercase tracking-wider">{ARTISTS.length} artists</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {ARTISTS.map((name, idx) => (
+              <div
+                key={name}
+                className="bg-white/5 border border-white/10 rounded-xl p-4 text-center transition-all duration-200 hover:border-amber-400/50 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)] animate-fadeIn"
+                style={{ animationDelay: `${idx * 40}ms` }}
+              >
+                <div className="h-11 w-11 mx-auto rounded-full bg-amber-400/15 border border-amber-400/30 flex items-center justify-center mb-2.5">
+                  <Music2 className="h-5 w-5 text-amber-400" />
+                </div>
+                <p className="text-[13px] font-medium text-white truncate">{name}</p>
+                <p className="text-[10px] text-white/60 mt-0.5">CrazyJam Artists</p>
+              </div>
             ))}
           </div>
         </section>
@@ -246,16 +274,17 @@ const PublicReleasesPageInner: React.FC = () => {
                 <p className="text-white/60 text-sm max-w-sm">No public releases yet — the catalog fills as artists publish from CrazyJam Studios.</p>
               </div>
             )}
-            {IMPRINTS.map((imp) => {
-              const list = byImprint(imp);
+            {SECTIONS.filter((s) => s.id !== "crazyjam-artists").map((sec) => {
+              // "CrazyJam" shows every song our creators publish on the platform.
+              const list = sec.id === "crazyjam" ? releases : bySection(sec);
               return (
-                <section key={imp.id} id={imp.id} className="flex flex-col gap-4 scroll-mt-20">
+                <section key={sec.id} id={sec.id} className="flex flex-col gap-4 scroll-mt-20">
                   <div className="flex items-baseline justify-between border-b border-white/10 pb-3">
                     <div>
-                      <h3 className="text-xl font-bold text-amber-400">{imp.name}</h3>
-                      <p className="text-[12px] text-white/60 mt-0.5">{imp.tagline}</p>
+                      <h3 className="text-xl font-bold text-amber-400">{sec.name}</h3>
+                      <p className="text-[12px] text-white/60 mt-0.5">{sec.tagline}</p>
                     </div>
-                    <span className="text-[10px] text-white/60 uppercase tracking-wider">{releases.length} releases</span>
+                    <span className="text-[10px] text-white/60 uppercase tracking-wider">{list.length} releases</span>
                   </div>
                   {list.length > 0 ? (
                     <ReleaseGrid releases={list} />
