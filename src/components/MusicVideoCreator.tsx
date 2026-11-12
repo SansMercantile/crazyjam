@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { TrackState } from "../types";
 import { audioEngine } from "../utils/audioEngine";
-import { saveVideo, generateLipSyncVideo, checkLipSyncAvailable } from "../utils/api";
+import { saveVideo, generateLipSyncVideo, checkLipSyncAvailable, spendCredits, getCredits } from "../utils/api";
 import { TrackPreviewPlayer } from "./TrackPreviewPlayer";
 import { VideoDirectorPanel } from "./VideoDirectorPanel";
 import { compositeOverlayVideo } from "../utils/videoCompositor";
@@ -63,6 +63,11 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
+  const [creditBalance, setCreditBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    getCredits().then((c) => setCreditBalance(c.credits)).catch(() => {});
+  }, []);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -244,6 +249,15 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
       setRenderProgress("Add at least one image or video clip first.");
       return;
     }
+    // Video renders are credit-based: debit 25 credits before rendering.
+    const spend = await spendCredits("video_render");
+    if (!spend.success) {
+      setRenderProgress(`Not enough credits (need ${spend.needed ?? 25}). Top up on the Pricing page to render a video.`);
+      setCreditBalance(spend.credits ?? creditBalance);
+      return;
+    }
+    setCreditBalance(spend.credits ?? null);
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     canvas.width = CANVAS_W;
@@ -596,13 +610,18 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
         )}
       </div>
 
+      <div className="flex items-center justify-between">
+        {creditBalance !== null && (
+          <span className="text-[11px] text-brand-ink-muted">Balance: <span className="text-brand-gold font-medium">{creditBalance}</span> credits</span>
+        )}
+      </div>
       <button
         onClick={handleRender}
         disabled={isRendering || clips.length === 0}
         className="w-full h-11 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-40"
       >
         {isRendering ? <Loader2 className="h-4 w-4 animate-spin" /> : <Film className="h-4 w-4" />}
-        {isRendering ? "Rendering..." : "Render Video"}
+        {isRendering ? "Rendering..." : "Render Video (25 credits)"}
       </button>
       {renderProgress && <p className="text-[11px] text-brand-ink-muted text-center">{renderProgress}</p>}
 

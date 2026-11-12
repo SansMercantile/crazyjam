@@ -308,6 +308,27 @@ export async function subscribeToPlan(planId: string): Promise<{ success: boolea
   return res.json();
 }
 
+// --- Credits (video creation + album art) ---
+export interface CreditPack { id: string; name: string; credits: number; price: string; }
+export interface CreditBalance { credits: number; costs: { album_cover: number; video_render: number }; }
+
+export async function getCredits(): Promise<CreditBalance> {
+  const res = await apiFetch("/api/billing/credits");
+  if (!res.ok) return { credits: 0, costs: { album_cover: 5, video_render: 25 } };
+  return res.json();
+}
+
+export async function topUpCredits(packId: string): Promise<{ success: boolean; redirectUrl?: string; error?: string }> {
+  const res = await apiFetch("/api/billing/credits/topup", { method: "POST", body: JSON.stringify({ packId }) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Top-up failed");
+  return res.json();
+}
+
+export async function spendCredits(action: "album_cover" | "video_render"): Promise<{ success: boolean; credits?: number; error?: string; needed?: number }> {
+  const res = await apiFetch("/api/billing/credits/spend", { method: "POST", body: JSON.stringify({ action }) });
+  return res.json();
+}
+
 export async function listPersonas(): Promise<string[]> {
   const res = await apiFetch("/api/personas");
   if (!res.ok) return [];

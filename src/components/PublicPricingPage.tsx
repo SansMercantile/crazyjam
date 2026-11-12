@@ -7,22 +7,28 @@
  * checkout; signed-out users get sent to sign in first.
  */
 import React, { useEffect, useState } from "react";
-import { Music2, Check, Loader2, Sparkles } from "lucide-react";
-import { listBillingPlans, subscribeToPlan, isLoggedIn, BillingPlan } from "../utils/api";
+import { Music2, Check, Loader2, Sparkles, Coins } from "lucide-react";
+import { listBillingPlans, subscribeToPlan, topUpCredits, getCredits, isLoggedIn, BillingPlan, CreditPack } from "../utils/api";
 
 export const PublicPricingPage: React.FC = () => {
   const [plans, setPlans] = useState<BillingPlan[]>([]);
-  const [note, setNote] = useState("Simple monthly pricing. Cancel anytime.");
+  const [creditPacks, setCreditPacks] = useState<CreditPack[]>([]);
+  const [note, setNote] = useState("Subscriptions cover unlimited music creation. Credits power video & album art.");
   const [loading, setLoading] = useState(true);
   const [busyPlan, setBusyPlan] = useState<string | null>(null);
+  const [busyPack, setBusyPack] = useState<string | null>(null);
+  const [creditBalance, setCreditBalance] = useState<number | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     document.title = "CrazyJam Pricing | AI music studio";
     listBillingPlans()
-      .then((d) => { setPlans(d.plans); setNote(d.note); })
+      .then((d) => { setPlans(d.plans); setCreditPacks(d.creditPacks || []); setNote(d.note); })
       .catch(() => setError("Could not load pricing right now."))
       .finally(() => setLoading(false));
+    if (isLoggedIn()) {
+      getCredits().then((c) => setCreditBalance(c.credits)).catch(() => {});
+    }
   }, []);
 
   const handleSubscribe = async (planId: string) => {
@@ -44,6 +50,27 @@ export const PublicPricingPage: React.FC = () => {
       setError(e.message || "Could not start checkout.");
     } finally {
       setBusyPlan(null);
+    }
+  };
+
+  const handleTopUp = async (packId: string) => {
+    setError("");
+    if (!isLoggedIn()) {
+      window.location.href = "/?topup=" + packId;
+      return;
+    }
+    setBusyPack(packId);
+    try {
+      const r = await topUpCredits(packId);
+      if (r.success && r.redirectUrl) {
+        window.location.href = r.redirectUrl;
+      } else {
+        setError(r.error || "Could not start checkout.");
+      }
+    } catch (e: any) {
+      setError(e.message || "Could not start checkout.");
+    } finally {
+      setBusyPack(null);
     }
   };
 
@@ -170,10 +197,55 @@ export const PublicPricingPage: React.FC = () => {
 
         {error && <p className="text-center text-red-400 text-sm">{error}</p>}
 
+        {/* Credit packs — video creation + album art */}
+        {creditPacks.length > 0 && (
+          <section className="flex flex-col gap-6 pt-4 border-t border-white/10">
+            <div className="text-center flex flex-col gap-2">
+              <div className="flex items-center justify-center gap-2">
+                <Coins className="h-5 w-5 text-amber-400" />
+                <h3 className="text-2xl font-bold">Credits for video &amp; album art</h3>
+              </div>
+              <p className="text-white/60 text-sm max-w-lg mx-auto leading-relaxed">
+                Subscriptions cover unlimited <span className="text-white/80">music</span> creation.
+                Video creation and album art are credit-based — top up a pack and spend
+                credits on those renders. One-off purchase, credits never expire.
+              </p>
+              {creditBalance !== null && (
+                <p className="text-amber-400 text-sm font-medium">Your balance: {creditBalance} credits</p>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-3xl mx-auto w-full">
+              {creditPacks.map((c) => (
+                <div key={c.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col gap-3 hover:border-amber-400/40 transition-all">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold">{c.name}</h4>
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-amber-400/15 border border-amber-400/30 text-amber-400">{c.credits} credits</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold">${c.price}</span>
+                    <span className="text-white/60 text-[12px]">one-off</span>
+                  </div>
+                  <p className="text-[12px] text-white/60 flex-1">
+                    ≈ {Math.floor(c.credits / 5)} album covers or {Math.floor(c.credits / 25)} video renders
+                  </p>
+                  <button
+                    onClick={() => handleTopUp(c.id)}
+                    disabled={busyPack === c.id}
+                    className="w-full h-10 flex items-center justify-center gap-2 rounded-xl border border-white/20 hover:border-amber-400/50 font-semibold text-sm transition-all disabled:opacity-50 active:scale-[0.99]"
+                  >
+                    {busyPack === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    {busyPack === c.id ? "Redirecting…" : "Top up"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="text-center flex flex-col gap-2">
           <p className="text-white/60 text-[12px] max-w-md mx-auto leading-relaxed">
             Secure checkout by PayFast — your card never touches our servers.
-            Prices in USD, billed monthly, cancel anytime.
+            Subscriptions billed monthly, cancel anytime. Credits are one-off and never expire.
           </p>
         </div>
       </main>

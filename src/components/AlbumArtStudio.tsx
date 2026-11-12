@@ -29,7 +29,7 @@ import {
   AlignRight,
   X,
 } from "lucide-react";
-import { saveAlbumArt, updateAlbumArt, listAlbumArt, deleteAlbumArt, generateAiAlbumArt } from "../utils/api";
+import { saveAlbumArt, updateAlbumArt, listAlbumArt, deleteAlbumArt, generateAiAlbumArt, spendCredits, getCredits } from "../utils/api";
 import { TrackState } from "../types";
 import { TrackPreviewPlayer } from "./TrackPreviewPlayer";
 
@@ -136,12 +136,25 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog, tracks, 
   // uploaded photo, never a fixed background. ---
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [creditBalance, setCreditBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    getCredits().then((c) => setCreditBalance(c.credits)).catch(() => {});
+  }, []);
 
   const handleGenerateAiArt = async () => {
     if (!aiPrompt.trim()) return;
     setIsGeneratingAi(true);
     setStatusMsg("");
     try {
+      // Album-art renders are credit-based: debit 5 credits before generating.
+      const spend = await spendCredits("album_cover");
+      if (!spend.success) {
+        setStatusMsg(`Not enough credits (need ${spend.needed ?? 5}). Top up on the Pricing page to render album art.`);
+        setCreditBalance(spend.credits ?? creditBalance);
+        return;
+      }
+      setCreditBalance(spend.credits ?? null);
       const result = await generateAiAlbumArt(aiPrompt.trim());
       if (!result.success || !result.imageBase64) {
         setStatusMsg(result.errorMessage || "AI generation failed.");
@@ -449,8 +462,13 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog, tracks, 
 
           {/* AI-generated art - real Bedrock text-to-image, dropped in as a movable layer */}
           <div className="flex flex-col gap-2 bg-brand-surface-2 border border-brand-border rounded-xl p-3">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase text-brand-ink">
-              <Wand2 className="h-3.5 w-3.5 text-brand-pink" /> Generate with AI
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase text-brand-ink">
+                <Wand2 className="h-3.5 w-3.5 text-brand-pink" /> Generate with AI
+              </div>
+              {creditBalance !== null && (
+                <span className="text-[9px] font-mono text-brand-ink-muted">{creditBalance} credits</span>
+              )}
             </div>
             <textarea
               value={aiPrompt}
@@ -466,7 +484,7 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog, tracks, 
               className="flex items-center justify-center gap-1.5 bg-brand-pink/20 hover:bg-brand-pink/30 border border-brand-pink/40 rounded-lg py-2 text-[10px] font-mono font-bold uppercase text-brand-ink transition-all disabled:opacity-40"
             >
               {isGeneratingAi ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
-              {isGeneratingAi ? "Generating..." : "Generate"}
+              {isGeneratingAi ? "Generating..." : "Generate (5 credits)"}
             </button>
           </div>
 
