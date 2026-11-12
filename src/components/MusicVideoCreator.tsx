@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { TrackState } from "../types";
 import { audioEngine } from "../utils/audioEngine";
-import { saveVideo, generateLipSyncVideo, checkLipSyncAvailable, spendCredits, getCredits } from "../utils/api";
+import { saveVideo, generateLipSyncVideo, checkLipSyncAvailable, getCredits } from "../utils/api";
 import { TrackPreviewPlayer } from "./TrackPreviewPlayer";
 import { VideoDirectorPanel } from "./VideoDirectorPanel";
 import { compositeOverlayVideo } from "../utils/videoCompositor";
@@ -249,15 +249,9 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
       setRenderProgress("Add at least one image or video clip first.");
       return;
     }
-    // Video renders are credit-based: debit 25 credits before rendering.
-    const spend = await spendCredits("video_render");
-    if (!spend.success) {
-      setRenderProgress(`Not enough credits (need ${spend.needed ?? 25}). Top up on the Pricing page to render a video.`);
-      setCreditBalance(spend.credits ?? creditBalance);
-      return;
-    }
-    setCreditBalance(spend.credits ?? null);
-
+    // The timeline compositor runs client-side (your own clips + your CPU) —
+    // it's free. The AI features on this page (Animate photo, Video Director)
+    // are credit-based and gate themselves server-side.
     const canvas = canvasRef.current;
     if (!canvas) return;
     canvas.width = CANVAS_W;
@@ -621,7 +615,7 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
         className="w-full h-11 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-40"
       >
         {isRendering ? <Loader2 className="h-4 w-4 animate-spin" /> : <Film className="h-4 w-4" />}
-        {isRendering ? "Rendering..." : "Render Video (25 credits)"}
+        {isRendering ? "Rendering..." : "Render Video"}
       </button>
       {renderProgress && <p className="text-[11px] text-brand-ink-muted text-center">{renderProgress}</p>}
 

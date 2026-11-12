@@ -29,7 +29,7 @@ import {
   AlignRight,
   X,
 } from "lucide-react";
-import { saveAlbumArt, updateAlbumArt, listAlbumArt, deleteAlbumArt, generateAiAlbumArt, spendCredits, getCredits } from "../utils/api";
+import { saveAlbumArt, updateAlbumArt, listAlbumArt, deleteAlbumArt, generateAiAlbumArt, getCredits } from "../utils/api";
 import { TrackState } from "../types";
 import { TrackPreviewPlayer } from "./TrackPreviewPlayer";
 
@@ -147,15 +147,10 @@ export const AlbumArtStudio: React.FC<AlbumArtStudioProps> = ({ addLog, tracks, 
     setIsGeneratingAi(true);
     setStatusMsg("");
     try {
-      // Album-art renders are credit-based: debit 5 credits before generating.
-      const spend = await spendCredits("album_cover");
-      if (!spend.success) {
-        setStatusMsg(`Not enough credits (need ${spend.needed ?? 5}). Top up on the Pricing page to render album art.`);
-        setCreditBalance(spend.credits ?? creditBalance);
-        return;
-      }
-      setCreditBalance(spend.credits ?? null);
+      // Album-art renders are credit-based: the backend deducts 5 credits and
+      // refunds them if the render fails. A low balance comes back as an error.
       const result = await generateAiAlbumArt(aiPrompt.trim());
+      getCredits().then((c) => setCreditBalance(c.credits)).catch(() => {});
       if (!result.success || !result.imageBase64) {
         setStatusMsg(result.errorMessage || "AI generation failed.");
         return;
