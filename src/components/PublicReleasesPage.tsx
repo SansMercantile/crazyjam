@@ -9,9 +9,67 @@
  * imprint so the catalog is always current.
  */
 import React, { useEffect, useState } from "react";
-import { Play, Pause, Music2, Disc3, ExternalLink } from "lucide-react";
+import { Play, Pause, Music2, Disc3, ExternalLink, ArrowUpRight } from "lucide-react";
 import { discoverReleases } from "../utils/api";
 import { PlaybackProvider, usePlayback, releaseToPlaybackItem } from "../context/PlaybackContext";
+
+// Official CrazyJam Records releases, distributed via Ditto. These are real,
+// released albums — each links out to its Ditto smart-link, which fans open in
+// their preferred service (Spotify, YouTube, Apple, Deezer, Tidal, etc).
+const FEATURED_RELEASES = [
+  {
+    id: "little-ben",
+    title: "Little Ben",
+    artist: "CrazyJam Records",
+    kind: "Album · 12 tracks",
+    url: "https://ditto.fm/little-ben",
+    blurb: "A 12-track journey from Cracked Phone to 3 Times.",
+  },
+  {
+    id: "cradle-of-jazz-vol-1",
+    title: "Cradle of Jazz, Vol. 1",
+    artist: "CrazyJam Records",
+    kind: "Album",
+    url: "https://ditto.fm/cradle-of-jazz-vol-1",
+    blurb: "The first volume in the Cradle of Jazz series.",
+  },
+  {
+    id: "letter-s-to-carli",
+    title: "Letters to Carli",
+    artist: "CrazyJam Records",
+    kind: "Album",
+    url: "https://ditto.fm/letter-s-to-carli",
+    blurb: "An intimate, letter-by-letter release.",
+  },
+];
+
+// Featured official-release card: links OUT to the Ditto smart-link (these
+// albums live on streaming services, not in the in-app player).
+const FeaturedCard: React.FC<{ release: typeof FEATURED_RELEASES[number]; idx: number }> = ({ release, idx }) => (
+  <a
+    href={release.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="group relative bg-white/5 border border-amber-400/20 rounded-xl overflow-hidden transition-all duration-200 hover:border-amber-400/60 hover:shadow-[0_12px_40px_rgba(217,196,143,0.15)] hover:-translate-y-1 animate-fadeIn"
+    style={{ animationDelay: `${idx * 60}ms` }}
+  >
+    <div className="relative aspect-square bg-gradient-to-br from-amber-400/15 via-white/5 to-transparent flex items-center justify-center">
+      <Disc3 className="h-16 w-16 text-amber-400/60 group-hover:text-amber-400 group-hover:rotate-90 transition-all duration-500" />
+      <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-amber-400 text-black text-[9px] font-bold uppercase tracking-wider">Official</span>
+      <span className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/50 border border-white/20 flex items-center justify-center text-white/70 group-hover:bg-amber-400 group-hover:text-black group-hover:border-amber-400 transition-all">
+        <ArrowUpRight className="h-3.5 w-3.5" />
+      </span>
+    </div>
+    <div className="p-4">
+      <h3 className="text-[14px] font-semibold text-white group-hover:text-amber-300 transition-colors truncate">{release.title}</h3>
+      <p className="text-[11px] text-amber-400/80 mt-0.5">{release.kind}</p>
+      <p className="text-[11px] text-white/60 mt-1.5 leading-relaxed">{release.blurb}</p>
+      <span className="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-amber-400 group-hover:underline">
+        Listen on your service <ArrowUpRight className="h-3 w-3" />
+      </span>
+    </div>
+  </a>
+);
 
 // The four label imprints. These names are the SEO targets — searches for
 // "CrazyJam Records", "CrazyJam Music", "CrazyJam Studios" and "CrazyJam"
@@ -162,6 +220,22 @@ const PublicReleasesPageInner: React.FC = () => {
       </section>
 
       <main className="max-w-6xl mx-auto px-6 py-10 flex flex-col gap-12">
+        {/* Official CrazyJam Records releases */}
+        <section id="official" className="flex flex-col gap-5 scroll-mt-20">
+          <div className="flex items-baseline justify-between border-b border-amber-400/20 pb-3">
+            <div>
+              <h3 className="text-2xl font-bold text-amber-400">CrazyJam Records — Official Releases</h3>
+              <p className="text-[12px] text-white/60 mt-1">Our released albums, out now on every streaming service via Ditto.</p>
+            </div>
+            <span className="text-[10px] text-white/60 uppercase tracking-wider">{FEATURED_RELEASES.length} albums</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {FEATURED_RELEASES.map((r, idx) => (
+              <FeaturedCard key={r.id} release={r} idx={idx} />
+            ))}
+          </div>
+        </section>
+
         {loading ? (
           <GridSkeleton />
         ) : (
