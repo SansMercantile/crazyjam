@@ -289,10 +289,10 @@ export const MultitrackTimeline: React.FC<MultitrackTimelineProps> = ({
               onClick={() => selectSection(section)}
               className={`shrink-0 w-44 rounded-2xl border-2 p-3 cursor-pointer transition-all select-none ${
                 isPlayingThis
-                  ? "border-emerald-400 bg-emerald-400/10"
+                  ? "border-emerald-400 bg-emerald-400/10 shadow-[0_0_20px_rgba(52,211,153,0.2)]"
                   : isActive
-                  ? "border-brand-gold bg-brand-gold/10"
-                  : "border-brand-border bg-brand-surface-2 hover:border-brand-border"
+                  ? "border-brand-gold bg-brand-gold/10 shadow-[0_4px_16px_rgba(169,134,63,0.15)]"
+                  : "border-brand-border bg-brand-surface-2 hover:border-brand-gold/40 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)]"
               }`}
             >
               <div className="flex items-center justify-between mb-2">

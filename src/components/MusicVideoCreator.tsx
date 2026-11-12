@@ -527,10 +527,23 @@ export const MusicVideoCreator: React.FC<MusicVideoCreatorProps> = ({ tracks, te
       )}
 
       {/* Clip list / timeline */}
-      {clips.length > 0 && (
+      {clips.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-8 text-center border border-dashed border-brand-border rounded-xl">
+          <div className="h-11 w-11 rounded-xl bg-brand-gold/10 border border-brand-gold/30 flex items-center justify-center">
+            <Film className="h-5 w-5 text-brand-gold" />
+          </div>
+          <div>
+            <p className="text-[12px] font-medium text-brand-ink">Your timeline is empty</p>
+            <p className="text-[11px] text-brand-ink-muted mt-0.5">Add images or video clips above, then render them with your track audio.</p>
+          </div>
+        </div>
+      ) : (
         <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-medium text-brand-ink">{clips.length} clip{clips.length > 1 ? "s" : ""} · {totalDuration}s total</span>
+          </div>
           {clips.map((clip, idx) => (
-            <div key={clip.id} className="flex items-center gap-3 bg-brand-surface-2 border border-brand-border rounded-lg p-2">
+            <div key={clip.id} className="flex items-center gap-3 bg-brand-surface-2 border border-brand-border rounded-lg p-2 transition-all hover:border-brand-gold/30">
               {clip.type === "image" ? (
                 <img src={clip.src} className="h-12 w-12 object-cover rounded" />
               ) : (
