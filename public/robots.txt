@@ -1,6 +1,35 @@
+# Robots.txt for CrazyJam - The AI-native music studio
+# https://crazyjam.sansmercantile.com
+
 User-agent: *
 Allow: /
-Allow: /releases
-Allow: /a/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /admin/
+Disallow: /billing/
 
+# Sitemap
 Sitemap: https://crazyjam.sansmercantile.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Googlebot specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bingbot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Block scrapers / spam bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /

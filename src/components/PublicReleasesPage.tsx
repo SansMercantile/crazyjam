@@ -9,9 +9,44 @@
  * imprint so the catalog is always current.
  */
 import React, { useEffect, useState } from "react";
-import { Play, Pause, Music2, Disc3, ExternalLink, ArrowUpRight } from "lucide-react";
+import { Play, Pause, Music2, Disc3, ExternalLink, ArrowUpRight, MapPin } from "lucide-react";
 import { discoverReleases } from "../utils/api";
 import { PlaybackProvider, usePlayback, releaseToPlaybackItem } from "../context/PlaybackContext";
+
+// CrazyJam Studios locations — embedded from Google Maps so visitors can find
+// the studios. Johannesburg is the CrazyJam Records/Studios HQ; Cape Town is
+// the Sans Mercantile head office; Kitakyushu is the Japan presence.
+// `rating`/`reviews` come straight from our live Google listing (CrazyJam
+// Records™, 118 Pritchard St) and are only rendered where Google has reviews.
+const STUDIO_LOCATIONS = [
+  {
+    id: "johannesburg",
+    name: "CrazyJam Studios — Johannesburg",
+    role: "Records & Studios HQ",
+    address: "118 Pritchard St, Johannesburg, 2000, South Africa",
+    mapQuery: "CrazyJam Records 118 Pritchard St Johannesburg",
+    rating: 5.0,
+    reviews: 3,
+  },
+  {
+    id: "cape-town",
+    name: "CrazyJam Studios — Cape Town",
+    role: "Head office",
+    address: "Cape Town, Western Cape, South Africa",
+    mapQuery: "Cape Town, South Africa",
+    rating: null,
+    reviews: 0,
+  },
+  {
+    id: "kitakyushu",
+    name: "CrazyJam Studios — Kitakyushu",
+    role: "Japan presence",
+    address: "Kitakyushu, Fukuoka, Japan",
+    mapQuery: "Kitakyushu, Fukuoka, Japan",
+    rating: null,
+    reviews: 0,
+  },
+];
 
 // Official CrazyJam Records releases. These are real, released albums — each
 // links out so fans can open it in their preferred music service.
@@ -234,6 +269,62 @@ const PublicReleasesPageInner: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURED_RELEASES.map((r, idx) => (
               <FeaturedCard key={r.id} release={r} idx={idx} />
+            ))}
+          </div>
+        </section>
+
+        {/* CrazyJam Studios locations */}
+        <section id="crazyjam-studios-locations" className="flex flex-col gap-5 scroll-mt-20">
+          <div className="flex items-baseline justify-between border-b border-white/10 pb-3">
+            <div>
+              <h3 className="text-xl font-bold text-amber-400">CrazyJam Studios — Locations</h3>
+              <p className="text-[12px] text-white/60 mt-0.5">Studio-crafted releases and production showcases — find the studios.</p>
+            </div>
+            <span className="text-[10px] text-white/60 uppercase tracking-wider">{STUDIO_LOCATIONS.length} locations</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {STUDIO_LOCATIONS.map((loc, idx) => (
+              <div
+                key={loc.id}
+                className="bg-white/5 border border-white/10 rounded-xl overflow-hidden flex flex-col transition-all duration-200 hover:border-amber-400/50 hover:shadow-[0_10px_30px_rgba(0,0,0,0.4)] animate-fadeIn"
+                style={{ animationDelay: `${idx * 60}ms` }}
+              >
+                <div className="relative h-44 bg-white/5">
+                  <iframe
+                    title={loc.name}
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(loc.mapQuery)}&output=embed`}
+                    className="w-full h-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+                <div className="p-4 flex flex-col gap-1.5">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-[13px] font-semibold text-white">{loc.name}</h4>
+                      <p className="text-[11px] text-amber-400/80">{loc.role}</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-white/60 pl-6">{loc.address}</p>
+                  {loc.rating != null ? (
+                    <p className="text-[11px] pl-6">
+                      <span className="text-amber-400 font-bold">★ {loc.rating.toFixed(1)}</span>{" "}
+                      <span className="text-white/50">Google · {loc.reviews} reviews</span>
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-white/40 pl-6">New location — no Google reviews yet</p>
+                  )}
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.mapQuery)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 mt-2 pl-6 text-[11px] font-medium text-amber-400 hover:underline"
+                  >
+                    Open in Google Maps <ArrowUpRight className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
             ))}
           </div>
         </section>

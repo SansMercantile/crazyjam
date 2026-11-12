@@ -1,0 +1,6 @@
+release/
+dist/
+node_modules/
+build_out.txt
+build_error.log
+_*.ps1

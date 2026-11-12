@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import LandingPage from "./LandingPage";
 import { ServiceAgent, TrackState, AgentLog, MusicBlueprint, NoteEvent } from "./types";
 import { AudioEngine, audioEngine } from "./utils/audioEngine";
 import { generateBlueprint, logout as apiLogout } from "./utils/api";
@@ -767,6 +768,12 @@ export default function App() {
     return rolesMap[role] || "🤖";
   };
 
+  // Show landing page if not authenticated
+  if (!auth0Authenticated) {
+    return <LandingPage />;
+  }
+
+  // Show onboarding if authenticated but not finished
   if (!onboardingFinished) {
     return (
       <div className="min-h-screen bg-brand-bg text-brand-ink flex flex-col justify-center p-6 sm:p-12 animate-fadeIn">

@@ -1,18 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Homepage (landing page) -->
   <url>
     <loc>https://crazyjam.sansmercantile.com/</loc>
+    <lastmod>2026-11-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- Features -->
   <url>
-    <loc>https://crazyjam.sansmercantile.com/releases</loc>
-    <changefreq>daily</changefreq>
+    <loc>https://crazyjam.sansmercantile.com/#features</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+
+  <!-- Official releases / catalog -->
   <url>
-    <loc>https://crazyjam.sansmercantile.com/pricing</loc>
+    <loc>https://crazyjam.sansmercantile.com/releases</loc>
+    <lastmod>2026-11-12</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Pricing + credit packs -->
+  <url>
+    <loc>https://crazyjam.sansmercantile.com/#pricing</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- CrazyJam Studios locations -->
+  <url>
+    <loc>https://crazyjam.sansmercantile.com/#studios</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- FAQ -->
+  <url>
+    <loc>https://crazyjam.sansmercantile.com/#faq</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
 </urlset>
