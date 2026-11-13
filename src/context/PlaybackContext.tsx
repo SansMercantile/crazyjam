@@ -295,13 +295,21 @@ export function usePlayback() {
   return ctx;
 }
 
+/** Resolve the cover-art URL for a release: official records get a hosted
+ *  /public/art URL; user-published releases keep their inline base64 image. */
+export function releaseCoverUrl(release: any): string | undefined {
+  if (release?.albumArtUrl) return release.albumArtUrl;
+  if (release?.albumArtImage) return `data:image/png;base64,${release.albumArtImage}`;
+  return undefined;
+}
+
 /** Convenience builder for a release from the Discover feed / public release page. */
 export function releaseToPlaybackItem(release: any): PlaybackItem {
   return {
     id: `release-${release.id}`,
     title: release.title,
     artist: release.artistName,
-    artUrl: release.albumArtImage,
+    artUrl: releaseCoverUrl(release),
     audioUrl: release.hasAudio ? publicReleaseAudioUrl(release.id) : undefined,
     blueprint: release.blueprint,
     tempo: release.blueprint?.tempo,

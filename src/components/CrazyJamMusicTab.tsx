@@ -14,7 +14,7 @@ import { audioEngine } from "../utils/audioEngine";
 import { blueprintToTracks } from "../utils/blueprintToTracks";
 import { ArtistPageEditor } from "./ArtistPageEditor";
 import { MusicVideoCreator } from "./MusicVideoCreator";
-import { usePlayback, releaseToPlaybackItem, trackToPlaybackItem } from "../context/PlaybackContext";
+import { usePlayback, releaseToPlaybackItem, trackToPlaybackItem, releaseCoverUrl } from "../context/PlaybackContext";
 import {
   discoverReleases,
   listMyReleases,
@@ -53,8 +53,8 @@ const ReleaseCard: React.FC<{
   return (
     <div className="bg-brand-surface border border-brand-border rounded-xl overflow-hidden flex flex-col group">
       <div className="relative aspect-square bg-brand-surface-2">
-        {release.albumArtImage ? (
-          <img src={`data:image/png;base64,${release.albumArtImage}`} className="w-full h-full object-cover" />
+        {releaseCoverUrl(release) ? (
+          <img src={releaseCoverUrl(release)} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-brand-ink-muted text-xs">No cover art</div>
         )}

@@ -11,6 +11,7 @@ import { TrackState } from "../types";
 import { audioEngine } from "../utils/audioEngine";
 import { blueprintToTracks } from "../utils/blueprintToTracks";
 import { getPublicArtistPage, discoverReleases } from "../utils/api";
+import { releaseCoverUrl } from "../context/PlaybackContext";
 
 interface PublicArtistPageProps {
   slug: string;
@@ -98,8 +99,8 @@ export const PublicArtistPage: React.FC<PublicArtistPageProps> = ({ slug }) => {
             <div className="flex flex-col gap-2">
               {releases.map((r) => (
                 <div key={r.id} className="flex items-center gap-3 bg-brand-surface border border-brand-border rounded-xl p-2.5 text-left">
-                  {r.albumArtImage ? (
-                    <img src={`data:image/png;base64,${r.albumArtImage}`} className="h-11 w-11 rounded-lg object-cover shrink-0" />
+                  {releaseCoverUrl(r) ? (
+                    <img src={releaseCoverUrl(r)} className="h-11 w-11 rounded-lg object-cover shrink-0" />
                   ) : (
                     <div className="h-11 w-11 rounded-lg bg-brand-surface-2 shrink-0" />
                   )}

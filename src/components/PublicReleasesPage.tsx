@@ -11,7 +11,7 @@
 import React, { useEffect, useState } from "react";
 import { Play, Pause, Music2, Disc3, ExternalLink, ArrowUpRight, MapPin } from "lucide-react";
 import { discoverReleases } from "../utils/api";
-import { PlaybackProvider, usePlayback, releaseToPlaybackItem } from "../context/PlaybackContext";
+import { PlaybackProvider, usePlayback, releaseToPlaybackItem, releaseCoverUrl } from "../context/PlaybackContext";
 
 // CrazyJam Studios locations — embedded from Google Maps so visitors can find
 // the studios. Johannesburg is the CrazyJam Records/Studios HQ; Cape Town is
@@ -163,8 +163,8 @@ const ReleaseGrid: React.FC<{ releases: any[] }> = ({ releases }) => {
             style={{ animationDelay: `${idx * 40}ms` }}
           >
             <div className="relative aspect-square bg-gradient-to-br from-white/5 to-white/[0.02]">
-              {r.albumArtImage ? (
-                <img src={`data:image/png;base64,${r.albumArtImage}`} alt={`${r.title} cover`} className="w-full h-full object-cover" />
+              {releaseCoverUrl(r) ? (
+                <img src={releaseCoverUrl(r)} alt={`${r.title} cover`} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-white/20"><Disc3 className="h-8 w-8" /></div>
               )}
