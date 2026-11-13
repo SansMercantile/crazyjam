@@ -6,6 +6,11 @@ import {
   MapPin, Award, Disc3, ExternalLink,
 } from 'lucide-react';
 
+// Brand marks served from /public so they persist across the landing page,
+// the favicon, and every route (no bundler path needed).
+const ICON_LOGO = '/CrazyJam-Icon-logo-1.png';
+const TEXT_LOGO = '/text-logo-1.png';
+
 // Official CrazyJam Records releases (same as /releases) — real, released albums.
 // Artwork lives in /public/art (optimized 1000x1000 progressive JPEGs).
 const FEATURED_RELEASES = [
@@ -71,10 +76,7 @@ const LandingPage = () => {
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-amber-400/15 border border-amber-400/30 flex items-center justify-center">
-                <Music className="h-4.5 w-4.5 text-amber-400" />
-              </div>
-              <span className="text-lg font-bold">CrazyJam</span>
+              <img src={TEXT_LOGO} alt="CrazyJam" className="h-7 w-auto object-contain" />
             </div>
             <div className="hidden md:flex items-center gap-7">
               <a href="#features" className="text-sm text-white/70 hover:text-white transition">Features</a>
@@ -352,8 +354,8 @@ const LandingPage = () => {
       <footer className="border-t border-white/10 py-10 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <Music className="h-5 w-5 text-amber-400" />
-            <span className="font-bold">CrazyJam</span>
+            <img src={ICON_LOGO} alt="CrazyJam" className="h-8 w-8 object-contain" />
+            <img src={TEXT_LOGO} alt="CrazyJam" className="h-6 w-auto object-contain" />
           </div>
           <div className="flex items-center gap-6 text-[13px] text-white/60">
             <a href="/releases" className="hover:text-white transition">Releases</a>
