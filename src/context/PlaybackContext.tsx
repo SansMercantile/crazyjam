@@ -10,6 +10,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { fetchTrackAudioBlob, publicReleaseAudioUrl, registerTrackPlay } from "../utils/api";
 import { audioEngine } from "../utils/audioEngine";
+import { releaseArtistName } from "../utils/releases";
 
 export interface PlaybackItem {
   id: string;
@@ -308,7 +309,7 @@ export function releaseToPlaybackItem(release: any): PlaybackItem {
   return {
     id: `release-${release.id}`,
     title: release.title,
-    artist: release.artistName,
+    artist: releaseArtistName(release),
     artUrl: releaseCoverUrl(release),
     audioUrl: release.hasAudio ? publicReleaseAudioUrl(release.id) : undefined,
     blueprint: release.blueprint,

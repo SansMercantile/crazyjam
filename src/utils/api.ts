@@ -647,7 +647,7 @@ export async function getPublicArtistPage(slug: string) {
 }
 
 // --- Releases (CrazyJam Music) ---
-export async function publishRelease(trackId: string, options: { albumArtId?: string; videoId?: string; description?: string; marketingBlurb?: string } = {}) {
+export async function publishRelease(trackId: string, options: { albumArtId?: string; videoId?: string; description?: string; marketingBlurb?: string; tags?: string[] } = {}) {
   const res = await apiFetch("/api/releases", {
     method: "POST",
     body: JSON.stringify({ trackId, ...options }),
@@ -943,4 +943,43 @@ export async function getVideoDirectorStatus(jobId: string): Promise<VideoGenera
   const res = await apiFetch(`/api/video-director/video-status?jobId=${encodeURIComponent(jobId)}`);
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Could not check render status");
   return res.json();
+}
+
+// --- Quick Teaser (one-click 15s lip-synced 9:16 vertical clip, closing the
+// Suno Visuals "instant teaser" gap using the artist's real face + our pipeline) ---
+export interface QuickTeaserResult {
+  success: boolean;
+  videoBase64?: string;
+  mimeType?: string;
+  generationSeconds?: number;
+  errorMessage?: string;
+}
+
+export async function generateQuickTeaser(params: {
+  trackTitle: string;
+  lyricLine: string;
+  faceImageBase64: string;
+  faceImageContentType?: string;
+  voiceId?: string;
+  captionText?: string;
+}): Promise<QuickTeaserResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 200000); // render can take a while
+  try {
+    const res = await apiFetch("/api/video-director/quick-teaser", {
+      method: "POST",
+      body: JSON.stringify(params),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || err.errorMessage || "Quick teaser request failed");
+    }
+    return res.json();
+  } catch (e: any) {
+    if (e.name === "AbortError") throw new Error("Teaser render timed out - the GPU may be busy, try again shortly.");
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }

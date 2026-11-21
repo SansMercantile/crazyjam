@@ -111,6 +111,7 @@ const LandingPage = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-amber-400/[0.06] via-transparent to-transparent pointer-events-none" />
         <div className="max-w-4xl mx-auto text-center relative flex flex-col gap-5">
           <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-[0.2em]">The AI-native music studio</span>
+          <p className="text-lg font-semibold text-amber-300">Create. Record. Release.</p>
           <h1 className="text-4xl md:text-6xl font-bold leading-tight">
             Make full songs with vocals,
             <span className="block text-amber-400">on your own terms</span>

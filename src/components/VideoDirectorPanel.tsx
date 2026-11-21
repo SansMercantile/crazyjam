@@ -14,10 +14,11 @@
  * the timeline like any other clips.
  */
 import React, { useState, useRef } from "react";
-import { Clapperboard, Sparkles, Loader2, Wand2, Image as ImageIcon, RefreshCw, Film, ChevronRight } from "lucide-react";
+import { Clapperboard, Sparkles, Loader2, Wand2, Image as ImageIcon, RefreshCw, Film, ChevronRight, Zap, Upload, Download } from "lucide-react";
 import {
   analyzeVideoConcepts, generateConceptScenes, enhanceVideoScene, generateSceneStill,
   generateVideoDirectorPrompt, startVideoDirectorRender, getVideoDirectorStatus,
+  generateQuickTeaser, blobToBase64,
   VideoDirectorConcept, VideoDirectorScene,
 } from "../utils/api";
 
@@ -207,18 +208,23 @@ export function VideoDirectorPanel({ trackTitle, genre, bpm, lyrics, onVideoRead
 
   if (!expanded) {
     return (
-      <button
-        onClick={() => setExpanded(true)}
-        className="flex items-center gap-2 bg-brand-surface-2 hover:bg-brand-border/30 border border-brand-border rounded-xl px-4 py-2.5 text-[11px] font-medium text-brand-ink transition-all"
-      >
-        <Clapperboard className="h-4 w-4 text-brand-pink" /> AI Video Director - generate cinematic scenes from your track
-        <ChevronRight className="h-3.5 w-3.5 text-brand-ink-muted" />
-      </button>
+      <div className="flex flex-col gap-2">
+        <QuickTeaserCard trackTitle={trackTitle} lyrics={lyrics} onVideoReady={onVideoReady} addLog={addLog} />
+        <button
+          onClick={() => setExpanded(true)}
+          className="flex items-center gap-2 bg-brand-surface-2 hover:bg-brand-border/30 border border-brand-border rounded-xl px-4 py-2.5 text-[11px] font-medium text-brand-ink transition-all"
+        >
+          <Clapperboard className="h-4 w-4 text-brand-pink" /> AI Video Director - generate cinematic scenes from your track
+          <ChevronRight className="h-3.5 w-3.5 text-brand-ink-muted" />
+        </button>
+      </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-3 bg-brand-surface-2 border border-brand-border rounded-xl p-4">
+      <QuickTeaserCard trackTitle={trackTitle} lyrics={lyrics} onVideoReady={onVideoReady} addLog={addLog} />
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-[12px] font-medium text-brand-ink">
           <Clapperboard className="h-4 w-4 text-brand-pink" /> AI Video Director
@@ -338,6 +344,164 @@ export function VideoDirectorPanel({ trackTitle, genre, bpm, lyrics, onVideoRead
           {step === "done" && (
             <p className="text-[10px] text-brand-gold">Added to your timeline below. Combine it with an "Animate a photo" clip for the performer shot.</p>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// QuickTeaserCard - one-click 15s lip-synced vertical (9:16) teaser. Closes the
+// Suno Visuals "instant teaser" gap using the artist's REAL face + our Wav2Lip
+// pipeline. Designed mobile-first (big touch targets, single column).
+// ---------------------------------------------------------------------------
+function QuickTeaserCard({ trackTitle, lyrics, onVideoReady, addLog }: {
+  trackTitle: string;
+  lyrics?: string;
+  onVideoReady: (file: File) => void;
+  addLog?: (log: any) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [lyricLine, setLyricLine] = useState("");
+  const [voiceId, setVoiceId] = useState("Matthew");
+  const [facePreview, setFacePreview] = useState<string | null>(null);
+  const [faceB64, setFaceB64] = useState<string>("");
+  const [faceMime, setFaceMime] = useState("image/jpeg");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [teaserUrl, setTeaserUrl] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const handlePickFace = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFaceMime(f.type || "image/jpeg");
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      setFacePreview(dataUrl);
+      setFaceB64((dataUrl.split(",")[1]) || "");
+    };
+    reader.readAsDataURL(f);
+  };
+
+  const handleGenerate = async () => {
+    if (!faceB64 || !lyricLine.trim()) return;
+    setBusy(true);
+    setError("");
+    setTeaserUrl(null);
+    try {
+      const result = await generateQuickTeaser({
+        trackTitle, lyricLine: lyricLine.trim(), faceImageBase64: faceB64,
+        faceImageContentType: faceMime, voiceId, captionText: lyricLine.trim(),
+      });
+      if (!result.success || !result.videoBase64) {
+        setError(result.errorMessage || "Teaser render failed.");
+        return;
+      }
+      const byteChars = atob(result.videoBase64);
+      const bytes = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([bytes], { type: result.mimeType || "video/mp4" });
+      const url = URL.createObjectURL(blob);
+      setTeaserUrl(url);
+      const file = new File([blob], `teaser-${trackTitle.replace(/\s+/g, "-").toLowerCase()}-${Date.now()}.mp4`, { type: "video/mp4" });
+      onVideoReady(file);
+      addLog?.({
+        agentName: "Quick Teaser", role: "Teaser Generator", avatar: "\u26a1",
+        message: `Rendered a 9:16 lip-synced teaser for "${trackTitle}" and added it to your timeline.`,
+        phase: "System", status: "completed",
+      });
+    } catch (e: any) {
+      setError(e.message || "Teaser render failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2 bg-gradient-to-r from-brand-pink/20 to-brand-gold/20 hover:from-brand-pink/30 hover:to-brand-gold/30 border border-brand-pink/40 rounded-xl px-4 py-3 text-[12px] font-semibold text-brand-ink transition-all"
+      >
+        <Zap className="h-4 w-4 text-brand-gold" /> Quick Teaser - instant 15s lip-synced vertical clip for Shorts / Reels / TikTok
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3 bg-gradient-to-br from-brand-pink/10 to-brand-gold/10 border border-brand-pink/30 rounded-xl p-4 mb-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-[12px] font-semibold text-brand-ink">
+          <Zap className="h-4 w-4 text-brand-gold" /> Quick Teaser
+        </div>
+        <button onClick={() => setOpen(false)} className="text-[10px] text-brand-ink-muted hover:text-brand-ink">Close</button>
+      </div>
+
+      <p className="text-[10px] text-brand-ink-muted">
+        One 15-second, 9:16 lip-synced teaser from your photo + a hook line. Perfect for Shorts, Reels & TikTok. Uses your real face - no blocked-likeness filters. 30 credits.
+      </p>
+
+      {error && <p className="text-[11px] text-red-400">{error}</p>}
+
+      {/* Face photo picker */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => fileRef.current?.click()}
+          className="h-20 w-20 shrink-0 rounded-lg border-2 border-dashed border-brand-border hover:border-brand-gold/50 overflow-hidden bg-brand-surface flex items-center justify-center"
+        >
+          {facePreview ? (
+            <img src={facePreview} className="h-full w-full object-cover" />
+          ) : (
+            <ImageIcon className="h-5 w-5 text-brand-ink-muted" />
+          )}
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="text-[11px] text-brand-ink font-medium">Your face photo</div>
+          <div className="text-[9px] text-brand-ink-muted">Tap to upload. This is who lip-syncs the hook.</div>
+        </div>
+        <input ref={fileRef} type="file" accept="image/*" onChange={handlePickFace} className="hidden" />
+      </div>
+
+      {/* Hook line */}
+      <textarea
+        value={lyricLine} onChange={(e) => setLyricLine(e.target.value)} rows={2}
+        placeholder={lyrics ? `Hook line from "${trackTitle}" (or edit)` : "The hook line to lip-sync (e.g. the catchiest 1-2 lines)"}
+        className="bg-brand-surface border border-brand-border focus:border-brand-gold/50 text-brand-ink px-3 py-2 text-xs rounded-lg outline-none resize-none"
+      />
+
+      {/* Voice picker */}
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] text-brand-ink-muted">Vocal</span>
+        {["Matthew", "Joanna", "Sage"].map((v) => (
+          <button
+            key={v}
+            onClick={() => setVoiceId(v)}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-all ${voiceId === v ? "bg-brand-gold/20 border-brand-gold/50 text-brand-gold" : "bg-brand-surface border-brand-border text-brand-ink-muted hover:text-brand-ink"}`}
+          >
+            {v}
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={handleGenerate} disabled={busy || !faceB64 || !lyricLine.trim()}
+        className="self-stretch sm:self-start flex items-center justify-center gap-1.5 bg-brand-gold/20 hover:bg-brand-gold/30 border border-brand-gold/40 rounded-lg px-4 py-2.5 text-[12px] font-semibold text-brand-ink transition-all disabled:opacity-40"
+      >
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 text-brand-gold" />}
+        {busy ? "Rendering teaser (up to a few minutes)..." : "Generate Teaser"}
+      </button>
+
+      {teaserUrl && (
+        <div className="flex flex-col gap-2">
+          <video src={teaserUrl} controls className="w-full max-w-[220px] rounded-lg border border-brand-border" />
+          <a
+            href={teaserUrl} download={`teaser-${trackTitle.replace(/\s+/g, "-").toLowerCase()}.mp4`}
+            className="self-start flex items-center gap-1.5 text-[11px] text-brand-gold hover:underline"
+          >
+            <Download className="h-3.5 w-3.5" /> Download teaser
+          </a>
         </div>
       )}
     </div>

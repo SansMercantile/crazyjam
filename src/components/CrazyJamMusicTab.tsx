@@ -27,6 +27,7 @@ import {
   saveTrack,
   blobToBase64,
 } from "../utils/api";
+import { CRAZYJAM_RECORDS_TAG, releaseArtistName } from "../utils/releases";
 
 // --- Shared release card (used in both Discover and My Studio) ---
 const ReleaseCard: React.FC<{
@@ -78,8 +79,8 @@ const ReleaseCard: React.FC<{
         <h4 className="text-[13px] font-medium text-brand-ink truncate">{release.title}</h4>
         <p className="text-[11px] text-brand-ink-muted truncate">
           {release.artistSlug ? (
-            <a href={`/a/${release.artistSlug}`} target="_blank" rel="noreferrer" className="hover:text-brand-gold">{release.artistName}</a>
-          ) : release.artistName}
+            <a href={`/a/${release.artistSlug}`} target="_blank" rel="noreferrer" className="hover:text-brand-gold">{releaseArtistName(release)}</a>
+          ) : releaseArtistName(release)}
         </p>
         <div className="flex items-center justify-between mt-1">
           <span className="text-[10px] text-brand-ink-muted">{release.genre || "Original"}</span>
@@ -183,6 +184,7 @@ export const PublishPanel: React.FC<{ addLog?: (l: any) => void; onPublished: ()
   const [selectedVideoId, setSelectedVideoId] = useState("");
   const [description, setDescription] = useState("");
   const [marketingBlurb, setMarketingBlurb] = useState("");
+  const [isCrazyJamRecord, setIsCrazyJamRecord] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [status, setStatus] = useState("");
 
@@ -205,6 +207,7 @@ export const PublishPanel: React.FC<{ addLog?: (l: any) => void; onPublished: ()
         videoId: selectedVideoId || undefined,
         description,
         marketingBlurb,
+        tags: isCrazyJamRecord ? [CRAZYJAM_RECORDS_TAG] : [],
       });
       setStatus("Published to CrazyJam Music.");
       addLog?.({ agentName: "Release Manager", role: "Publishing", avatar: "🚀", message: "Track published to CrazyJam Music.", phase: "System", status: "completed" });
@@ -258,6 +261,13 @@ export const PublishPanel: React.FC<{ addLog?: (l: any) => void; onPublished: ()
         <label className="text-[11px] font-medium text-brand-ink-muted">Marketing blurb</label>
         <textarea value={marketingBlurb} onChange={(e) => setMarketingBlurb(e.target.value)} rows={2} className="bg-brand-surface-2 border border-brand-border text-brand-ink text-sm rounded-lg px-3 py-2 outline-none resize-none" placeholder="A punchy line to hook listeners" />
       </div>
+
+      <label className="flex items-start gap-3 border border-brand-border rounded-lg p-3 cursor-pointer">
+        <input type="checkbox" checked={isCrazyJamRecord} onChange={(e) => setIsCrazyJamRecord(e.target.checked)} className="mt-1" />
+        <span className="text-[12px] text-brand-ink">Add the “{CRAZYJAM_RECORDS_TAG}” tag
+          <span className="block text-[11px] text-brand-ink-muted mt-1">This marks the release as owned by CrazyJam Records.</span>
+        </span>
+      </label>
 
       <button onClick={handlePublish} disabled={isPublishing} className="w-full h-11 flex items-center justify-center gap-2 metal-gold rounded-xl font-semibold text-sm transition-all disabled:opacity-50">
         {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
