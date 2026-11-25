@@ -1,0 +1,18 @@
+{
+  "name": "CrazyJam — AI Music Studio",
+  "short_name": "CrazyJam",
+  "description": "The AI-native music studio. Make full songs with vocals, teasers, cover art and videos on our own GPU models.",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
+  "categories": ["music", "productivity", "entertainment"],
+  "icons": [
+    { "src": "/CrazyJam-Icon-logo-1.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/CrazyJam-Icon-logo-1.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/CrazyJam-Icon-logo-1.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

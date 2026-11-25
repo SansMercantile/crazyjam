@@ -1,0 +1,214 @@
+"""
+CrazyJam Co-Producer — FL Studio Piano Roll script.
+
+Generates chords / melody / bass / drums straight into the FL Studio piano roll
+by calling the CrazyJam cloud backend (your GPU models), then laying the result
+out as native FL notes.
+
+Install:
+  Copy this file to:
+    Documents\\Image-Line\\FL Studio\\Settings\\Piano roll scripts\\
+  Then in FL Studio: Piano roll > hamburger menu > Piano roll scripts >
+  "CrazyJam Co-Producer".
+
+Auth: the script talks to the local CrazyJam Bridge (default http://127.0.0.1:8787)
+which holds your CrazyJam login token, so no credentials live in this script.
+Point CRAZYJAM_BRIDGE at a remote bridge instead if you prefer.
+"""
+
+import flpianoroll as flp  # FL <-> Python communication (Piano Roll scripting API)
+import json
+import urllib.request
+import urllib.error
+
+# --- Config -----------------------------------------------------------------
+# The CrazyJam Bridge runs alongside CrazyJam Studio (or standalone) and brokers
+# authenticated calls to the CrazyJam cloud backend. Override via env if needed.
+import os
+BRIDGE = os.environ.get("CRAZYJAM_BRIDGE", "http://127.0.0.1:8787")
+
+# Map CrazyJam scale names -> (root offset from C, in-scale semitone mask).
+# The mask lists which of the 12 pitch classes are IN the scale (C-indexed).
+SCALES = {
+    "C Major":  (0, [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]),
+    "A Minor":  (9, [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0]),
+    "C Minor":  (0, [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0]),
+    "G Major":  (7, [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]),
+    "D Minor":  (2, [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0]),
+    "F Major":  (5, [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]),
+    "A Minor Pent": (9, [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0]),
+}
+SCALE_NAMES = list(SCALES.keys())
+
+GENRES = ["Afrobeats", "Amapiano", "Hip-Hop", "R&B", "Pop", "House", "Afro-fusion"]
+
+# CrazyJam note name ("A4", "C#3") -> FL note number.
+# FL Studio uses STANDARD MIDI note numbers internally (60 = middle C); the
+# piano-roll UI merely *labels* 60 as "C5" cosmetically. The MIDI number is what
+# Note.number expects, so C4 (standard) -> 60 with no octave shift.
+def _note_to_number(name):
+    names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    # strip optional octave; forms like A4 / C#3 / Bb2
+    if not name:
+        return 60
+    i = 0
+    pitch = ""
+    while i < len(name) and not name[i].isdigit() and name[i] != "-":
+        pitch += name[i]
+        i += 1
+    try:
+        octave = int(name[i:])
+    except Exception:
+        octave = 4
+    # normalize flats to sharps
+    flats = {"Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#"}
+    pitch = flats.get(pitch, pitch)
+    if pitch not in names:
+        return 60
+    return 12 * (octave + 1) + names.index(pitch)   # standard MIDI number (60 = C4)
+
+# CrazyJam step index (16-step bar) -> ticks. Steps are 1/16 of a 4/4 bar.
+def _step_to_ticks(step):
+    return int(step * (flp.score.PPQ / 4.0))
+
+
+def createDialog() -> flp.ScriptDialog:
+    form = flp.ScriptDialog(
+        "CrazyJam Co-Producer",
+        "Generate chords, melody, bass and drums with the CrazyJam AI and lay "
+        "them into this piano roll. Requires the CrazyJam Bridge running.",
+    )
+    form.addInputText("Prompt", "dark amapiano groove, soulful keys")
+    form.addInputCombo("Genre", GENRES, 0)
+    form.addInputCombo("Scale", SCALE_NAMES, 1)
+    form.addInputKnobInt("Tempo (BPM)", 104, 60, 180)
+    form.addInputKnobInt("Bars", 1, 1, 4)
+    form.addInputCheckbox("Chords", True)
+    form.addInputCheckbox("Melody", True)
+    form.addInputCheckbox("Bass", True)
+    form.addInputCheckbox("Drums", False)
+    form.addInputCheckbox("Clear existing notes", True)
+    return form
+
+
+def _call_bridge(path, payload):
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        BRIDGE + path, data=data, method="POST",
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=180) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.URLError as e:
+        Utils = flp.Utils
+        Utils.ShowMessage(
+            "Could not reach the CrazyJam Bridge at %s.\n\n"
+            "Start CrazyJam Studio (or the standalone bridge) and try again.\n\n%s" % (BRIDGE, e)
+        )
+        return None
+
+
+def _add_note(number, step, length_steps, velocity=0.8, color=0, group=0):
+    note = flp.Note()
+    note.number = int(number)
+    note.time = _step_to_ticks(step)
+    note.length = max(1, _step_to_ticks(length_steps))
+    note.velocity = velocity
+    note.color = color
+    note.group = group
+    flp.score.addNote(note)
+
+
+def _constrain_to_scale(number, root, mask):
+    """Snap a note number to the nearest in-scale pitch class."""
+    pc = number % 12
+    rel = (pc - root) % 12
+    if mask[rel]:
+        return number
+    # search outward for nearest in-scale semitone
+    for d in range(1, 7):
+        up = (rel + d) % 12
+        down = (rel - d) % 12
+        if mask[up]:
+            return number + d
+        if mask[down]:
+            return number - d
+    return number
+
+
+def apply(form: flp.ScriptDialog) -> None:
+    prompt = form.getInputValue("Prompt")
+    genre = GENRES[form.getInputValue("Genre")]
+    scale_name = SCALE_NAMES[form.getInputValue("Scale")]
+    root, mask = SCALES[scale_name]
+    tempo = form.getInputValue("Tempo (BPM)")
+    bars = form.getInputValue("Bars")
+    want_chords = form.getInputValue("Chords")
+    want_melody = form.getInputValue("Melody")
+    want_bass = form.getInputValue("Bass")
+    want_drums = form.getInputValue("Drums")
+
+    if form.getInputValue("Clear existing notes"):
+        flp.score.clearNotes(True)
+
+    # --- Call the CrazyJam cloud backend via the bridge ---------------------
+    result = _call_bridge("/api/co-producer/generate", {
+        "prompt": prompt,
+        "genre": genre,
+        "scale": scale_name,
+        "tempo": tempo,
+        "bars": bars,
+        "parts": {
+            "chords": bool(want_chords),
+            "melody": bool(want_melody),
+            "bass": bool(want_bass),
+            "drums": bool(want_drums),
+        },
+    })
+    if result is None:
+        return
+    if not result.get("success"):
+        Utils = flp.Utils
+        Utils.ShowMessage("CrazyJam generation failed:\n%s" % result.get("errorMessage", "unknown error"))
+        return
+
+    data = result.get("data", {})
+
+    # --- Lay chords (color 1, group 1) --------------------------------------
+    if want_chords and data.get("chords"):
+        group = flp.score.getNextFreeGroupIndex()
+        for chord in data["chords"]:
+            step = chord.get("step", 0)
+            length = chord.get("length", 4)
+            for n in chord.get("notes", []):
+                num = _constrain_to_scale(_note_to_number(n), root, mask)
+                _add_note(num, step, length, velocity=0.7, color=0, group=group)
+
+    # --- Lay bass (color 2, group 2) ----------------------------------------
+    if want_bass and data.get("bass"):
+        group = flp.score.getNextFreeGroupIndex()
+        for n in data["bass"]:
+            num = _constrain_to_scale(_note_to_number(n.get("note", "A2")), root, mask)
+            num = max(24, min(48, num))  # keep bass in the low register (C1-C3)
+            _add_note(num, n.get("step", 0), n.get("length", 2), velocity=0.85, color=1, group=group)
+
+    # --- Lay melody (color 3, group 3) --------------------------------------
+    if want_melody and data.get("melody"):
+        group = flp.score.getNextFreeGroupIndex()
+        for n in data["melody"]:
+            num = _constrain_to_scale(_note_to_number(n.get("note", "A4")), root, mask)
+            _add_note(num, n.get("step", 0), n.get("length", 1), velocity=0.8, color=2, group=group)
+
+    # --- Lay drums (GM map, color 4, group 4) -------------------------------
+    if want_drums and data.get("drums"):
+        group = flp.score.getNextFreeGroupIndex()
+        # GM MIDI numbers (60 = middle C in FL too); 36 kick, 38 snare, 42 hihat.
+        DRUMS = {"kick": 36, "snare": 38, "hihat": 42, "perc": 39, "clap": 39, "shaker": 70, "logdrum": 45}
+        for lane_name, hits in data["drums"].items():
+            drum_num = DRUMS.get(lane_name.lower(), 38)
+            for step in hits:
+                _add_note(drum_num, step, 1, velocity=0.9, color=3, group=group)
+
+    Utils = flp.Utils
+    Utils.ShowMessage("CrazyJam: generated your groove into the piano roll.\n\n%s" % data.get("summary", ""))

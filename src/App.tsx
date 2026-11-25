@@ -207,6 +207,7 @@ export default function App() {
   const [onboardingFinished, setOnboardingFinished] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("create");
   const [sidebarExpanded, setSidebarExpanded] = useState<boolean>(true);
+  const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
 
   // --- Theme: light / dark / system ---
   const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">(() => {
@@ -801,22 +802,43 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-brand-bg text-brand-ink font-sans antialiased flex text-left relative overflow-hidden">
+      {/* Mobile backdrop: tap to dismiss the sliding sidebar on phones */}
+      {mobileNavOpen && (
+        <button
+          aria-label="Close menu"
+          onClick={() => setMobileNavOpen(false)}
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+        />
+      )}
+
       {/* Sidebar Navigation Panel with automated 5-min logo alternations */}
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => { setActiveTab(tab); setMobileNavOpen(false); }}
         isExpanded={sidebarExpanded}
         setIsExpanded={setSidebarExpanded}
         userInfo={currentUser}
         onLogout={handleLogout}
         themeMode={themeMode}
         onThemeModeChange={setThemeMode}
+        mobileOpen={mobileNavOpen}
       />
 
       {/* Main DAW Content Space */}
       <div className={`flex-1 flex flex-col min-w-0 min-h-screen overflow-y-auto transition-all duration-300 ${
-        sidebarExpanded ? "pl-64" : "pl-18"
-      }`}>
+        sidebarExpanded ? "md:pl-64" : "md:pl-18"
+      } pl-0`}>
+        {/* Mobile top bar with hamburger to open the nav */}
+        <div className="md:hidden sticky top-0 z-30 flex items-center gap-3 bg-brand-bg/95 backdrop-blur border-b border-brand-border px-4 py-3">
+          <button
+            onClick={() => setMobileNavOpen(true)}
+            aria-label="Open menu"
+            className="p-2 -ml-2 rounded-lg text-brand-ink hover:bg-brand-surface-2"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/></svg>
+          </button>
+          <span className="font-display font-semibold text-sm text-brand-ink">CrazyJam</span>
+        </div>
         <Header
           title={title}
           scale={scale}

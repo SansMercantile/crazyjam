@@ -1,0 +1,176 @@
+"""
+CrazyJam Remake — FL Studio Piano Roll script (drag & drop).
+
+Drop any beat / instrument / melody (audio or MIDI) onto this script and it remakes
+it into the piano roll as native FL notes, humanized so it sounds played, with an
+instrument-match suggestion for the channel.
+
+How to use:
+  1. In FL Studio's Browser, find your audio/MIDI file.
+  2. Run this script from the Piano roll > Scripts menu.
+  3. Paste the file path (or leave it to read the file you last dropped in FL).
+
+The script calls the local CrazyJam Bridge (http://127.0.0.1:8787), which transcribes
+the audio to MIDI, humanizes it, and returns a piano-roll-ready structure + an
+instrument-match hint. Requires the bridge running (it auto-starts with FL Studio).
+"""
+
+import flpianoroll as flp  # FL <-> Python communication (Piano Roll scripting API)
+import json
+import os
+import urllib.request
+import urllib.error
+
+BRIDGE = os.environ.get("CRAZYJAM_BRIDGE", "http://127.0.0.1:8787")
+
+GENRES = ["Afrobeats", "Amapiano", "Hip-Hop", "R&B", "Pop", "House", "Afro-fusion"]
+SCALES = {
+    "C Major":  (0, [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]),
+    "A Minor":  (9, [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0]),
+    "C Minor":  (0, [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0]),
+    "G Major":  (7, [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]),
+    "D Minor":  (2, [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0]),
+    "F Major":  (5, [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]),
+    "A Minor Pent": (9, [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0]),
+}
+SCALE_NAMES = list(SCALES.keys())
+
+
+def createDialog() -> flp.ScriptDialog:
+    form = flp.ScriptDialog(
+        "CrazyJam Remake",
+        "Drop a beat/instrument file to remake it as humanized MIDI in this piano roll. "
+        "Requires the CrazyJam Bridge running.",
+    )
+    form.addInputText("File path (audio or .mid)", "")
+    form.addInputCombo("Genre", GENRES, 0)
+    form.addInputCombo("Scale", SCALE_NAMES, 1)
+    form.addInputCheckbox("Humanize", True)
+    form.addInputCheckbox("Separate stems (full song)", False)
+    form.addInputCheckbox("Clear existing notes", True)
+    return form
+
+
+def _call_bridge_multipart(path, file_path, params):
+    boundary = "----crazyjamboundary"
+    with open(file_path, "rb") as f:
+        file_data = f.read()
+    filename = os.path.basename(file_path)
+    body = b""
+    body += ("--%s\r\nContent-Disposition: form-data; name=\"file\"; filename=\"%s\"\r\n"
+             "Content-Type: application/octet-stream\r\n\r\n" % (boundary, filename)).encode()
+    body += file_data + b"\r\n"
+    for k, v in params.items():
+        body += ("--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n" % (boundary, k, v)).encode()
+    body += ("--%s--\r\n" % boundary).encode()
+
+    req = urllib.request.Request(
+        BRIDGE + path, data=body, method="POST",
+        headers={"Content-Type": "multipart/form-data; boundary=%s" % boundary},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=600) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.URLError as e:
+        flp.Utils.ShowMessage(
+            "Could not reach the CrazyJam Bridge at %s.\n\n"
+            "It auto-starts with FL Studio — make sure the monitor is running.\n\n%s" % (BRIDGE, e)
+        )
+        return None
+
+
+def _step_to_ticks(step):
+    return int(step * (flp.score.PPQ / 4.0))
+
+
+def _add_note(number, step, length_steps, velocity=0.8, color=0, group=0):
+    note = flp.Note()
+    note.number = int(number)
+    note.time = _step_to_ticks(step)
+    note.length = max(1, _step_to_ticks(length_steps))
+    note.velocity = max(0.0, min(1.0, velocity))
+    note.color = color
+    note.group = group
+    flp.score.addNote(note)
+
+
+def _constrain_to_scale(number, root, mask):
+    pc = number % 12
+    rel = (pc - root) % 12
+    if mask[rel]:
+        return number
+    for d in range(1, 7):
+        up = (rel + d) % 12
+        down = (rel - d) % 12
+        if mask[up]:
+            return number + d
+        if mask[down]:
+            return number - d
+    return number
+
+
+def apply(form: flp.ScriptDialog) -> None:
+    file_path = (form.getInputValue("File path (audio or .mid)") or "").strip().strip('"')
+    if not file_path or not os.path.exists(file_path):
+        flp.Utils.ShowMessage(
+            "Drop a file first.\n\n"
+            "Enter the full path to an audio file (WAV/MP3) or .mid file, e.g.:\n"
+            "C:\\Users\\you\\Music\\loop.wav"
+        )
+        return
+
+    genre = GENRES[form.getInputValue("Genre")]
+    scale_name = SCALE_NAMES[form.getInputValue("Scale")]
+    root, mask = SCALES[scale_name]
+    humanize_it = form.getInputValue("Humanize")
+    separate = form.getInputValue("Separate stems (full song)")
+
+    if form.getInputValue("Clear existing notes"):
+        flp.score.clearNotes(True)
+
+    params = {
+        "genre": genre,
+        "scale": scale_name,
+        "mode": "auto",
+        "separate": "true" if separate else "false",
+        "humanize_it": "true" if humanize_it else "false",
+    }
+
+    # MIDI file? send to a midi-parse path; otherwise remake from audio.
+    is_midi = file_path.lower().endswith((".mid", ".midi"))
+    endpoint = "/api/bridge/remake-midi" if is_midi else "/api/bridge/remake"
+    result = _call_bridge_multipart(endpoint, file_path, params)
+    if result is None:
+        return
+    if not result.get("success"):
+        flp.Utils.ShowMessage("Remake failed:\n%s" % result.get("errorMessage", "unknown error"))
+        return
+
+    bpm = result.get("bpm", 120)
+    laid = 0
+
+    # --- melodic notes ---
+    if result.get("notes"):
+        group = flp.score.getNextFreeGroupIndex()
+        for n in result["notes"]:
+            num = _constrain_to_scale(int(n["note"]), root, mask)
+            _add_note(num, n["step"], n["length"], velocity=n.get("velocity", 0.8), color=2, group=group)
+            laid += 1
+
+    # --- drums ---
+    if result.get("drums"):
+        group = flp.score.getNextFreeGroupIndex()
+        DRUMS = {"kick": 36, "snare": 38, "hihat": 42, "perc": 39, "clap": 39, "shaker": 70, "logdrum": 45}
+        for lane, steps in result["drums"].items():
+            drum_num = DRUMS.get(lane.lower(), 38)
+            for step in steps:
+                _add_note(drum_num, step, 1, velocity=0.9, color=3, group=group)
+                laid += 1
+
+    hint = result.get("instrument_hint", {})
+    suggestion = hint.get("suggested_preset", "")
+    flp.Utils.ShowMessage(
+        "Remake complete: %d notes laid @ %d BPM.\n\n"
+        "Suggested instrument for this sound:\n%s\n\n%s"
+        % (laid, round(bpm), suggestion, result.get("summary", ""))
+    )

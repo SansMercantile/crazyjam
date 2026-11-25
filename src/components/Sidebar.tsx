@@ -35,6 +35,7 @@ interface SidebarProps {
   onLogout: () => void;
   themeMode: ThemeMode;
   onThemeModeChange: (mode: ThemeMode) => void;
+  mobileOpen?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -46,7 +47,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onLogout,
   themeMode,
   onThemeModeChange,
+  mobileOpen = false,
 }) => {
+  // On mobile the sidebar is a full-width slide-over (always show labels);
+  // on md+ it keeps the expand/collapse rail behavior.
+  const showLabels = isExpanded || mobileOpen;
   const navItems = [
     { id: "create", label: "Create", icon: Wand2 },
     { id: "dashboard", label: "Control Room", icon: Sliders },
@@ -63,18 +68,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       id="daw-sidebar"
-      className={`bg-brand-surface border-r border-brand-border h-screen fixed left-0 top-0 flex flex-col justify-between transition-all duration-300 z-50 ${
-        isExpanded ? "w-64" : "w-18"
+      className={`bg-brand-surface border-r border-brand-border h-screen fixed left-0 top-0 flex flex-col justify-between transition-transform duration-300 z-50 w-64 ${
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      } md:translate-x-0 md:transition-all ${
+        isExpanded ? "md:w-64" : "md:w-18"
       }`}
     >
       {/* Top Brand Area */}
       <div className="flex flex-col">
         <div className={`flex items-center justify-between border-b border-brand-border h-[72px] transition-all ${
-          isExpanded ? "px-5" : "px-3 relative"
+          showLabels ? "px-5" : "px-3 relative"
         }`}>
           {/* Logo Area - the white CrazyJam wordmark keeps a soft shadow for contrast; icon mark stays clean */}
-          <div className={`flex items-center overflow-hidden transition-all ${isExpanded ? "gap-3" : "w-full justify-center"}`}>
-            {isExpanded ? (
+          <div className={`flex items-center overflow-hidden transition-all ${showLabels ? "gap-3" : "w-full justify-center"}`}>
+            {showLabels ? (
               <div
                 className="flex items-center gap-2 cursor-pointer"
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -107,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className={`text-brand-ink-muted hover:text-brand-gold transition shrink-0 ${
+            className={`text-brand-ink-muted hover:text-brand-gold transition shrink-0 hidden md:block ${
               isExpanded
                 ? "p-1.5 rounded-lg hover:bg-brand-surface-2"
                 : "absolute -right-3 top-6 p-1 bg-brand-surface hover:bg-brand-surface-2 border border-brand-border rounded-full"
@@ -127,13 +134,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 title={item.label}
-                className={`w-full flex items-center ${isExpanded ? "justify-start px-3.5" : "justify-center"} gap-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors duration-150 ${
+                className={`w-full flex items-center ${showLabels ? "justify-start px-3.5" : "justify-center"} gap-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors duration-150 ${
                   isActive
                     ? "bg-brand-gold/10 text-brand-gold"
                     : "text-brand-ink-muted hover:text-brand-ink hover:bg-brand-surface-2"
                 }`}
               >
-                {isExpanded ? (
+                {showLabels ? (
                   <span className="truncate">{item.label}</span>
                 ) : (
                   <Icon className="h-4.5 w-4.5 shrink-0" />
@@ -147,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Footer: theme toggle, profile, sign out */}
       <div className="flex flex-col border-t border-brand-border p-3 gap-2">
         {/* Theme toggle */}
-        {isExpanded ? (
+        {showLabels ? (
           <div className="flex items-center gap-1 bg-brand-surface-2 rounded-lg p-1">
             {([
               { mode: "light" as ThemeMode, icon: Sun },
@@ -177,7 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         {/* Profile + Sign out */}
-        {isExpanded ? (
+        {showLabels ? (
           <div className="flex items-center gap-2.5 p-2 bg-brand-surface-2 rounded-lg">
             <AnimatedAvatar avatar={userInfo?.avatar || "🕵️"} size="sm" className="border-brand-gold/40 shrink-0" />
             <div className="min-w-0 flex-1">
@@ -212,7 +219,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {isExpanded && (
+        {showLabels && (
           <div className="pt-1 text-center">
             <span className="text-[9px] text-brand-ink-muted tracking-wide">Sans Mercantile Co.</span>
           </div>

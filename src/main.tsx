@@ -13,6 +13,14 @@ import { initDatadog } from './lib/datadog';
 
 initDatadog();
 
+// Register the PWA service worker (installable on iOS/Android/desktop). Skipped
+// in dev so HMR keeps working cleanly.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => { /* non-fatal */ });
+  });
+}
+
 const AUTH0_DOMAIN = "dev-b78ozdt6veybztac.us.auth0.com";
 // Dedicated CrazyJam SPA app (Single Page Application type - required for
 // public-client PKCE flow, unlike the Nexus site's Regular Web App which
